@@ -183,7 +183,6 @@ const defaultDebugSettings = {
 const debugSettings = { ...defaultDebugSettings };
 const achievementStorageKey = 'moqueteAchievements';
 const statisticsStorageKey = 'moqueteStatistics';
-const languageStorageKey = 'moqueteLanguage';
 const supportedLanguages = ['es', 'en', 'pt'];
 const achievementIds = [
   'firstWin',
@@ -535,7 +534,7 @@ let gameStarted = false;
 let botEnabled = false;
 let botAttackCooldown = 0;
 let botDifficulty = 'medium';
-let currentLanguage = loadLanguageSetting();
+let currentLanguage = 'es';
 let animationId = null;
 let fireballs = [];
 let fireBeams = [];
@@ -612,7 +611,6 @@ const simpleTopButton = document.getElementById('simpleTopButton');
 const categoryTopDetailed = document.getElementById('categoryTopDetailed');
 const categoryTopSimple = document.getElementById('categoryTopSimple');
 const botToggle = document.getElementById('botToggle');
-const languageSelect = document.getElementById('languageSelect');
 const masterVolumeControl = document.getElementById('masterVolumeControl');
 const masterVolumeValue = document.getElementById('masterVolumeValue');
 const musicVolumeControl = document.getElementById('musicVolumeControl');
@@ -926,23 +924,6 @@ function createEmptyFightAchievementFlags() {
   };
 }
 
-function loadLanguageSetting() {
-  try {
-    const savedLanguage = localStorage.getItem(languageStorageKey);
-    return supportedLanguages.includes(savedLanguage) ? savedLanguage : 'es';
-  } catch (error) {
-    return 'es';
-  }
-}
-
-function saveLanguageSetting() {
-  try {
-    localStorage.setItem(languageStorageKey, currentLanguage);
-  } catch (error) {
-    // localStorage can be blocked; language still works until the page reloads.
-  }
-}
-
 function t(key) {
   const languagePack = uiTranslations[currentLanguage] || uiTranslations.es;
   return languagePack[key] || uiTranslations.es[key] || key;
@@ -972,7 +953,6 @@ function syncAchievementText() {
 function applyLanguage() {
   if (!supportedLanguages.includes(currentLanguage)) currentLanguage = 'es';
   document.documentElement.lang = currentLanguage;
-  if (languageSelect) languageSelect.value = currentLanguage;
 
   document.querySelectorAll('[data-i18n]').forEach((element) => {
     element.innerText = t(element.dataset.i18n);
@@ -8986,14 +8966,6 @@ player2ColorInputs.forEach((input) => {
 botDifficultyInputs.forEach((input) => {
   input.addEventListener('change', updateBotDifficulty);
 });
-
-if (languageSelect) {
-  languageSelect.addEventListener('change', () => {
-    currentLanguage = supportedLanguages.includes(languageSelect.value) ? languageSelect.value : 'es';
-    saveLanguageSetting();
-    applyLanguage();
-  });
-}
 
 [
   { input: masterVolumeControl, output: masterVolumeValue, setting: 'master' },

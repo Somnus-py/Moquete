@@ -2416,18 +2416,6 @@ body.menu-open .instructions {
   width: 18px;
 }
 
-.language-setting select {
-  background: #111;
-  border: 3px solid #111;
-  box-shadow: 0 4px 0 rgba(17, 17, 17, 0.32);
-  color: #fff;
-  cursor: pointer;
-  font: inherit;
-  max-width: 210px;
-  padding: 8px 12px;
-  text-transform: uppercase;
-}
-
 .audio-setting {
   align-items: center;
   cursor: default;
