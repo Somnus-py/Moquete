@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base Juego de Pelea</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="menu-open">
+  <div class="game-shell">
+    <div class="ui">
+      <div class="health-panel">
+        <div class="fighter-hud-heading">
+          <span class="fighter-portrait" id="p1Portrait" data-character="normal" aria-hidden="true"></span>
+          <div class="fighter-title">
+            <span class="fighter-slot">Jugador 1</span>
+            <strong id="p1CharacterName">Normal</strong>
+          </div>
+          <em id="p1HudTag">P1</em>
+        </div>
+        <div class="health-bar">
+          <div class="bar" id="bar1"></div>
+          <strong id="health1">100</strong>
+        </div>
+        <div class="cooldown-row" id="cooldowns1">
+          <div class="cooldown-chip disabled" id="p1CooldownQ"><span>Q</span></div>
+          <div class="cooldown-chip disabled" id="p1CooldownF"><span>F</span></div>
+        </div>
+      </div>
+      <div class="health-panel right">
+        <div class="fighter-hud-heading">
+          <em id="p2HudTag">P2</em>
+          <div class="fighter-title">
+            <span class="fighter-slot">Jugador 2</span>
+            <strong id="p2CharacterName">Normal</strong>
+          </div>
+          <span class="fighter-portrait" id="p2Portrait" data-character="normal" aria-hidden="true"></span>
+        </div>
+        <div class="health-bar">
+          <strong id="health2">100</strong>
+          <div class="bar" id="bar2"></div>
+        </div>
+        <div class="cooldown-row right" id="cooldowns2">
+          <div class="cooldown-chip disabled" id="p2CooldownQ"><span>/</span></div>
+          <div class="cooldown-chip disabled" id="p2CooldownF"><span>.</span></div>
+        </div>
+      </div>
+    </div>
+    <canvas id="gameCanvas" width="1024" height="576"></canvas>
+    <div class="achievement-toast hidden" id="achievementToast" aria-live="polite">
+      <span>Logro obtenido</span>
+      <strong id="achievementToastTitle">Logro</strong>
+      <em id="achievementToastDescription">Descripcion</em>
+    </div>
+    <div class="main-menu" id="mainMenu">
+      <div class="menu-screen title-menu" id="titleScreen">
+        <h1>Moquete</h1>
+        <span class="menu-subtitle">Juego de pelea local</span>
+        <div class="menu-actions">
+          <button type="button" id="playButton">Jugar</button>
+        </div>
+        <div class="menu-actions secondary-actions">
+          <button type="button" id="guideButton">Guia</button>
+          <button type="button" id="achievementsButton">Logros</button>
+          <button type="button" id="statsButton">Estadisticas</button>
+          <button type="button" id="opinionButton">Opinion de Codex</button>
+          <button type="button" id="settingsButton">Ajustes</button>
+        </div>
+      </div>
+      <div class="menu-screen olddays-menu hidden" id="oldDaysScreen">
+        <h1>Moquete</h1>
+        <span class="menu-subtitle">Alpha edition</span>
+        <div class="menu-actions">
+          <button type="button" id="oldDaysPlayButton">Jugar</button>
+        </div>
+        <div class="menu-actions secondary-actions">
+          <button type="button" id="oldDaysBackButton">Volver a la version actual</button>
+        </div>
+      </div>
+      <div class="menu-screen character-menu hidden" id="characterScreen">
+        <h2 id="characterSelectTitle">Personaje Jugador 1</h2>
+        <div class="character-grid">
+          <button type="button" class="character-option normal-option" id="normalCharacterButton">
+            <span>Normal</span>
+            <span class="character-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option fire-master-option" id="fireMasterCharacterButton">
+            <span>Fire Master</span>
+            <span class="character-preview fire-master-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-flame"></span>
+              <span class="preview-belt"></span>
+              <span class="preview-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option tank-option" id="tankCharacterButton">
+            <span>Living Tank</span>
+            <span class="character-preview tank-preview" aria-hidden="true">
+              <span class="preview-tank-cannon"></span>
+              <span class="preview-tank-turret"></span>
+              <span class="preview-tank-body"></span>
+              <span class="preview-tank-track"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option cowboy-option" id="cowboyCharacterButton">
+            <span>Cowboy</span>
+            <span class="character-preview cowboy-preview" aria-hidden="true">
+              <span class="preview-cowboy-hat"></span>
+              <span class="preview-cowboy-body"></span>
+              <span class="preview-cowboy-gun"></span>
+              <span class="preview-cowboy-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option reflecter-option" id="reflecterCharacterButton">
+            <span>Reflecter</span>
+            <span class="character-preview reflecter-preview" aria-hidden="true">
+              <span class="preview-reflecter-head"></span>
+              <span class="preview-reflecter-body"></span>
+              <span class="preview-reflecter-core"></span>
+              <span class="preview-reflecter-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option switcher-option" id="switcherCharacterButton">
+            <span>Switcher</span>
+            <span class="character-preview switcher-preview" aria-hidden="true">
+              <span class="preview-switcher-head"></span>
+              <span class="preview-switcher-body"></span>
+              <span class="preview-switcher-collar"></span>
+              <span class="preview-switcher-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option sorcerer-option" id="sorcererCharacterButton">
+            <span>Sorcerer</span>
+            <span class="character-preview sorcerer-preview" aria-hidden="true">
+              <span class="preview-sorcerer-hat"></span>
+              <span class="preview-sorcerer-body"></span>
+              <span class="preview-sorcerer-orb"></span>
+              <span class="preview-sorcerer-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option gambler-option" id="gamblerCharacterButton">
+            <span>Gambler</span>
+            <span class="character-preview gambler-preview" aria-hidden="true">
+              <span class="preview-gambler-hat"></span>
+              <span class="preview-gambler-body"></span>
+              <span class="preview-gambler-card"></span>
+              <span class="preview-gambler-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option chrono-option" id="chronoCharacterButton">
+            <span>Chrono</span>
+            <span class="character-preview chrono-preview" aria-hidden="true">
+              <span class="preview-chrono-head"></span>
+              <span class="preview-chrono-body"></span>
+              <span class="preview-chrono-clock"></span>
+              <span class="preview-chrono-blade"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option ghost-option locked" id="ghostCharacterButton">
+            <span>Ghost</span>
+            <span class="character-preview ghost-preview" aria-hidden="true">
+              <span class="preview-ghost-head"></span>
+              <span class="preview-ghost-body"></span>
+              <span class="preview-ghost-tail"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option divine-general-option locked" id="divineGeneralCharacterButton">
+            <span>Divine General</span>
+            <span class="character-preview divine-general-preview" aria-hidden="true">
+              <span class="preview-divine-halo"></span>
+              <span class="preview-divine-head"></span>
+              <span class="preview-divine-body"></span>
+              <span class="preview-divine-arm left"></span>
+              <span class="preview-divine-arm right"></span>
+            </span>
+          </button>
+        </div>
+        <div class="character-actions">
+          <button type="button" id="randomCharacterButton" aria-label="Elegir personaje aleatorio">?</button>
+          <button type="button" id="characterBackButton">Volver</button>
+        </div>
+      </div>
+      <div class="menu-screen map-menu hidden" id="mapScreen">
+        <h2>Elegir mapa</h2>
+        <div class="map-grid">
+          <button type="button" class="map-option alpha-map" data-map="alpha">
+            <span>Alpha</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option foundry-map" data-map="foundry">
+            <span>Fundicion</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option desert-map" data-map="desert">
+            <span>Desierto</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option neon-map" data-map="neon">
+            <span>Azotea Neon</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option casino-map" data-map="casino">
+            <span>Casino</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option military-map" data-map="military">
+            <span>Estacion Militar</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option dark-room-map hidden" data-map="darkRoom" id="darkRoomMapButton">
+            <span>Dark Room</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+        </div>
+        <button type="button" id="mapBackButton">Volver</button>
+      </div>
+      <div class="menu-screen settings-menu hidden" id="settingsScreen">
+        <h2>Ajustes</h2>
+        <label class="setting-row">
+          <span>Pelear contra bot</span>
+          <input type="checkbox" id="botToggle" />
+        </label>
+        <div class="setting-row difficulty-setting">
+          <span>Dificultad del bot</span>
+          <div class="difficulty-options">
+            <label>
+              <input type="radio" name="botDifficulty" value="easy" />
+              Facil
+            </label>
+            <label>
+              <input type="radio" name="botDifficulty" value="medium" checked />
+              Media
+            </label>
+            <label>
+              <input type="radio" name="botDifficulty" value="hard" />
+              Dificil
+            </label>
+          </div>
+        </div>
+        <label class="setting-row audio-setting">
+          <span>Volumen general</span>
+          <input type="range" id="masterVolumeControl" min="0" max="1" step="0.05" value="1" />
+          <strong id="masterVolumeValue">100%</strong>
+        </label>
+        <label class="setting-row audio-setting">
+          <span>Musica</span>
+          <input type="range" id="musicVolumeControl" min="0" max="1" step="0.05" value="1" />
+          <strong id="musicVolumeValue">100%</strong>
+        </label>
+        <label class="setting-row audio-setting">
+          <span>Efectos</span>
+          <input type="range" id="sfxVolumeControl" min="0" max="1" step="0.05" value="1" />
+          <strong id="sfxVolumeValue">100%</strong>
+        </label>
+        <div class="setting-row color-setting">
+          <span>Color Jugador 1</span>
+          <div class="color-options" data-player-color="1">
+            <label class="color-swatch" title="Rojo">
+              <input type="radio" name="player1Color" value="#ef5350" />
+              <span style="--swatch: #ef5350;"></span>
+            </label>
+            <label class="color-swatch" title="Azul">
+              <input type="radio" name="player1Color" value="#42a5f5" checked />
+              <span style="--swatch: #42a5f5;"></span>
+            </label>
+            <label class="color-swatch" title="Verde">
+              <input type="radio" name="player1Color" value="#66bb6a" />
+              <span style="--swatch: #66bb6a;"></span>
+            </label>
+            <label class="color-swatch" title="Amarillo">
+              <input type="radio" name="player1Color" value="#fdd835" />
+              <span style="--swatch: #fdd835;"></span>
+            </label>
+            <label class="color-swatch" title="Naranja">
+              <input type="radio" name="player1Color" value="#fb8c00" />
+              <span style="--swatch: #fb8c00;"></span>
+            </label>
+            <label class="color-swatch" title="Purpura">
+              <input type="radio" name="player1Color" value="#ab47bc" />
+              <span style="--swatch: #ab47bc;"></span>
+            </label>
+            <label class="color-swatch" title="Blanco">
+              <input type="radio" name="player1Color" value="#f5f5f5" />
+              <span style="--swatch: #f5f5f5;"></span>
+            </label>
+            <label class="color-swatch" title="Negro">
+              <input type="radio" name="player1Color" value="#111111" />
+              <span style="--swatch: #111111;"></span>
+            </label>
+            <label class="color-swatch" title="Rosa">
+              <input type="radio" name="player1Color" value="#ec407a" />
+              <span style="--swatch: #ec407a;"></span>
+            </label>
+            <label class="color-swatch" title="Marron">
+              <input type="radio" name="player1Color" value="#795548" />
+              <span style="--swatch: #795548;"></span>
+            </label>
+            <label class="color-swatch" title="Gris">
+              <input type="radio" name="player1Color" value="#9e9e9e" />
+              <span style="--swatch: #9e9e9e;"></span>
+            </label>
+            <label class="color-swatch" title="Dorado">
+              <input type="radio" name="player1Color" value="#d4af37" />
+              <span style="--swatch: #d4af37;"></span>
+            </label>
+            <label class="color-swatch" title="Bronce">
+              <input type="radio" name="player1Color" value="#cd7f32" />
+              <span style="--swatch: #cd7f32;"></span>
+            </label>
+          </div>
+        </div>
+        <div class="setting-row color-setting">
+          <span>Color Jugador 2</span>
+          <div class="color-options" data-player-color="2">
+            <label class="color-swatch" title="Rojo">
+              <input type="radio" name="player2Color" value="#ef5350" checked />
+              <span style="--swatch: #ef5350;"></span>
+            </label>
+            <label class="color-swatch" title="Azul">
+              <input type="radio" name="player2Color" value="#42a5f5" />
+              <span style="--swatch: #42a5f5;"></span>
+            </label>
+            <label class="color-swatch" title="Verde">
+              <input type="radio" name="player2Color" value="#66bb6a" />
+              <span style="--swatch: #66bb6a;"></span>
+            </label>
+            <label class="color-swatch" title="Amarillo">
+              <input type="radio" name="player2Color" value="#fdd835" />
+              <span style="--swatch: #fdd835;"></span>
+            </label>
+            <label class="color-swatch" title="Naranja">
+              <input type="radio" name="player2Color" value="#fb8c00" />
+              <span style="--swatch: #fb8c00;"></span>
+            </label>
+            <label class="color-swatch" title="Purpura">
+              <input type="radio" name="player2Color" value="#ab47bc" />
+              <span style="--swatch: #ab47bc;"></span>
+            </label>
+            <label class="color-swatch" title="Blanco">
+              <input type="radio" name="player2Color" value="#f5f5f5" />
+              <span style="--swatch: #f5f5f5;"></span>
+            </label>
+            <label class="color-swatch" title="Negro">
+              <input type="radio" name="player2Color" value="#111111" />
+              <span style="--swatch: #111111;"></span>
+            </label>
+            <label class="color-swatch" title="Rosa">
+              <input type="radio" name="player2Color" value="#ec407a" />
+              <span style="--swatch: #ec407a;"></span>
+            </label>
+            <label class="color-swatch" title="Marron">
+              <input type="radio" name="player2Color" value="#795548" />
+              <span style="--swatch: #795548;"></span>
+            </label>
+            <label class="color-swatch" title="Gris">
+              <input type="radio" name="player2Color" value="#9e9e9e" />
+              <span style="--swatch: #9e9e9e;"></span>
+            </label>
+            <label class="color-swatch" title="Dorado">
+              <input type="radio" name="player2Color" value="#d4af37" />
+              <span style="--swatch: #d4af37;"></span>
+            </label>
+            <label class="color-swatch" title="Bronce">
+              <input type="radio" name="player2Color" value="#cd7f32" />
+              <span style="--swatch: #cd7f32;"></span>
+            </label>
+          </div>
+        </div>
+        <button type="button" id="backButton">Volver</button>
+      </div>
+      <div class="menu-screen debug-menu hidden" id="debugScreen">
+        <h2>Pantalla Debug</h2>
+        <div class="debug-grid">
+          <label class="debug-control">
+            <span>Multiplicador de dano</span>
+            <input type="range" id="debugDamageMultiplier" min="0" max="5" step="0.25" value="1" />
+            <strong id="debugDamageValue">1x</strong>
+          </label>
+          <label class="debug-control">
+            <span>Multiplicador de vida</span>
+            <input type="range" id="debugHealthMultiplier" min="0.25" max="5" step="0.25" value="1" />
+            <strong id="debugHealthValue">1x</strong>
+          </label>
+          <label class="debug-control">
+            <span>Velocidad jugadores</span>
+            <input type="range" id="debugMoveMultiplier" min="0.25" max="3" step="0.25" value="1" />
+            <strong id="debugMoveValue">1x</strong>
+          </label>
+          <label class="debug-control">
+            <span>Multiplicador cooldowns</span>
+            <input type="range" id="debugCooldownMultiplier" min="0" max="3" step="0.25" value="1" />
+            <strong id="debugCooldownValue">1x</strong>
+          </label>
+          <label class="debug-control">
+            <span>Multiplicador gravedad</span>
+            <input type="range" id="debugGravityMultiplier" min="0" max="3" step="0.25" value="1" />
+            <strong id="debugGravityValue">1x</strong>
+          </label>
+          <label class="debug-control">
+            <span>Velocidad proyectiles</span>
+            <input type="range" id="debugProjectileMultiplier" min="0.25" max="3" step="0.25" value="1" />
+            <strong id="debugProjectileValue">1x</strong>
+          </label>
+          <label class="debug-control">
+            <span>Duracion efectos</span>
+            <input type="range" id="debugDurationMultiplier" min="0" max="3" step="0.25" value="1" />
+            <strong id="debugDurationValue">1x</strong>
+          </label>
+          <label class="debug-control">
+            <span>Empuje golpes</span>
+            <input type="range" id="debugKnockbackMultiplier" min="0" max="3" step="0.25" value="1" />
+            <strong id="debugKnockbackValue">1x</strong>
+          </label>
+        </div>
+        <div class="debug-targets">
+          <div class="debug-targets-heading">
+            <strong>Personajes afectados</strong>
+            <label>
+              <input type="checkbox" id="debugAffectAll" checked />
+              Todos
+            </label>
+          </div>
+          <div class="debug-target-grid">
+            <label><input type="checkbox" data-debug-character="normal" checked /> Normal</label>
+            <label><input type="checkbox" data-debug-character="fireMaster" checked /> Fire Master</label>
+            <label><input type="checkbox" data-debug-character="tank" checked /> Tank</label>
+            <label><input type="checkbox" data-debug-character="cowboy" checked /> Cowboy</label>
+            <label><input type="checkbox" data-debug-character="reflecter" checked /> Reflecter</label>
+            <label><input type="checkbox" data-debug-character="switcher" checked /> Switcher</label>
+            <label><input type="checkbox" data-debug-character="sorcerer" checked /> Sorcerer</label>
+            <label><input type="checkbox" data-debug-character="gambler" checked /> Gambler</label>
+            <label><input type="checkbox" data-debug-character="chrono" checked /> Chrono</label>
+            <label><input type="checkbox" data-debug-character="ghost" checked /> Ghost</label>
+            <label><input type="checkbox" data-debug-character="divineGeneral" checked /> Divine</label>
+          </div>
+        </div>
+        <div class="debug-actions">
+          <button type="button" id="debugResetButton">Restaurar todo</button>
+          <button type="button" id="debugBackButton">Volver</button>
+        </div>
+      </div>
+      <div class="menu-screen secret-guide-menu hidden" id="secretGuideScreen">
+        <h2>Codigos secretos</h2>
+        <div class="guide-section">
+          <h3>Felicidades!</h3>
+          <div class="character-guide">
+            <span>Felicidades! encontraste la lista de todos los codigos en el juego, me pregunto quien te dijo este codigo..</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Codigos</h3>
+          <div class="character-guide">
+            <span><strong>cheater</strong> abre la Pantalla Debug para alterar dano, vida, velocidad, cooldowns, gravedad, proyectiles, duraciones, empuje y personajes afectados.</span>
+            <span><strong>olddays</strong> abre la version Alpha edition, con partida directa Normal vs Normal.</span>
+            <span><strong>blind</strong> activa modo guess who: nombres ocultos, personajes blancos y habilidades mezcladas temporalmente.</span>
+            <span><strong>overheat</strong> potencia a Fire Master con mas dano y menos cooldown.</span>
+            <span><strong>ironwall</strong> potencia a Living Tank con mas vida y golpes/canon mas fuertes.</span>
+            <span><strong>deadeye</strong> potencia a Cowboy con mas balas y mas dano por bala.</span>
+            <span><strong>mirrorluck</strong> hace que Reflecter copie la ruleta de Gambler con mucha mas suerte, escudo mas largo y copia mas peligrosa.</span>
+            <span><strong>kaioken</strong> desbloquea la segunda habilidad de Normal: aura roja, velocidad, vida y dano durante 12 segundos.</span>
+            <span><strong>upgrade</strong> convierte a Reflecter en una version negra futurista con 300 vida, 20 dano, escudo mas peligroso y copias dobles.</span>
+            <span><strong>prism</strong> mejora a Switcher con diseno prism, cooldown mas bajo y habilidades de modo mas rapidas/potentes.</span>
+            <span><strong>fulladapt</strong> desbloquea a Divine General, le da 250 de vida y lo inicia con 6 a 10 adaptaciones en los tipos principales.</span>
+            <span><strong>lights out</strong> desbloquea el mapa secreto Dark Room por una partida.</span>
+            <span><strong>secretguide1</strong> abre esta lista de codigos.</span>
+            <span><strong>secretguide2</strong> abre la lista de eventos especiales.</span>
+            <span><strong>clear</strong> desactiva los codigos activos y restaura personajes/mapas secretos.</span>
+          </div>
+        </div>
+        <button type="button" id="secretGuideBackButton">Volver</button>
+      </div>
+      <div class="menu-screen secret-guide-menu hidden" id="secretCharactersScreen">
+        <h2>Personajes secretos</h2>
+        <div class="guide-section">
+          <h3>Obtenibles por codigos y desafios</h3>
+          <div class="character-guide">
+            <span><strong>Normal Kaioken</strong> codigo kaioken: Normal gana nuevo diseno, +65 vida temporal, dano x2.2, velocidad x2.75 y combo de 7 golpes durante Kaioken.</span>
+            <span><strong>Fire Master Overheat</strong> codigo overheat: Fire Master gana mas dano de fuego y menos cooldown.</span>
+            <span><strong>Living Tank Ironwall</strong> codigo ironwall: Living Tank gana mas vida y golpes/canon mas fuertes.</span>
+            <span><strong>Cowboy Deadeye</strong> codigo deadeye: Cowboy gana mas balas y mas dano por bala.</span>
+            <span><strong>Reflecter Mirrorluck</strong> codigo mirrorluck: Reflecter gana diseno casino/espejo, 165 vida, escudo mas largo, menos cooldown y copia de ruleta mucho mas confiable.</span>
+            <span><strong>Reflecter 2.0</strong> codigo upgrade: Reflecter pasa a version negra futurista con 300 vida, 20 dano, escudo ampliado y copias dobles.</span>
+            <span><strong>Switcher Prism</strong> codigo prism: Switcher gana diseno prism reforzado, cooldown menor, dash mas fuerte, mas curacion y mejor armadura amarilla.</span>
+            <span><strong>Divine General Full Adapt</strong> codigo fulladapt: Divine General queda desbloqueado, sube a 250 vida y empieza con 6 a 10 adaptaciones contra los tipos principales de golpes, proyectiles y estados.</span>
+            <span><strong>Divine General</strong> desafio de los 7 sellos: gana Perfect Duel, Reflectado, Casino Royale, Mana Meltdown, Choque de Titanes, Ejecutor temporal y Dominio absoluto.</span>
+          </div>
+        </div>
+        <button type="button" id="secretCharactersBackButton">Volver</button>
+      </div>
+      <div class="menu-screen secret-guide-menu hidden" id="eventGuideScreen">
+        <h2>Eventos especiales</h2>
+        <div class="guide-section">
+          <h3>Felicidades!</h3>
+          <div class="character-guide">
+            <span>Felicidades! encontraste la lista de eventos del juego. Algunos solo aparecen si elegis personajes y mapas muy especificos.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Eventos</h3>
+          <div class="character-guide">
+            <span><strong>Duelo del Desierto</strong> Cowboy vs Cowboy en mapa Desierto, sin bot. Si ambos esperan quietos entre 5 y 20 segundos, el mapa pasa a atardecer y cada Cowboy recibe una sola bala de 100 de dano.</span>
+            <span><strong>Choque de Titanes</strong> Living Tank vs Living Tank en mapa Militar. Si pelean cerca y en el suelo durante unos segundos, el proximo canon de cada Tank queda sobrecargado a 90 de dano.</span>
+            <span><strong>Ruptura Arcana</strong> Sorcerer vs Reflecter en mapa Neon. Cuando Reflecter refleja/copia magia de Sorcerer, las esferas rojas se potencian temporalmente.</span>
+            <span><strong>Colapso Espejo</strong> Sorcerer vs Reflecter. Si Reflecter devuelve la esfera secreta cargada de Sorcerer, la esfera reflejada crece, pega mas fuerte y resetea cooldowns clave.</span>
+            <span><strong>Casino Royale</strong> Gambler vs Gambler en mapa Casino, sin bot. Si ambos llegan a 20% de suerte, ambos ganan +25% de suerte y ruleta lista.</span>
+            <span><strong>Mana Meltdown</strong> Fire Master vs Sorcerer en mapa Foundry. Si fuego y magia coinciden en pantalla, sus proyectiles hacen +20% de dano temporalmente.</span>
+            <span><strong>Prism Overdrive</strong> Switcher vs Switcher en mapa Neon. Al cambiar/usar modos varias veces, ambos Switcher reducen cooldown y potencian habilidades temporalmente.</span>
+            <span><strong>Absolute Adaptation</strong> Divine General vs Chrono en Dark Room. Cuando Divine acumula 6 adaptaciones, gana adaptacion amplia, baja cooldowns y Chrono recupera sus tecnicas temporales.</span>
+          </div>
+        </div>
+        <button type="button" id="eventGuideBackButton">Volver</button>
+      </div>
+      <div class="menu-screen achievements-menu hidden" id="achievementsScreen">
+        <h2>Logros</h2>
+        <div class="achievements-grid">
+          <div class="achievement-card" data-achievement="firstWin">
+            <span class="achievement-icon achievement-icon-fist" aria-hidden="true"></span>
+            <strong>Primer moquete</strong>
+            <span>Gana tu primera pelea.</span>
+          </div>
+          <div class="achievement-card" data-achievement="fastWin">
+            <span class="achievement-icon achievement-icon-clock" aria-hidden="true"></span>
+            <strong>Sin respirar</strong>
+            <span>Gana una ronda en menos de 30 segundos.</span>
+          </div>
+          <div class="achievement-card" data-achievement="clutchWin">
+            <span class="achievement-icon achievement-icon-heart" aria-hidden="true"></span>
+            <strong>Ultima gota</strong>
+            <span>Gana una pelea con 10 de vida o menos.</span>
+          </div>
+          <div class="achievement-card" data-achievement="perfectDuel">
+            <span class="achievement-icon achievement-icon-bullet" aria-hidden="true"></span>
+            <strong>Duelo perfecto</strong>
+            <span>Activa el Duelo del Desierto y gana con la bala unica.</span>
+          </div>
+          <div class="achievement-card" data-achievement="jackpot">
+            <span class="achievement-icon achievement-icon-jackpot" aria-hidden="true"></span>
+            <strong>JACKPOT!!</strong>
+            <span>Consigue triple 7 con Gambler.</span>
+          </div>
+          <div class="achievement-card" data-achievement="reflectedWin">
+            <span class="achievement-icon achievement-icon-reflect" aria-hidden="true"></span>
+            <strong>Reflectado</strong>
+            <span>Gana usando una habilidad copiada por Reflecter.</span>
+          </div>
+          <div class="achievement-card" data-achievement="darkRoom">
+            <span class="achievement-icon achievement-icon-dark" aria-hidden="true"></span>
+            <strong>Sin luz</strong>
+            <span>Juega una partida en Dark Room.</span>
+          </div>
+          <div class="achievement-card" data-achievement="oldDays">
+            <span class="achievement-icon achievement-icon-alpha" aria-hidden="true"></span>
+            <strong>Viejos dias</strong>
+            <span>Entra a la Alpha edition.</span>
+          </div>
+          <div class="achievement-card" data-achievement="debug">
+            <span class="achievement-icon achievement-icon-debug" aria-hidden="true"></span>
+            <strong>No era trampa</strong>
+            <span>Abre la Pantalla Debug.</span>
+          </div>
+          <div class="achievement-card" data-achievement="codeBreaker">
+            <span class="achievement-icon achievement-icon-code" aria-hidden="true"></span>
+            <strong>Codigo roto</strong>
+            <span>Activa cualquier codigo secreto de personaje.</span>
+          </div>
+          <div class="achievement-card" data-achievement="prismDriver">
+            <span class="achievement-icon achievement-icon-prism" aria-hidden="true"></span>
+            <strong>Piloto prism</strong>
+            <span>Activa Prism Overdrive.</span>
+          </div>
+          <div class="achievement-card" data-achievement="casinoRoyalty">
+            <span class="achievement-icon achievement-icon-jackpot" aria-hidden="true"></span>
+            <strong>Realeza del casino</strong>
+            <span>Gana una pelea con Casino Royale activo.</span>
+          </div>
+          <div class="achievement-card" data-achievement="meltdownMaster">
+            <span class="achievement-icon achievement-icon-meltdown" aria-hidden="true"></span>
+            <strong>Maestro meltdown</strong>
+            <span>Gana una pelea durante Mana Meltdown.</span>
+          </div>
+          <div class="achievement-card" data-achievement="tankCommander">
+            <span class="achievement-icon achievement-icon-tank" aria-hidden="true"></span>
+            <strong>Comandante blindado</strong>
+            <span>Gana una pelea con Choque de Titanes activo.</span>
+          </div>
+          <div class="achievement-card" data-achievement="flawlessWin">
+            <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
+            <strong>Intocable</strong>
+            <span>Gana una pelea con la vida llena.</span>
+          </div>
+          <div class="achievement-card" data-achievement="specialist">
+            <span class="achievement-icon achievement-icon-specialist" aria-hidden="true"></span>
+            <strong>Especialista</strong>
+            <span>Usa 10 especiales en una pelea.</span>
+          </div>
+          <div class="achievement-card" data-achievement="timeExecutioner">
+            <span class="achievement-icon achievement-icon-clock" aria-hidden="true"></span>
+            <strong>Ejecutor temporal</strong>
+            <span>Gana con Chrono tras hacer dano durante Time Stop.</span>
+          </div>
+          <div class="achievement-card" data-achievement="absoluteDominance">
+            <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
+            <strong>Dominio absoluto</strong>
+            <span>Gana contra bot dificil en menos de 25 segundos sin recibir dano.</span>
+          </div>
+          <div class="achievement-card" data-achievement="ghostUnlocked">
+            <span class="achievement-icon achievement-icon-dark" aria-hidden="true"></span>
+            <strong>Presencia fantasmal</strong>
+            <span>Gana tu primera pelea para desbloquear a Ghost.</span>
+          </div>
+          <div class="achievement-card" data-achievement="divineGeneralUnlocked">
+            <span class="achievement-icon achievement-icon-divine" aria-hidden="true"></span>
+            <strong>Juicio del General</strong>
+            <span>Completa los 7 sellos dificiles para desbloquear a Divine General.</span>
+          </div>
+        </div>
+        <button type="button" id="achievementsBackButton">Volver</button>
+      </div>
+      <div class="menu-screen stats-menu hidden" id="statsScreen">
+        <h2>Estadisticas</h2>
+        <div class="stats-summary">
+          <div>
+            <span>Tiempo de juego</span>
+            <strong id="statsTotalPlayTime">0:00</strong>
+          </div>
+          <div>
+            <span>Peleas</span>
+            <strong id="statsTotalFights">0</strong>
+          </div>
+          <div>
+            <span>Victorias</span>
+            <strong id="statsTotalWins">0</strong>
+          </div>
+          <div>
+            <span>Derrotas</span>
+            <strong id="statsTotalLosses">0</strong>
+          </div>
+          <div>
+            <span>Empates</span>
+            <strong id="statsTotalDraws">0</strong>
+          </div>
+          <div>
+            <span>Winrate</span>
+            <strong id="statsWinRate">0%</strong>
+          </div>
+          <div>
+            <span>Contra bot</span>
+            <strong id="statsBotFights">0</strong>
+          </div>
+        </div>
+        <div class="stats-table">
+          <div class="stats-row stats-header">
+            <span>Personaje</span>
+            <span>Usos</span>
+            <span>Victorias</span>
+            <span>Derrotas</span>
+            <span>Empates</span>
+            <span>Winrate</span>
+          </div>
+          <div id="statsCharacterRows">
+            <div class="stats-row" data-stats-character="normal">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="normal" aria-hidden="true"></span>
+                <b>Normal</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+            <div class="stats-row" data-stats-character="fireMaster">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="fireMaster" aria-hidden="true"></span>
+                <b>Fire Master</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+            <div class="stats-row" data-stats-character="tank">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="tank" aria-hidden="true"></span>
+                <b>Living Tank</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+            <div class="stats-row" data-stats-character="cowboy">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="cowboy" aria-hidden="true"></span>
+                <b>Cowboy</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+            <div class="stats-row" data-stats-character="reflecter">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="reflecter" aria-hidden="true"></span>
+                <b>Reflecter</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+            <div class="stats-row" data-stats-character="switcher">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="switcher" aria-hidden="true"></span>
+                <b>Switcher</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+            <div class="stats-row" data-stats-character="sorcerer">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="sorcerer" aria-hidden="true"></span>
+                <b>Sorcerer</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+            <div class="stats-row" data-stats-character="gambler">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="gambler" aria-hidden="true"></span>
+                <b>Gambler</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+            <div class="stats-row" data-stats-character="chrono">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="chrono" aria-hidden="true"></span>
+                <b>Chrono</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+            <div class="stats-row" data-stats-character="ghost">
+              <div class="stats-character">
+                <span class="fighter-portrait" data-character="ghost" aria-hidden="true"></span>
+                <b>Ghost</b>
+              </div>
+              <strong data-stat="played">0</strong>
+              <strong data-stat="wins">0</strong>
+              <strong data-stat="losses">0</strong>
+              <strong data-stat="draws">0</strong>
+              <strong data-stat="winRate">0%</strong>
+            </div>
+          </div>
+        </div>
+        <div class="stats-actions">
+          <button type="button" id="statsResetButton">Reiniciar estadisticas</button>
+          <button type="button" id="statsBackButton">Volver</button>
+        </div>
+      </div>
+      <div class="menu-screen guide-menu hidden" id="guideScreen">
+        <h2>Guia</h2>
+        <div class="guide-section">
+          <h3>Controles</h3>
+          <div class="guide-grid">
+            <div>
+              <strong>Jugador 1</strong>
+              <span>A/D mover</span>
+              <span>W saltar</span>
+              <span>S atacar</span>
+              <span>E golpe fuerte</span>
+              <span>Q especial 1</span>
+              <span>F especial 2</span>
+            </div>
+            <div>
+              <strong>Jugador 2</strong>
+              <span>Flechas mover/saltar</span>
+              <span>Flecha abajo atacar</span>
+              <span>Shift golpe fuerte</span>
+              <span>/ especial 1</span>
+              <span>. especial 2</span>
+            </div>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Personajes</h3>
+          <div class="character-guide">
+            <span><strong>Normal</strong> 100 vida, golpes basicos. Con kaioken, F activa 12s de aura roja, velocidad, vida y dano; durante Kaioken, Q lanza un combo rapido.</span>
+            <span><strong>Fire Master</strong> 120 vida, bola de fuego y fire beam. Q+F dispara Inferno Split: tres bolas de fuego y un beam, con cooldown mas largo.</span>
+            <span><strong>Living Tank</strong> 200 vida, lento, golpes pesados y canon. Con ironwall llega a 260 vida y pega mas fuerte.</span>
+            <span><strong>Cowboy</strong> 80 vida, rafaga de 12 balas. Gana si mantiene distancia y corta habilidades antes de que arranquen.</span>
+            <span><strong>Reflecter</strong> 150 vida, escudo que copia habilidades. Con mirrorluck gana suerte/copia mejorada; con upgrade pasa a 300 vida, 20 dano y copias mas peligrosas.</span>
+            <span><strong>Gambler</strong> 150 vida, 5 danio base. Q tira 3 numeros cada 2s. F sube +5% la suerte cada 5s. Q+F usa Loaded Dice: garantiza un triple positivo y sube suerte, con baja chance de 777; consume ambos cooldowns.</span>
+            <span><strong>Sorcerer</strong> 175 vida, 5 danio base. Q esfera roja de 35 danio, F esfera gravitatoria azul por 5 segundos. Q+F carga una esfera secreta mas lenta y peligrosa.</span>
+            <span><strong>Switcher</strong> 120 vida, 6 daño base. Q cambia collar, F activa rojo/azul/verde/amarillo. Q+F usa Prism Snap: cambia de modo, golpea cerca y aplica un efecto extra segun el modo nuevo.</span>
+            <span><strong>Chrono</strong> 175 vida. Q lanza una cuchilla temporal dirigida que ralentiza; si golpea a un rival ya ralentizado deja una marca. F crea un campo lento y detona esa marca con dano extra. Q+F usa Time Stop: congela al rival y sus proyectiles por unos segundos, con cooldown alto.</span>
+            <span><strong>Ghost</strong> se desbloquea al ganar tu primera pelea. Tiene 50 vida y 1 dano. Q activa Fase: queda 50% menos visible, invulnerable y mas rapido 5s; si atraviesa al rival le hace 2 dano cada 0,1s. Cooldown de 1s.</span>
+            <span><strong>Divine General</strong> se desbloquea completando los 7 sellos dificiles. Tiene 200 vida. Q lo vuelve invulnerable temporalmente y adapta su defensa; puede acumular hasta 6 adaptaciones por cada tipo de ataque, y cada adaptacion total suma +15% de dano base. F usa una contra que cambia segun lo aprendido, con respuestas unicas contra Fire Master, Living Tank, Cowboy, Switcher, Sorcerer y Gambler.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Mapas y audio</h3>
+          <div class="character-guide">
+            <span><strong>Alpha</strong> no tiene interaccion de terreno. Es el mapa limpio para probar balance puro.</span>
+            <span><strong>Desierto</strong> las dunas laterales ralentizan un poco. El centro es la zona mas estable.</span>
+            <span><strong>Neon</strong> el carril central da velocidad. Sirve para persecuciones y entradas agresivas.</span>
+            <span><strong>Casino</strong> la casilla 777 cambia de posicion y puede curar o potenciar suerte. Gambler saca mas valor de este mapa.</span>
+            <span><strong>Estacion Militar</strong> el barro frena. Castiga quedarse abajo sin plan.</span>
+            <span><strong>Audio</strong> hay musica de menu, sonidos de botones, sonidos de especiales y una musica local para triple 7 si existe assets/audio/jackpot.mp3.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Eventos especiales</h3>
+          <div class="character-guide">
+            <span><strong>Sorcerer vs Reflecter</strong> Reflecter puede devolver el orbe secreto y activar una ruptura fuerte del duelo.</span>
+            <span><strong>Sorcerer vs Reflecter en Neon</strong> puede aparecer Ruptura Arcana, que sube la presion magica.</span>
+            <span><strong>Switcher vs Switcher en Neon</strong> Prism Overdrive premia usar bien los cambios de modo.</span>
+            <span><strong>Cowboy vs Cowboy en Desierto</strong> el duelo limita disparos y convierte la pelea en precision.</span>
+            <span><strong>Tank vs Tank en Militar</strong> el choque pesado premia posicionamiento y distancia corta.</span>
+            <span><strong>Fire Master vs Sorcerer en Foundry</strong> Mana Meltdown vuelve el intercambio de magia mas peligroso.</span>
+            <span><strong>Divine General vs Chrono en Dark Room</strong> Absolute Adaptation convierte las adaptaciones de Divine en una crisis temporal.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Counters</h3>
+          <div class="character-guide">
+            <span><strong>Normal</strong> sufre contra Living Tank por vida/alcance, Sorcerer por control y Divine General si la pelea se alarga. Le conviene presionar a Cowboy, Fire Master y Gambler antes de que usen distancia o recursos.</span>
+            <span><strong>Fire Master</strong> counterea a Living Tank porque castiga su lentitud desde lejos. Sufre contra Reflecter, Chrono y Divine General: uno copia, otro corta ventanas, y Divine se adapta al fuego.</span>
+            <span><strong>Living Tank</strong> counterea a Normal, Cowboy y Ghost por aguante y golpes grandes. Sufre contra Fire Master, Sorcerer y Divine General porque lo obligan a caminar bajo castigo o le rompen el plan pesado.</span>
+            <span><strong>Cowboy</strong> counterea a Fire Master, Switcher y Ghost si mantiene distancia con rafagas. Sufre contra Living Tank, Reflecter y Divine General cuando sus balas dejan de ser ventaja.</span>
+            <span><strong>Reflecter</strong> counterea a Fire Master, Cowboy, Sorcerer y Chrono si predice especiales. Sufre contra Normal, Tank, Switcher agresivo y Divine General si lo fuerzan a pelear sin depender del escudo.</span>
+            <span><strong>Sorcerer</strong> counterea a Living Tank, Normal y Ghost con control de zona. Sufre contra Reflecter, Cowboy temprano, Chrono si pierde el ritmo y Divine General si este adapta arcane.</span>
+            <span><strong>Switcher</strong> puede adaptarse contra casi todos: azul para entrar, verde para curar, amarillo para aguantar, rojo para castigar. Sufre contra Cowboy, Sorcerer y Divine General si lo fuerzan a gastar mal su habilidad de modo.</span>
+            <span><strong>Gambler</strong> amenaza a cualquiera si llega a jackpot o acumula suerte. Sufre contra Cowboy, Chrono, Ghost agresivo y Divine General si este adapta luck y le rompe la economia de suerte.</span>
+            <span><strong>Chrono</strong> counterea personajes que dependen de una ventana clara, como Fire Master, Gambler y Ghost. Sufre contra presion constante de Cowboy, Reflecter si lee cuchillas, y Divine General si no gana antes del escalado.</span>
+            <span><strong>Ghost</strong> molesta a zoners y jugadores lentos con fase, invulnerabilidad y velocidad. Sufre contra Living Tank por no bajarlo rapido, Sorcerer por control de zona y Chrono si predice la entrada.</span>
+            <span><strong>Divine General</strong> counterea peleas largas y personajes predecibles porque convierte dano recibido en defensa y dano base. Sufre si lo rematan antes de acumular adaptaciones o si le baitéan Q/F para dejarlo sin respuesta.</span>
+          </div>
+        </div>
+        <button type="button" id="guideBackButton">Volver</button>
+      </div>
+      <div class="menu-screen opinion-menu hidden" id="opinionScreen">
+        <h2>Opinion de Codex</h2>
+        <div class="guide-section">
+          <h3>Diagnostico</h3>
+          <div class="character-guide">
+            <span>El juego ya tiene identidad: personajes distintos, mapas con reglas propias, codigos, eventos, logros y audio. Ahora el problema principal no es cantidad de contenido, es claridad.</span>
+            <span>La prioridad deberia ser que el jugador entienda rapido que esta pasando: cooldowns, estado de buffs, terreno activo, evento especial y logro desbloqueado.</span>
+            <span>El balance sigue dependiendo mucho de Sorcerer, Gambler y Switcher. Son los personajes con mas picos de poder; si uno domina, conviene tocar cooldowns antes que borrar mecanicas.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <div class="section-title-row">
+            <h3>Top por categoria</h3>
+            <button type="button" class="mini-menu-button" id="simpleTopButton">Version simplificada</button>
+          </div>
+          <div class="character-guide" id="categoryTopDetailed">
+            <span><strong>Mejor general</strong> Divine General, porque 200 vida, invulnerabilidad temporal, adaptacion por tipo y dano escalable lo vuelven el personaje mas completo si sobrevive al inicio.</span>
+            <span><strong>Mejor tanque</strong> Living Tank sigue siendo el mas estable sin condiciones, pero Divine General lo supera en peleas largas cuando acumula adaptaciones.</span>
+            <span><strong>Mejor control</strong> Chrono y Sorcerer: Chrono decide ventanas con slow/time stop; Sorcerer domina espacio con orbes y gravedad.</span>
+            <span><strong>Mejor alto riesgo/alto premio</strong> Gambler, porque jackpot y suerte pueden romper una pelea, aunque es inconsistente si lo presionan temprano.</span>
+            <span><strong>Mejor a distancia</strong> Cowboy por presion simple y constante; Sorcerer es mas fuerte si el jugador sabe controlar zonas.</span>
+            <span><strong>Mejor anti-proyectiles</strong> Reflecter por escudo/copia inmediata; Divine General escala mejor si tiene tiempo para adaptarse.</span>
+            <span><strong>Mas tecnico</strong> Switcher, Chrono y Divine General: Switcher exige modos, Chrono timing, Divine elegir cuando adaptarse y cuando contraatacar.</span>
+            <span><strong>Mejor factor sorpresa</strong> Ghost, porque fase e invulnerabilidad cambian el ritmo, pero su dano bajo exige jugar perfecto.</span>
+            <span><strong>Mas facil de aprender</strong> Normal, porque no depende de recursos ni combos.</span>
+          </div>
+          <div class="character-guide hidden" id="categoryTopSimple">
+            <span><strong>Fuerza general</strong> 1 Divine General, 2 Sorcerer, 3 Chrono, 4 Gambler, 5 Switcher, 6 Living Tank, 7 Cowboy, 8 Reflecter, 9 Fire Master, 10 Ghost, 11 Normal.</span>
+            <span><strong>Vida/aguante</strong> 1 Living Tank, 2 Divine General, 3 Sorcerer, 4 Chrono, 5 Gambler, 6 Reflecter, 7 Fire Master, 8 Switcher, 9 Normal, 10 Cowboy, 11 Ghost.</span>
+            <span><strong>Distancia</strong> 1 Cowboy, 2 Sorcerer, 3 Chrono, 4 Fire Master, 5 Living Tank, 6 Reflecter, 7 Switcher, 8 Divine General, 9 Gambler, 10 Normal, 11 Ghost.</span>
+            <span><strong>Movilidad</strong> 1 Ghost, 2 Gambler, 3 Switcher, 4 Chrono, 5 Cowboy, 6 Normal, 7 Fire Master, 8 Divine General, 9 Sorcerer, 10 Reflecter, 11 Living Tank.</span>
+            <span><strong>Dificultad tecnica</strong> 1 Divine General, 2 Switcher, 3 Chrono, 4 Gambler, 5 Sorcerer, 6 Reflecter, 7 Ghost, 8 Fire Master, 9 Cowboy, 10 Living Tank, 11 Normal.</span>
+            <span><strong>Anti-proyectiles</strong> 1 Reflecter, 2 Divine General, 3 Chrono, 4 Sorcerer, 5 Switcher, 6 Living Tank, 7 Ghost, 8 Gambler, 9 Cowboy, 10 Fire Master, 11 Normal.</span>
+            <span><strong>Factor sorpresa</strong> 1 Gambler, 2 Ghost, 3 Divine General, 4 Chrono, 5 Switcher, 6 Sorcerer, 7 Reflecter, 8 Cowboy, 9 Fire Master, 10 Living Tank, 11 Normal.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Top 10 enfrentamientos</h3>
+          <div class="character-guide">
+            <span><strong>1. Divine General vs Sorcerer</strong> el duelo mas fuerte ahora: control arcano contra adaptacion. Si Divine aguanta y sella magia, Sorcerer pierde su plan principal.</span>
+            <span><strong>2. Divine General vs Chrono</strong> lectura contra tiempo. Chrono quiere congelar ventanas; Divine quiere sobrevivir, adaptarse y convertir cada error en dano base permanente.</span>
+            <span><strong>3. Sorcerer vs Reflecter</strong> sigue siendo de los mas epicos: magia fuerte contra escudo/copia. Si Reflecter predice bien, da vuelta una pelea perdida.</span>
+            <span><strong>4. Switcher vs Sorcerer</strong> tecnico y exigente: Switcher debe elegir modo perfecto mientras Sorcerer controla espacio y castiga entradas malas.</span>
+            <span><strong>5. Divine General vs Gambler</strong> escalado contra azar. Gambler puede explotar con jackpot, pero Divine puede romper suerte si logra adaptarse a luck.</span>
+            <span><strong>6. Cowboy vs Divine General</strong> presion temprana contra adaptacion balistica. Cowboy necesita cerrar rapido antes de que sus balas alimenten a Divine.</span>
+            <span><strong>7. Chrono vs Ghost</strong> raro y divertido: Ghost ignora ritmo con fase, Chrono castiga con control temporal si predice la entrada.</span>
+            <span><strong>8. Fire Master vs Living Tank</strong> clasico de zoner contra tanque: Fire Master castiga desde lejos, pero si Tank entra una vez puede destruirlo.</span>
+            <span><strong>9. Cowboy vs Reflecter</strong> tension pura: Cowboy quiere llenar la pantalla de balas, Reflecter espera el momento exacto para castigarlo.</span>
+            <span><strong>10. Ghost vs Gambler</strong> caos real: Ghost necesita golpes precisos y evasivos; Gambler puede ganar por suerte, stun o jackpot si sobrevive.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Ideas a mejorar</h3>
+          <div class="character-guide">
+            <span><strong>1. HUD de cooldowns</strong> barras pequenas bajo la vida para Q y F. Es la mejora mas importante para que el combate sea legible.</span>
+            <span><strong>2. Marcadores de buffs</strong> iconos cortos para Kaioken, jackpot, armadura amarilla, overheat, ironwall y prism.</span>
+            <span><strong>3. Selector de audio completo</strong> mute, volumen por categoria y prueba de sonido desde Ajustes.</span>
+            <span><strong>4. Guia interactiva</strong> que muestre ataques por personaje con mini animaciones o ejemplos de dano/cooldown.</span>
+            <span><strong>5. Estadisticas post-pelea</strong> dano hecho, especiales usados, especiales acertados, tiempo y logros conseguidos.</span>
+            <span><strong>6. Balance por datos</strong> guardar victorias por personaje/mapa para detectar si Sorcerer, Gambler o Switcher estan demasiado arriba.</span>
+            <span><strong>7. Mas feedback de terreno</strong> icono o texto breve cuando entras a barro, duna, carril neon o casilla 777.</span>
+            <span><strong>8. IA menos basica</strong> el bot deberia esquivar gravedad, respetar Reflecter y no gastar especiales sin rango.</span>
+          </div>
+        </div>
+        <button type="button" id="opinionBackButton">Volver</button>
+      </div>
+    </div>
+    <div class="restart-panel hidden" id="restartPanel">
+      <h2 id="victoryTitle">Jugador gana</h2>
+      <div class="victory-stats">
+        <div class="victory-stat-header"></div>
+        <strong>Jugador 1</strong>
+        <strong>Jugador 2</strong>
+        <span>Dano causado</span>
+        <b id="p1DamageDealt">0</b>
+        <b id="p2DamageDealt">0</b>
+        <span>Golpes acertados</span>
+        <b id="p1HitsLanded">0</b>
+        <b id="p2HitsLanded">0</b>
+        <span>Especiales usados</span>
+        <b id="p1SpecialsUsed">0</b>
+        <b id="p2SpecialsUsed">0</b>
+        <span>Especiales acertados</span>
+        <b id="p1SpecialsLanded">0</b>
+        <b id="p2SpecialsLanded">0</b>
+        <span>Vida restante</span>
+        <b id="p1HealthLeft">0</b>
+        <b id="p2HealthLeft">0</b>
+      </div>
+      <div class="victory-time">Duracion: <b id="fightDuration">0:00</b></div>
+      <div class="restart-actions">
+        <button type="button" id="restartButton">Reiniciar pelea</button>
+        <button type="button" id="menuButton">Volver al menu</button>
+      </div>
+      <span>Tambien podes presionar R</span>
+    </div>
+  </div>
+  <div class="instructions">
+    <p>Jugador 1: A/D mover, W saltar, S atacar, E golpe fuerte, Q especial 1, F especial 2</p>
+    <p id="player2Instructions">Jugador 2: &larr;/&rarr; mover, &uarr; saltar, &darr; atacar, Shift golpe fuerte, / especial 1, . especial 2</p>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
