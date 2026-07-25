@@ -325,6 +325,7 @@ const uiTranslations = {
     guide: 'Guia',
     achievements: 'Logros',
     stats: 'Estadisticas',
+    information: 'Informacion',
     opinion: 'Opinion de Codex',
     settings: 'Ajustes',
     settingsTitle: 'Ajustes',
@@ -367,6 +368,7 @@ const uiTranslations = {
     guide: 'Guide',
     achievements: 'Achievements',
     stats: 'Stats',
+    information: 'Information',
     opinion: 'Codex Opinion',
     settings: 'Settings',
     settingsTitle: 'Settings',
@@ -409,6 +411,7 @@ const uiTranslations = {
     guide: 'Guia',
     achievements: 'Conquistas',
     stats: 'Estatisticas',
+    information: 'Informacao',
     opinion: 'Opiniao do Codex',
     settings: 'Ajustes',
     settingsTitle: 'Ajustes',
@@ -560,6 +563,7 @@ const settingsScreen = document.getElementById('settingsScreen');
 const guideScreen = document.getElementById('guideScreen');
 const achievementsScreen = document.getElementById('achievementsScreen');
 const statsScreen = document.getElementById('statsScreen');
+const infoScreen = document.getElementById('infoScreen');
 const opinionScreen = document.getElementById('opinionScreen');
 const debugScreen = document.getElementById('debugScreen');
 const secretGuideScreen = document.getElementById('secretGuideScreen');
@@ -587,12 +591,14 @@ const settingsButton = document.getElementById('settingsButton');
 const guideButton = document.getElementById('guideButton');
 const achievementsButton = document.getElementById('achievementsButton');
 const statsButton = document.getElementById('statsButton');
+const infoButton = document.getElementById('infoButton');
 const opinionButton = document.getElementById('opinionButton');
 const backButton = document.getElementById('backButton');
 const guideBackButton = document.getElementById('guideBackButton');
 const achievementsBackButton = document.getElementById('achievementsBackButton');
 const statsBackButton = document.getElementById('statsBackButton');
 const statsResetButton = document.getElementById('statsResetButton');
+const infoBackButton = document.getElementById('infoBackButton');
 const opinionBackButton = document.getElementById('opinionBackButton');
 const debugBackButton = document.getElementById('debugBackButton');
 const debugResetButton = document.getElementById('debugResetButton');
@@ -6009,6 +6015,7 @@ function returnToMenu() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -8514,6 +8521,7 @@ function openMapSelect() {
   characterScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   mapScreen.classList.remove('hidden');
 }
 
@@ -8543,6 +8551,7 @@ function openCharacterSelect() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -8560,6 +8569,7 @@ function closeCharacterSelect() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -8576,6 +8586,7 @@ function openSettings() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -8588,6 +8599,7 @@ function closeSettings() {
   settingsScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
   secretCharactersScreen.classList.add('hidden');
@@ -8605,6 +8617,7 @@ function openGuide() {
   opinionScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
   eventGuideScreen.classList.add('hidden');
@@ -8615,6 +8628,7 @@ function closeGuide() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
   secretCharactersScreen.classList.add('hidden');
   eventGuideScreen.classList.add('hidden');
@@ -8630,6 +8644,7 @@ function openAchievements() {
   settingsScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -8640,6 +8655,7 @@ function openAchievements() {
 
 function closeAchievements() {
   achievementsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   titleScreen.classList.remove('hidden');
 }
 
@@ -8653,6 +8669,7 @@ function openStatistics() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -8663,6 +8680,35 @@ function openStatistics() {
 
 function closeStatistics() {
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
+  titleScreen.classList.remove('hidden');
+}
+
+function openInfo() {
+  titleScreen.classList.add('hidden');
+  oldDaysScreen.classList.add('hidden');
+  characterScreen.classList.add('hidden');
+  mapScreen.classList.add('hidden');
+  settingsScreen.classList.add('hidden');
+  guideScreen.classList.add('hidden');
+  achievementsScreen.classList.add('hidden');
+  statsScreen.classList.add('hidden');
+  opinionScreen.classList.add('hidden');
+  debugScreen.classList.add('hidden');
+  secretGuideScreen.classList.add('hidden');
+  secretCharactersScreen.classList.add('hidden');
+  eventGuideScreen.classList.add('hidden');
+  infoScreen.classList.remove('hidden');
+}
+
+function closeInfo() {
+  infoScreen.classList.add('hidden');
+  achievementsScreen.classList.add('hidden');
+  statsScreen.classList.add('hidden');
+  secretGuideScreen.classList.add('hidden');
+  secretCharactersScreen.classList.add('hidden');
+  eventGuideScreen.classList.add('hidden');
+  oldDaysScreen.classList.add('hidden');
   titleScreen.classList.remove('hidden');
 }
 
@@ -8677,6 +8723,7 @@ function openOpinion() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
   secretCharactersScreen.classList.add('hidden');
@@ -8688,6 +8735,7 @@ function closeOpinion() {
   opinionScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
   secretCharactersScreen.classList.add('hidden');
   eventGuideScreen.classList.add('hidden');
@@ -8705,6 +8753,7 @@ function openDebug() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
   secretCharactersScreen.classList.add('hidden');
@@ -8716,6 +8765,7 @@ function closeDebug() {
   debugScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
   secretCharactersScreen.classList.add('hidden');
   eventGuideScreen.classList.add('hidden');
@@ -8733,6 +8783,7 @@ function openOldDays() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -8745,6 +8796,7 @@ function closeOldDays() {
   oldDaysScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   titleScreen.classList.remove('hidden');
 }
 
@@ -8757,6 +8809,7 @@ function openSecretGuide() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretCharactersScreen.classList.add('hidden');
@@ -8768,6 +8821,7 @@ function closeSecretGuide() {
   secretGuideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   titleScreen.classList.remove('hidden');
 }
 
@@ -8780,6 +8834,7 @@ function openSecretCharacters() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -8791,6 +8846,7 @@ function closeSecretCharacters() {
   secretCharactersScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   titleScreen.classList.remove('hidden');
 }
 
@@ -8803,6 +8859,7 @@ function openEventGuide() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -8814,6 +8871,7 @@ function closeEventGuide() {
   eventGuideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
   titleScreen.classList.remove('hidden');
 }
 
@@ -9014,12 +9072,14 @@ settingsButton.addEventListener('click', openSettings);
 guideButton.addEventListener('click', openGuide);
 achievementsButton.addEventListener('click', openAchievements);
 statsButton.addEventListener('click', openStatistics);
+infoButton.addEventListener('click', openInfo);
 opinionButton.addEventListener('click', openOpinion);
 backButton.addEventListener('click', closeSettings);
 guideBackButton.addEventListener('click', closeGuide);
 achievementsBackButton.addEventListener('click', closeAchievements);
 statsBackButton.addEventListener('click', closeStatistics);
 statsResetButton.addEventListener('click', resetPersistentStatistics);
+infoBackButton.addEventListener('click', closeInfo);
 opinionBackButton.addEventListener('click', closeOpinion);
 debugBackButton.addEventListener('click', closeDebug);
 debugResetButton.addEventListener('click', resetDebugSettings);
