@@ -446,6 +446,7 @@ const uiTranslations = {
   },
 };
 let menuSecretBuffer = '';
+let codexOpinionUnlocked = false;
 let blindMode = false;
 let blindCharacterMix = {};
 let darkRoomUnlocked = false;
@@ -974,6 +975,17 @@ function applyLanguage() {
   syncAchievementText();
   syncGhostUnlockUI();
   syncDivineGeneralUnlockUI();
+}
+
+function syncCodexOpinionUI() {
+  if (!opinionButton) return;
+  opinionButton.classList.toggle('hidden', !codexOpinionUnlocked);
+}
+
+function unlockCodexOpinion() {
+  codexOpinionUnlocked = true;
+  syncCodexOpinionUI();
+  openOpinion();
 }
 
 function loadAchievements() {
@@ -6692,6 +6704,9 @@ function handleMenuSecretInput(event) {
   if (menuSecretBuffer.endsWith('cheater')) {
     menuSecretBuffer = '';
     openDebug();
+  } else if (menuSecretBuffer.endsWith('codex')) {
+    menuSecretBuffer = '';
+    unlockCodexOpinion();
   } else if (menuSecretBuffer.endsWith('old')) {
     menuSecretBuffer = '';
     openOldDays();
@@ -8651,6 +8666,8 @@ function closeStatistics() {
 }
 
 function openOpinion() {
+  if (!codexOpinionUnlocked) return;
+
   titleScreen.classList.add('hidden');
   oldDaysScreen.classList.add('hidden');
   characterScreen.classList.add('hidden');
@@ -9017,6 +9034,7 @@ loadAudioSettings();
 syncAudioSettingsUI();
 syncDebugControls();
 applyLanguage();
+syncCodexOpinionUI();
 migrateUnlocksFromExistingAchievements();
 syncAchievementsUI();
 syncStatisticsUI();
