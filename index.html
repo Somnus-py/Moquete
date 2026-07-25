@@ -48,33 +48,33 @@
     </div>
     <canvas id="gameCanvas" width="1024" height="576"></canvas>
     <div class="achievement-toast hidden" id="achievementToast" aria-live="polite">
-      <span>Logro obtenido</span>
+      <span data-i18n="achievementToastLabel">Logro obtenido</span>
       <strong id="achievementToastTitle">Logro</strong>
       <em id="achievementToastDescription">Descripcion</em>
     </div>
     <div class="main-menu" id="mainMenu">
       <div class="menu-screen title-menu" id="titleScreen">
         <h1>Moquete</h1>
-        <span class="menu-subtitle">Juego de pelea local</span>
+        <span class="menu-subtitle" data-i18n="menuSubtitle">Juego de pelea local</span>
         <div class="menu-actions">
-          <button type="button" id="playButton">Jugar</button>
+          <button type="button" id="playButton" data-i18n="play">Jugar</button>
         </div>
         <div class="menu-actions secondary-actions">
-          <button type="button" id="guideButton">Guia</button>
-          <button type="button" id="achievementsButton">Logros</button>
-          <button type="button" id="statsButton">Estadisticas</button>
-          <button type="button" id="opinionButton">Opinion de Codex</button>
-          <button type="button" id="settingsButton">Ajustes</button>
+          <button type="button" id="guideButton" data-i18n="guide">Guia</button>
+          <button type="button" id="achievementsButton" data-i18n="achievements">Logros</button>
+          <button type="button" id="statsButton" data-i18n="stats">Estadisticas</button>
+          <button type="button" id="opinionButton" data-i18n="opinion">Opinion de Codex</button>
+          <button type="button" id="settingsButton" data-i18n="settings">Ajustes</button>
         </div>
       </div>
       <div class="menu-screen olddays-menu hidden" id="oldDaysScreen">
         <h1>Moquete</h1>
         <span class="menu-subtitle">Alpha edition</span>
         <div class="menu-actions">
-          <button type="button" id="oldDaysPlayButton">Jugar</button>
+          <button type="button" id="oldDaysPlayButton" data-i18n="play">Jugar</button>
         </div>
         <div class="menu-actions secondary-actions">
-          <button type="button" id="oldDaysBackButton">Volver a la version actual</button>
+          <button type="button" id="oldDaysBackButton" data-i18n="backCurrent">Volver a la version actual</button>
         </div>
       </div>
       <div class="menu-screen character-menu hidden" id="characterScreen">
@@ -246,45 +246,53 @@
         <button type="button" id="mapBackButton">Volver</button>
       </div>
       <div class="menu-screen settings-menu hidden" id="settingsScreen">
-        <h2>Ajustes</h2>
+        <h2 data-i18n="settingsTitle">Ajustes</h2>
         <label class="setting-row">
-          <span>Pelear contra bot</span>
+          <span data-i18n="fightBot">Pelear contra bot</span>
           <input type="checkbox" id="botToggle" />
         </label>
         <div class="setting-row difficulty-setting">
-          <span>Dificultad del bot</span>
+          <span data-i18n="botDifficulty">Dificultad del bot</span>
           <div class="difficulty-options">
             <label>
               <input type="radio" name="botDifficulty" value="easy" />
-              Facil
+              <span data-i18n="easy">Facil</span>
             </label>
             <label>
               <input type="radio" name="botDifficulty" value="medium" checked />
-              Media
+              <span data-i18n="medium">Media</span>
             </label>
             <label>
               <input type="radio" name="botDifficulty" value="hard" />
-              Dificil
+              <span data-i18n="hard">Dificil</span>
             </label>
           </div>
         </div>
+        <label class="setting-row language-setting">
+          <span data-i18n="language">Idioma</span>
+          <select id="languageSelect" aria-label="Idioma">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+            <option value="pt">Português</option>
+          </select>
+        </label>
         <label class="setting-row audio-setting">
-          <span>Volumen general</span>
+          <span data-i18n="masterVolume">Volumen general</span>
           <input type="range" id="masterVolumeControl" min="0" max="1" step="0.05" value="1" />
           <strong id="masterVolumeValue">100%</strong>
         </label>
         <label class="setting-row audio-setting">
-          <span>Musica</span>
+          <span data-i18n="music">Musica</span>
           <input type="range" id="musicVolumeControl" min="0" max="1" step="0.05" value="1" />
           <strong id="musicVolumeValue">100%</strong>
         </label>
         <label class="setting-row audio-setting">
-          <span>Efectos</span>
+          <span data-i18n="effects">Efectos</span>
           <input type="range" id="sfxVolumeControl" min="0" max="1" step="0.05" value="1" />
           <strong id="sfxVolumeValue">100%</strong>
         </label>
         <div class="setting-row color-setting">
-          <span>Color Jugador 1</span>
+          <span data-i18n="player1Color">Color Jugador 1</span>
           <div class="color-options" data-player-color="1">
             <label class="color-swatch" title="Rojo">
               <input type="radio" name="player1Color" value="#ef5350" />
@@ -341,7 +349,7 @@
           </div>
         </div>
         <div class="setting-row color-setting">
-          <span>Color Jugador 2</span>
+          <span data-i18n="player2Color">Color Jugador 2</span>
           <div class="color-options" data-player-color="2">
             <label class="color-swatch" title="Rojo">
               <input type="radio" name="player2Color" value="#ef5350" checked />
@@ -397,58 +405,58 @@
             </label>
           </div>
         </div>
-        <button type="button" id="backButton">Volver</button>
+        <button type="button" id="backButton" data-i18n="back">Volver</button>
       </div>
       <div class="menu-screen debug-menu hidden" id="debugScreen">
-        <h2>Pantalla Debug</h2>
+        <h2 data-i18n="debugTitle">Pantalla Debug</h2>
         <div class="debug-grid">
           <label class="debug-control">
-            <span>Multiplicador de dano</span>
+            <span data-i18n="debugDamage">Multiplicador de dano</span>
             <input type="range" id="debugDamageMultiplier" min="0" max="5" step="0.25" value="1" />
             <strong id="debugDamageValue">1x</strong>
           </label>
           <label class="debug-control">
-            <span>Multiplicador de vida</span>
+            <span data-i18n="debugHealth">Multiplicador de vida</span>
             <input type="range" id="debugHealthMultiplier" min="0.25" max="5" step="0.25" value="1" />
             <strong id="debugHealthValue">1x</strong>
           </label>
           <label class="debug-control">
-            <span>Velocidad jugadores</span>
+            <span data-i18n="debugMove">Velocidad jugadores</span>
             <input type="range" id="debugMoveMultiplier" min="0.25" max="3" step="0.25" value="1" />
             <strong id="debugMoveValue">1x</strong>
           </label>
           <label class="debug-control">
-            <span>Multiplicador cooldowns</span>
+            <span data-i18n="debugCooldown">Multiplicador cooldowns</span>
             <input type="range" id="debugCooldownMultiplier" min="0" max="3" step="0.25" value="1" />
             <strong id="debugCooldownValue">1x</strong>
           </label>
           <label class="debug-control">
-            <span>Multiplicador gravedad</span>
+            <span data-i18n="debugGravity">Multiplicador gravedad</span>
             <input type="range" id="debugGravityMultiplier" min="0" max="3" step="0.25" value="1" />
             <strong id="debugGravityValue">1x</strong>
           </label>
           <label class="debug-control">
-            <span>Velocidad proyectiles</span>
+            <span data-i18n="debugProjectile">Velocidad proyectiles</span>
             <input type="range" id="debugProjectileMultiplier" min="0.25" max="3" step="0.25" value="1" />
             <strong id="debugProjectileValue">1x</strong>
           </label>
           <label class="debug-control">
-            <span>Duracion efectos</span>
+            <span data-i18n="debugDuration">Duracion efectos</span>
             <input type="range" id="debugDurationMultiplier" min="0" max="3" step="0.25" value="1" />
             <strong id="debugDurationValue">1x</strong>
           </label>
           <label class="debug-control">
-            <span>Empuje golpes</span>
+            <span data-i18n="debugKnockback">Empuje golpes</span>
             <input type="range" id="debugKnockbackMultiplier" min="0" max="3" step="0.25" value="1" />
             <strong id="debugKnockbackValue">1x</strong>
           </label>
         </div>
         <div class="debug-targets">
           <div class="debug-targets-heading">
-            <strong>Personajes afectados</strong>
+            <strong data-i18n="debugTargets">Personajes afectados</strong>
             <label>
               <input type="checkbox" id="debugAffectAll" checked />
-              Todos
+              <span data-i18n="all">Todos</span>
             </label>
           </div>
           <div class="debug-target-grid">
@@ -466,8 +474,8 @@
           </div>
         </div>
         <div class="debug-actions">
-          <button type="button" id="debugResetButton">Restaurar todo</button>
-          <button type="button" id="debugBackButton">Volver</button>
+          <button type="button" id="debugResetButton" data-i18n="resetAll">Restaurar todo</button>
+          <button type="button" id="debugBackButton" data-i18n="back">Volver</button>
         </div>
       </div>
       <div class="menu-screen secret-guide-menu hidden" id="secretGuideScreen">
@@ -482,7 +490,7 @@
           <h3>Codigos</h3>
           <div class="character-guide">
             <span><strong>cheater</strong> abre la Pantalla Debug para alterar dano, vida, velocidad, cooldowns, gravedad, proyectiles, duraciones, empuje y personajes afectados.</span>
-            <span><strong>olddays</strong> abre la version Alpha edition, con partida directa Normal vs Normal.</span>
+            <span><strong>Old</strong> abre la version Alpha edition, con partida directa Normal vs Normal.</span>
             <span><strong>blind</strong> activa modo guess who: nombres ocultos, personajes blancos y habilidades mezcladas temporalmente.</span>
             <span><strong>overheat</strong> potencia a Fire Master con mas dano y menos cooldown.</span>
             <span><strong>ironwall</strong> potencia a Living Tank con mas vida y golpes/canon mas fuertes.</span>
@@ -491,8 +499,8 @@
             <span><strong>kaioken</strong> desbloquea la segunda habilidad de Normal: aura roja, velocidad, vida y dano durante 12 segundos.</span>
             <span><strong>upgrade</strong> convierte a Reflecter en una version negra futurista con 300 vida, 20 dano, escudo mas peligroso y copias dobles.</span>
             <span><strong>prism</strong> mejora a Switcher con diseno prism, cooldown mas bajo y habilidades de modo mas rapidas/potentes.</span>
-            <span><strong>fulladapt</strong> desbloquea a Divine General, le da 250 de vida y lo inicia con 6 a 10 adaptaciones en los tipos principales.</span>
-            <span><strong>lights out</strong> desbloquea el mapa secreto Dark Room por una partida.</span>
+            <span><strong>fulladapt</strong> requiere Divine General desbloqueado: le da 250 de vida y lo inicia con 6 a 10 adaptaciones en los tipos principales.</span>
+            <span><strong>lightsout</strong> desbloquea el mapa secreto Dark Room por una partida.</span>
             <span><strong>secretguide1</strong> abre esta lista de codigos.</span>
             <span><strong>secretguide2</strong> abre la lista de eventos especiales.</span>
             <span><strong>clear</strong> desactiva los codigos activos y restaura personajes/mapas secretos.</span>
@@ -512,7 +520,7 @@
             <span><strong>Reflecter Mirrorluck</strong> codigo mirrorluck: Reflecter gana diseno casino/espejo, 165 vida, escudo mas largo, menos cooldown y copia de ruleta mucho mas confiable.</span>
             <span><strong>Reflecter 2.0</strong> codigo upgrade: Reflecter pasa a version negra futurista con 300 vida, 20 dano, escudo ampliado y copias dobles.</span>
             <span><strong>Switcher Prism</strong> codigo prism: Switcher gana diseno prism reforzado, cooldown menor, dash mas fuerte, mas curacion y mejor armadura amarilla.</span>
-            <span><strong>Divine General Full Adapt</strong> codigo fulladapt: Divine General queda desbloqueado, sube a 250 vida y empieza con 6 a 10 adaptaciones contra los tipos principales de golpes, proyectiles y estados.</span>
+            <span><strong>Divine General Full Adapt</strong> codigo fulladapt: requiere haber desbloqueado a Divine General; sube a 250 vida y empieza con 6 a 10 adaptaciones contra los tipos principales de golpes, proyectiles y estados.</span>
             <span><strong>Divine General</strong> desafio de los 7 sellos: gana Perfect Duel, Reflectado, Casino Royale, Mana Meltdown, Choque de Titanes, Ejecutor temporal y Dominio absoluto.</span>
           </div>
         </div>
@@ -542,7 +550,7 @@
         <button type="button" id="eventGuideBackButton">Volver</button>
       </div>
       <div class="menu-screen achievements-menu hidden" id="achievementsScreen">
-        <h2>Logros</h2>
+        <h2 data-i18n="achievements">Logros</h2>
         <div class="achievements-grid">
           <div class="achievement-card" data-achievement="firstWin">
             <span class="achievement-icon achievement-icon-fist" aria-hidden="true"></span>
@@ -551,101 +559,101 @@
           </div>
           <div class="achievement-card" data-achievement="fastWin">
             <span class="achievement-icon achievement-icon-clock" aria-hidden="true"></span>
-            <strong>Sin respirar</strong>
-            <span>Gana una ronda en menos de 30 segundos.</span>
+            <strong>No Time Wasted</strong>
+            <span>Win a round in under 30 seconds.</span>
           </div>
           <div class="achievement-card" data-achievement="clutchWin">
             <span class="achievement-icon achievement-icon-heart" aria-hidden="true"></span>
-            <strong>Ultima gota</strong>
-            <span>Gana una pelea con 10 de vida o menos.</span>
+            <strong>Last Breath</strong>
+            <span>Win a fight with 10 health or less.</span>
           </div>
           <div class="achievement-card" data-achievement="perfectDuel">
             <span class="achievement-icon achievement-icon-bullet" aria-hidden="true"></span>
-            <strong>Duelo perfecto</strong>
-            <span>Activa el Duelo del Desierto y gana con la bala unica.</span>
+            <strong>One Bullet Was Enough</strong>
+            <span>Win with the single bullet from Desert Duel.</span>
           </div>
           <div class="achievement-card" data-achievement="jackpot">
             <span class="achievement-icon achievement-icon-jackpot" aria-hidden="true"></span>
             <strong>JACKPOT!!</strong>
-            <span>Consigue triple 7 con Gambler.</span>
+            <span>Roll triple 7 with Gambler.</span>
           </div>
           <div class="achievement-card" data-achievement="reflectedWin">
             <span class="achievement-icon achievement-icon-reflect" aria-hidden="true"></span>
-            <strong>Reflectado</strong>
-            <span>Gana usando una habilidad copiada por Reflecter.</span>
+            <strong>Reflected Victory</strong>
+            <span>Win using an ability copied by Reflecter.</span>
           </div>
           <div class="achievement-card" data-achievement="darkRoom">
             <span class="achievement-icon achievement-icon-dark" aria-hidden="true"></span>
-            <strong>Sin luz</strong>
-            <span>Juega una partida en Dark Room.</span>
+            <strong>Lights Out</strong>
+            <span>Play a match in Dark Room.</span>
           </div>
           <div class="achievement-card" data-achievement="oldDays">
             <span class="achievement-icon achievement-icon-alpha" aria-hidden="true"></span>
-            <strong>Viejos dias</strong>
-            <span>Entra a la Alpha edition.</span>
+            <strong>Viaje al pasado</strong>
+            <span>Enter Alpha edition.</span>
           </div>
           <div class="achievement-card" data-achievement="debug">
             <span class="achievement-icon achievement-icon-debug" aria-hidden="true"></span>
-            <strong>No era trampa</strong>
-            <span>Abre la Pantalla Debug.</span>
+            <strong>Debug Intruder</strong>
+            <span>Open the Debug Screen.</span>
           </div>
           <div class="achievement-card" data-achievement="codeBreaker">
             <span class="achievement-icon achievement-icon-code" aria-hidden="true"></span>
-            <strong>Codigo roto</strong>
-            <span>Activa cualquier codigo secreto de personaje.</span>
+            <strong>Code Breaker</strong>
+            <span>Activate any secret character code.</span>
           </div>
           <div class="achievement-card" data-achievement="prismDriver">
             <span class="achievement-icon achievement-icon-prism" aria-hidden="true"></span>
-            <strong>Piloto prism</strong>
-            <span>Activa Prism Overdrive.</span>
+            <strong>Prism Driver</strong>
+            <span>Activate Prism Overdrive.</span>
           </div>
           <div class="achievement-card" data-achievement="casinoRoyalty">
             <span class="achievement-icon achievement-icon-jackpot" aria-hidden="true"></span>
-            <strong>Realeza del casino</strong>
-            <span>Gana una pelea con Casino Royale activo.</span>
+            <strong>Casino Royalty</strong>
+            <span>Win during Casino Royale.</span>
           </div>
           <div class="achievement-card" data-achievement="meltdownMaster">
             <span class="achievement-icon achievement-icon-meltdown" aria-hidden="true"></span>
-            <strong>Maestro meltdown</strong>
-            <span>Gana una pelea durante Mana Meltdown.</span>
+            <strong>Meltdown Master</strong>
+            <span>Win during Mana Meltdown.</span>
           </div>
           <div class="achievement-card" data-achievement="tankCommander">
             <span class="achievement-icon achievement-icon-tank" aria-hidden="true"></span>
-            <strong>Comandante blindado</strong>
-            <span>Gana una pelea con Choque de Titanes activo.</span>
+            <strong>Tank Commander</strong>
+            <span>Win a Clash of Titans.</span>
           </div>
           <div class="achievement-card" data-achievement="flawlessWin">
             <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
-            <strong>Intocable</strong>
-            <span>Gana una pelea con la vida llena.</span>
+            <strong>Untouchable</strong>
+            <span>Win with full health.</span>
           </div>
           <div class="achievement-card" data-achievement="specialist">
             <span class="achievement-icon achievement-icon-specialist" aria-hidden="true"></span>
-            <strong>Especialista</strong>
-            <span>Usa 10 especiales en una pelea.</span>
+            <strong>Specialist</strong>
+            <span>Use 10 specials in one fight.</span>
           </div>
           <div class="achievement-card" data-achievement="timeExecutioner">
             <span class="achievement-icon achievement-icon-clock" aria-hidden="true"></span>
-            <strong>Ejecutor temporal</strong>
-            <span>Gana con Chrono tras hacer dano durante Time Stop.</span>
+            <strong>Time Executioner</strong>
+            <span>Win with Chrono after dealing damage during Time Stop.</span>
           </div>
           <div class="achievement-card" data-achievement="absoluteDominance">
             <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
-            <strong>Dominio absoluto</strong>
-            <span>Gana contra bot dificil en menos de 25 segundos sin recibir dano.</span>
+            <strong>Absolute Dominance</strong>
+            <span>Win against a hard bot in under 25 seconds without taking damage.</span>
           </div>
           <div class="achievement-card" data-achievement="ghostUnlocked">
             <span class="achievement-icon achievement-icon-dark" aria-hidden="true"></span>
-            <strong>Presencia fantasmal</strong>
-            <span>Gana tu primera pelea para desbloquear a Ghost.</span>
+            <strong>Dark Room Wraith</strong>
+            <span>Unlock Ghost after playing a match in Dark Room.</span>
           </div>
           <div class="achievement-card" data-achievement="divineGeneralUnlocked">
             <span class="achievement-icon achievement-icon-divine" aria-hidden="true"></span>
-            <strong>Juicio del General</strong>
-            <span>Completa los 7 sellos dificiles para desbloquear a Divine General.</span>
+            <strong>General Judgment</strong>
+            <span>Complete the 7 difficult seals to unlock Divine General.</span>
           </div>
         </div>
-        <button type="button" id="achievementsBackButton">Volver</button>
+        <button type="button" id="achievementsBackButton" data-i18n="back">Volver</button>
       </div>
       <div class="menu-screen stats-menu hidden" id="statsScreen">
         <h2>Estadisticas</h2>
@@ -842,7 +850,7 @@
             <span><strong>Sorcerer</strong> 175 vida, 5 danio base. Q esfera roja de 35 danio, F esfera gravitatoria azul por 5 segundos. Q+F carga una esfera secreta mas lenta y peligrosa.</span>
             <span><strong>Switcher</strong> 120 vida, 6 daño base. Q cambia collar, F activa rojo/azul/verde/amarillo. Q+F usa Prism Snap: cambia de modo, golpea cerca y aplica un efecto extra segun el modo nuevo.</span>
             <span><strong>Chrono</strong> 175 vida. Q lanza una cuchilla temporal dirigida que ralentiza; si golpea a un rival ya ralentizado deja una marca. F crea un campo lento y detona esa marca con dano extra. Q+F usa Time Stop: congela al rival y sus proyectiles por unos segundos, con cooldown alto.</span>
-            <span><strong>Ghost</strong> se desbloquea al ganar tu primera pelea. Tiene 50 vida y 1 dano. Q activa Fase: queda 50% menos visible, invulnerable y mas rapido 5s; si atraviesa al rival le hace 2 dano cada 0,1s. Cooldown de 1s.</span>
+            <span><strong>Ghost</strong> se desbloquea despues de jugar una partida en Dark Room. Tiene 50 vida y 1 dano. Q activa Fase: queda 50% menos visible, invulnerable y mas rapido 5s; si atraviesa al rival le hace 2 dano cada 0,1s. Cooldown de 1s.</span>
             <span><strong>Divine General</strong> se desbloquea completando los 7 sellos dificiles. Tiene 200 vida. Q lo vuelve invulnerable temporalmente y adapta su defensa; puede acumular hasta 6 adaptaciones por cada tipo de ataque, y cada adaptacion total suma +15% de dano base. F usa una contra que cambia segun lo aprendido, con respuestas unicas contra Fire Master, Living Tank, Cowboy, Switcher, Sorcerer y Gambler.</span>
           </div>
         </div>

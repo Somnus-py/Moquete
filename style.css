@@ -554,7 +554,7 @@ body.menu-open .instructions {
 .achievement-card::after {
   background: #111;
   color: #fff;
-  content: 'Pendiente';
+  content: attr(data-locked-label);
   font-size: 10px;
   font-weight: 900;
   padding: 4px 7px;
@@ -577,7 +577,7 @@ body.menu-open .instructions {
 .achievement-card.unlocked::after {
   background: #66bb6a;
   color: #111;
-  content: 'Obtenido';
+  content: attr(data-unlocked-label);
 }
 
 .achievement-card strong {
@@ -2413,6 +2413,18 @@ body.menu-open .instructions {
 .difficulty-options input {
   height: 18px;
   width: 18px;
+}
+
+.language-setting select {
+  background: #111;
+  border: 3px solid #111;
+  box-shadow: 0 4px 0 rgba(17, 17, 17, 0.32);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  max-width: 210px;
+  padding: 8px 12px;
+  text-transform: uppercase;
 }
 
 .audio-setting {

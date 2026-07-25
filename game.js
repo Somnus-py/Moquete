@@ -183,6 +183,8 @@ const defaultDebugSettings = {
 const debugSettings = { ...defaultDebugSettings };
 const achievementStorageKey = 'moqueteAchievements';
 const statisticsStorageKey = 'moqueteStatistics';
+const languageStorageKey = 'moqueteLanguage';
+const supportedLanguages = ['es', 'en', 'pt'];
 const achievementIds = [
   'firstWin',
   'fastWin',
@@ -214,29 +216,233 @@ const divineGeneralTrialAchievements = [
   'timeExecutioner',
   'absoluteDominance',
 ];
-const achievementDetails = {
-  firstWin: { title: 'Primer moquete', description: 'Gana tu primera pelea.' },
-  fastWin: { title: 'sin perder el tiempo', description: 'Gana una ronda en menos de 30 segundos.' },
-  clutchWin: { title: 'Ultima respiro', description: 'Gana una pelea con 10 de vida o menos.' },
-  perfectDuel: { title: 'solo necesitaba 1 bala', description: 'Gana con la bala unica del Duelo del Desierto.' },
-  jackpot: { title: 'JACKPOT!!', description: 'Consigue triple 7 con Gambler.' },
-  reflectedWin: { title: 'Reflectado', description: 'Gana usando una habilidad copiada por Reflecter.' },
-  darkRoom: { title: 'Con los ojos cerrados', description: 'Juega una partida en Dark Room.' },
-  oldDays: { title: 'nostalgia', description: 'Entra a la Alpha edition.' },
-  debug: { title: 'tramposo', description: 'Abre la Pantalla Debug.' },
-  codeBreaker: { title: 'Codigo roto', description: 'Activa cualquier codigo secreto de personaje.' },
-  prismDriver: { title: 'Piloto prism', description: 'Activa Prism Overdrive.' },
-  casinoRoyalty: { title: 'Realeza del casino', description: 'Gana Casino Royale.' },
-  meltdownMaster: { title: 'Maestro del fuego', description: 'Gana durante Mana Meltdown.' },
-  tankCommander: { title: 'Comandante blindado', description: 'Gana un Choque de Titanes.' },
-  flawlessWin: { title: 'Intocable', description: 'Gana con la vida llena.' },
-  specialist: { title: 'Especialista', description: 'Usa 10 especiales en una pelea.' },
-  timeExecutioner: { title: 'Ejecutor temporal', description: 'Gana con Chrono tras hacer dano durante Time Stop.' },
-  absoluteDominance: { title: 'Dominio absoluto', description: 'Gana contra bot dificil en menos de 25 segundos sin recibir dano.' },
-  ghostUnlocked: { title: 'Presencia fantasmal', description: 'Desbloquea a Ghost ganando tu primera pelea.' },
-  divineGeneralUnlocked: {
-    title: 'Juicio del General',
-    description: 'Completa los 7 sellos dificiles para desbloquear a Divine General.',
+const achievementDetailsByLanguage = {
+  es: {
+    firstWin: { title: 'Primer moquete', description: 'Gana tu primera pelea.' },
+    fastWin: { title: 'Sin perder tiempo', description: 'Gana una ronda en menos de 30 segundos.' },
+    clutchWin: { title: 'Ultimo aliento', description: 'Gana una pelea con 10 de vida o menos.' },
+    perfectDuel: { title: 'Una bala basto', description: 'Gana con la bala unica del Duelo del Desierto.' },
+    jackpot: { title: 'JACKPOT!!', description: 'Saca triple 7 con Gambler.' },
+    reflectedWin: { title: 'Victoria reflejada', description: 'Gana usando una habilidad copiada por Reflecter.' },
+    darkRoom: { title: 'Luces fuera', description: 'Juega una partida en Dark Room.' },
+    oldDays: { title: 'Viaje al pasado', description: 'Entra a Alpha edition.' },
+    debug: { title: 'Intruso debug', description: 'Abre la Pantalla Debug.' },
+    codeBreaker: { title: 'Rompedor de codigos', description: 'Activa cualquier codigo secreto de personaje.' },
+    prismDriver: { title: 'Piloto prisma', description: 'Activa Prism Overdrive.' },
+    casinoRoyalty: { title: 'Realeza casino', description: 'Gana durante Casino Royale.' },
+    meltdownMaster: { title: 'Maestro meltdown', description: 'Gana durante Mana Meltdown.' },
+    tankCommander: { title: 'Comandante tanque', description: 'Gana un Choque de Titanes.' },
+    flawlessWin: { title: 'Intocable', description: 'Gana con toda la vida.' },
+    specialist: { title: 'Especialista', description: 'Usa 10 especiales en una pelea.' },
+    timeExecutioner: {
+      title: 'Ejecutor temporal',
+      description: 'Gana con Chrono despues de hacer dano durante Time Stop.',
+    },
+    absoluteDominance: {
+      title: 'Dominio absoluto',
+      description: 'Gana contra un bot dificil en menos de 25 segundos sin recibir dano.',
+    },
+    ghostUnlocked: {
+      title: 'Espectro del Dark Room',
+      description: 'Desbloquea a Ghost despues de jugar una partida en Dark Room.',
+    },
+    divineGeneralUnlocked: {
+      title: 'Juicio del general',
+      description: 'Completa los 7 sellos dificiles para desbloquear a Divine General.',
+    },
+  },
+  en: {
+    firstWin: { title: 'First Moquete', description: 'Win your first fight.' },
+    fastWin: { title: 'No Time Wasted', description: 'Win a round in under 30 seconds.' },
+    clutchWin: { title: 'Last Breath', description: 'Win a fight with 10 health or less.' },
+    perfectDuel: { title: 'One Bullet Was Enough', description: 'Win with the single bullet from Desert Duel.' },
+    jackpot: { title: 'JACKPOT!!', description: 'Roll triple 7 with Gambler.' },
+    reflectedWin: { title: 'Reflected Victory', description: 'Win using an ability copied by Reflecter.' },
+    darkRoom: { title: 'Lights Out', description: 'Play a match in Dark Room.' },
+    oldDays: { title: 'Trip to the Past', description: 'Enter Alpha edition.' },
+    debug: { title: 'Debug Intruder', description: 'Open the Debug Screen.' },
+    codeBreaker: { title: 'Code Breaker', description: 'Activate any secret character code.' },
+    prismDriver: { title: 'Prism Driver', description: 'Activate Prism Overdrive.' },
+    casinoRoyalty: { title: 'Casino Royalty', description: 'Win during Casino Royale.' },
+    meltdownMaster: { title: 'Meltdown Master', description: 'Win during Mana Meltdown.' },
+    tankCommander: { title: 'Tank Commander', description: 'Win a Clash of Titans.' },
+    flawlessWin: { title: 'Untouchable', description: 'Win with full health.' },
+    specialist: { title: 'Specialist', description: 'Use 10 specials in one fight.' },
+    timeExecutioner: {
+      title: 'Time Executioner',
+      description: 'Win with Chrono after dealing damage during Time Stop.',
+    },
+    absoluteDominance: {
+      title: 'Absolute Dominance',
+      description: 'Win against a hard bot in under 25 seconds without taking damage.',
+    },
+    ghostUnlocked: { title: 'Dark Room Wraith', description: 'Unlock Ghost after playing a match in Dark Room.' },
+    divineGeneralUnlocked: {
+      title: 'General Judgment',
+      description: 'Complete the 7 difficult seals to unlock Divine General.',
+    },
+  },
+  pt: {
+    firstWin: { title: 'Primeiro Moquete', description: 'Venca sua primeira luta.' },
+    fastWin: { title: 'Sem perder tempo', description: 'Venca uma rodada em menos de 30 segundos.' },
+    clutchWin: { title: 'Ultimo suspiro', description: 'Venca uma luta com 10 de vida ou menos.' },
+    perfectDuel: { title: 'Uma bala bastou', description: 'Venca com a bala unica do Duelo do Deserto.' },
+    jackpot: { title: 'JACKPOT!!', description: 'Tire triplo 7 com Gambler.' },
+    reflectedWin: { title: 'Vitoria refletida', description: 'Venca usando uma habilidade copiada por Reflecter.' },
+    darkRoom: { title: 'Luzes apagadas', description: 'Jogue uma partida no Dark Room.' },
+    oldDays: { title: 'Viagem ao passado', description: 'Entre na Alpha edition.' },
+    debug: { title: 'Intruso debug', description: 'Abra a Tela Debug.' },
+    codeBreaker: { title: 'Quebra-codigos', description: 'Ative qualquer codigo secreto de personagem.' },
+    prismDriver: { title: 'Piloto prisma', description: 'Ative Prism Overdrive.' },
+    casinoRoyalty: { title: 'Realeza casino', description: 'Venca durante Casino Royale.' },
+    meltdownMaster: { title: 'Mestre meltdown', description: 'Venca durante Mana Meltdown.' },
+    tankCommander: { title: 'Comandante tanque', description: 'Venca um Clash of Titans.' },
+    flawlessWin: { title: 'Intocavel', description: 'Venca com vida cheia.' },
+    specialist: { title: 'Especialista', description: 'Use 10 especiais em uma luta.' },
+    timeExecutioner: {
+      title: 'Executor temporal',
+      description: 'Venca com Chrono depois de causar dano durante Time Stop.',
+    },
+    absoluteDominance: {
+      title: 'Dominio absoluto',
+      description: 'Venca contra um bot dificil em menos de 25 segundos sem receber dano.',
+    },
+    ghostUnlocked: {
+      title: 'Espectro do Dark Room',
+      description: 'Desbloqueie Ghost depois de jogar uma partida no Dark Room.',
+    },
+    divineGeneralUnlocked: {
+      title: 'Julgamento do general',
+      description: 'Complete os 7 selos dificeis para desbloquear Divine General.',
+    },
+  },
+};
+const uiTranslations = {
+  es: {
+    achievementToastLabel: 'Logro obtenido',
+    menuSubtitle: 'Juego de pelea local',
+    play: 'Jugar',
+    guide: 'Guia',
+    achievements: 'Logros',
+    stats: 'Estadisticas',
+    opinion: 'Opinion de Codex',
+    settings: 'Ajustes',
+    settingsTitle: 'Ajustes',
+    back: 'Volver',
+    backCurrent: 'Volver a la version actual',
+    fightBot: 'Pelear contra bot',
+    botDifficulty: 'Dificultad del bot',
+    easy: 'Facil',
+    medium: 'Media',
+    hard: 'Dificil',
+    language: 'Idioma',
+    masterVolume: 'Volumen general',
+    music: 'Musica',
+    effects: 'Efectos',
+    player1Color: 'Color Jugador 1',
+    player2Color: 'Color Jugador 2',
+    debugTitle: 'Pantalla Debug',
+    debugDamage: 'Multiplicador de dano',
+    debugHealth: 'Multiplicador de vida',
+    debugMove: 'Velocidad jugadores',
+    debugCooldown: 'Multiplicador cooldowns',
+    debugGravity: 'Multiplicador gravedad',
+    debugProjectile: 'Velocidad proyectiles',
+    debugDuration: 'Duracion efectos',
+    debugKnockback: 'Empuje golpes',
+    debugTargets: 'Personajes afectados',
+    all: 'Todos',
+    resetAll: 'Restaurar todo',
+    pending: 'Pendiente',
+    unlocked: 'Obtenido',
+    ghostUnlockedTitle: 'Ghost desbloqueado',
+    ghostLockedTitle: 'Juega una partida en Dark Room para usar Ghost',
+    divineUnlockedTitle: 'Divine General desbloqueado',
+    divineLockedTitle: 'Completa los 7 sellos dificiles para usar Divine General',
+  },
+  en: {
+    achievementToastLabel: 'Achievement unlocked',
+    menuSubtitle: 'Local fighting game',
+    play: 'Play',
+    guide: 'Guide',
+    achievements: 'Achievements',
+    stats: 'Stats',
+    opinion: 'Codex Opinion',
+    settings: 'Settings',
+    settingsTitle: 'Settings',
+    back: 'Back',
+    backCurrent: 'Back to current version',
+    fightBot: 'Fight bot',
+    botDifficulty: 'Bot difficulty',
+    easy: 'Easy',
+    medium: 'Medium',
+    hard: 'Hard',
+    language: 'Language',
+    masterVolume: 'Master volume',
+    music: 'Music',
+    effects: 'Effects',
+    player1Color: 'Player 1 color',
+    player2Color: 'Player 2 color',
+    debugTitle: 'Debug Screen',
+    debugDamage: 'Damage multiplier',
+    debugHealth: 'Health multiplier',
+    debugMove: 'Player speed',
+    debugCooldown: 'Cooldown multiplier',
+    debugGravity: 'Gravity multiplier',
+    debugProjectile: 'Projectile speed',
+    debugDuration: 'Effect duration',
+    debugKnockback: 'Hit knockback',
+    debugTargets: 'Affected characters',
+    all: 'All',
+    resetAll: 'Reset all',
+    pending: 'Pending',
+    unlocked: 'Unlocked',
+    ghostUnlockedTitle: 'Ghost unlocked',
+    ghostLockedTitle: 'Play a match in Dark Room to use Ghost',
+    divineUnlockedTitle: 'Divine General unlocked',
+    divineLockedTitle: 'Complete the 7 difficult seals to use Divine General',
+  },
+  pt: {
+    achievementToastLabel: 'Conquista obtida',
+    menuSubtitle: 'Jogo de luta local',
+    play: 'Jogar',
+    guide: 'Guia',
+    achievements: 'Conquistas',
+    stats: 'Estatisticas',
+    opinion: 'Opiniao do Codex',
+    settings: 'Ajustes',
+    settingsTitle: 'Ajustes',
+    back: 'Voltar',
+    backCurrent: 'Voltar para a versao atual',
+    fightBot: 'Lutar contra bot',
+    botDifficulty: 'Dificuldade do bot',
+    easy: 'Facil',
+    medium: 'Media',
+    hard: 'Dificil',
+    language: 'Idioma',
+    masterVolume: 'Volume geral',
+    music: 'Musica',
+    effects: 'Efeitos',
+    player1Color: 'Cor Jogador 1',
+    player2Color: 'Cor Jogador 2',
+    debugTitle: 'Tela Debug',
+    debugDamage: 'Multiplicador de dano',
+    debugHealth: 'Multiplicador de vida',
+    debugMove: 'Velocidade jogadores',
+    debugCooldown: 'Multiplicador cooldowns',
+    debugGravity: 'Multiplicador gravidade',
+    debugProjectile: 'Velocidade projeteis',
+    debugDuration: 'Duracao efeitos',
+    debugKnockback: 'Empurrao golpes',
+    debugTargets: 'Personagens afetados',
+    all: 'Todos',
+    resetAll: 'Restaurar tudo',
+    pending: 'Pendente',
+    unlocked: 'Obtido',
+    ghostUnlockedTitle: 'Ghost desbloqueado',
+    ghostLockedTitle: 'Jogue uma partida no Dark Room para usar Ghost',
+    divineUnlockedTitle: 'Divine General desbloqueado',
+    divineLockedTitle: 'Complete os 7 selos dificeis para usar Divine General',
   },
 };
 let menuSecretBuffer = '';
@@ -325,6 +531,7 @@ let gameStarted = false;
 let botEnabled = false;
 let botAttackCooldown = 0;
 let botDifficulty = 'medium';
+let currentLanguage = loadLanguageSetting();
 let animationId = null;
 let fireballs = [];
 let fireBeams = [];
@@ -398,6 +605,7 @@ const simpleTopButton = document.getElementById('simpleTopButton');
 const categoryTopDetailed = document.getElementById('categoryTopDetailed');
 const categoryTopSimple = document.getElementById('categoryTopSimple');
 const botToggle = document.getElementById('botToggle');
+const languageSelect = document.getElementById('languageSelect');
 const masterVolumeControl = document.getElementById('masterVolumeControl');
 const masterVolumeValue = document.getElementById('masterVolumeValue');
 const musicVolumeControl = document.getElementById('musicVolumeControl');
@@ -711,6 +919,63 @@ function createEmptyFightAchievementFlags() {
   };
 }
 
+function loadLanguageSetting() {
+  try {
+    const savedLanguage = localStorage.getItem(languageStorageKey);
+    return supportedLanguages.includes(savedLanguage) ? savedLanguage : 'es';
+  } catch (error) {
+    return 'es';
+  }
+}
+
+function saveLanguageSetting() {
+  try {
+    localStorage.setItem(languageStorageKey, currentLanguage);
+  } catch (error) {
+    // localStorage can be blocked; language still works until the page reloads.
+  }
+}
+
+function t(key) {
+  const languagePack = uiTranslations[currentLanguage] || uiTranslations.es;
+  return languagePack[key] || uiTranslations.es[key] || key;
+}
+
+function getAchievementDetails(achievementId) {
+  const languagePack = achievementDetailsByLanguage[currentLanguage] || achievementDetailsByLanguage.es;
+  return languagePack[achievementId] || achievementDetailsByLanguage.es[achievementId] || {
+    title: achievementId,
+    description: '',
+  };
+}
+
+function syncAchievementText() {
+  document.querySelectorAll('[data-achievement]').forEach((achievementCard) => {
+    const details = getAchievementDetails(achievementCard.dataset.achievement);
+    const title = achievementCard.querySelector('strong');
+    const description = achievementCard.querySelector('span:last-child');
+
+    if (title) title.innerText = details.title;
+    if (description) description.innerText = details.description;
+    achievementCard.dataset.lockedLabel = t('pending');
+    achievementCard.dataset.unlockedLabel = t('unlocked');
+  });
+}
+
+function applyLanguage() {
+  if (!supportedLanguages.includes(currentLanguage)) currentLanguage = 'es';
+  document.documentElement.lang = currentLanguage;
+  if (languageSelect) languageSelect.value = currentLanguage;
+
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    element.innerText = t(element.dataset.i18n);
+  });
+
+  syncAchievementText();
+  syncGhostUnlockUI();
+  syncDivineGeneralUnlockUI();
+}
+
 function loadAchievements() {
   try {
     const savedAchievements = JSON.parse(localStorage.getItem(achievementStorageKey) || '{}');
@@ -739,6 +1004,7 @@ function syncAchievementsUI() {
     const achievementId = achievementCard.dataset.achievement;
     achievementCard.classList.toggle('unlocked', Boolean(unlockedAchievements[achievementId]));
   });
+  syncAchievementText();
   syncGhostUnlockUI();
   syncDivineGeneralUnlockUI();
 }
@@ -757,7 +1023,7 @@ function syncGhostUnlockUI() {
   const unlocked = isGhostUnlocked();
   ghostCharacterButton.classList.toggle('locked', !unlocked);
   ghostCharacterButton.disabled = !unlocked;
-  ghostCharacterButton.title = unlocked ? 'Ghost desbloqueado' : 'Gana tu primera pelea para usar Ghost';
+  ghostCharacterButton.title = unlocked ? t('ghostUnlockedTitle') : t('ghostLockedTitle');
 }
 
 function syncDivineGeneralUnlockUI() {
@@ -766,9 +1032,7 @@ function syncDivineGeneralUnlockUI() {
   const unlocked = isDivineGeneralUnlocked();
   divineGeneralCharacterButton.classList.toggle('locked', !unlocked);
   divineGeneralCharacterButton.disabled = !unlocked;
-  divineGeneralCharacterButton.title = unlocked
-    ? 'Divine General desbloqueado'
-    : 'Completa los 7 sellos dificiles para usar Divine General';
+  divineGeneralCharacterButton.title = unlocked ? t('divineUnlockedTitle') : t('divineLockedTitle');
 }
 
 function hasCompletedDivineGeneralTrial() {
@@ -782,7 +1046,7 @@ function tryUnlockDivineGeneral() {
 }
 
 function migrateUnlocksFromExistingAchievements() {
-  if (!unlockedAchievements.ghostUnlocked && unlockedAchievements.firstWin) {
+  if (!unlockedAchievements.ghostUnlocked && unlockedAchievements.darkRoom) {
     unlockedAchievements.ghostUnlocked = true;
     saveAchievements();
   }
@@ -792,7 +1056,7 @@ function migrateUnlocksFromExistingAchievements() {
 function showAchievementToast(achievementId) {
   if (!achievementToast || !achievementToastTitle || !achievementToastDescription) return;
 
-  const details = achievementDetails[achievementId] || { title: achievementId, description: '' };
+  const details = getAchievementDetails(achievementId);
   achievementToastTitle.innerText = details.title;
   achievementToastDescription.innerText = details.description;
   achievementToast.classList.remove('hidden');
@@ -815,7 +1079,7 @@ function unlockAchievement(achievementId) {
   syncAchievementsUI();
   playSound('achievement');
   showAchievementToast(achievementId);
-  if (achievementId === 'firstWin') {
+  if (achievementId === 'darkRoom') {
     unlockAchievement('ghostUnlocked');
   }
   if (achievementId !== 'divineGeneralUnlocked') {
@@ -6428,7 +6692,7 @@ function handleMenuSecretInput(event) {
   if (menuSecretBuffer.endsWith('cheater')) {
     menuSecretBuffer = '';
     openDebug();
-  } else if (menuSecretBuffer.endsWith('olddays')) {
+  } else if (menuSecretBuffer.endsWith('old')) {
     menuSecretBuffer = '';
     openOldDays();
   } else if (menuSecretBuffer.endsWith('blind')) {
@@ -6485,9 +6749,9 @@ function handleMenuSecretInput(event) {
     updateCooldownIndicators();
   } else if (menuSecretBuffer.endsWith('fulladapt')) {
     menuSecretBuffer = '';
+    if (!isDivineGeneralUnlocked()) return;
     characterSecretModes.divineFullAdapt = true;
     unlockAchievement('codeBreaker');
-    unlockAchievement('divineGeneralUnlocked');
     [player1, player2].forEach((fighter) => {
       if (fighter.characterType === 'divineGeneral') {
         fighter.secretVariant = 'divineFullAdapt';
@@ -6500,7 +6764,7 @@ function handleMenuSecretInput(event) {
     });
     syncDivineGeneralUnlockUI();
     updateCooldownIndicators();
-  } else if (menuSecretBuffer.endsWith('lights out')) {
+  } else if (menuSecretBuffer.endsWith('lightsout')) {
     menuSecretBuffer = '';
     unlockDarkRoomMap();
   } else if (menuSecretBuffer.endsWith('secretguide1')) {
@@ -8647,6 +8911,14 @@ botDifficultyInputs.forEach((input) => {
   input.addEventListener('change', updateBotDifficulty);
 });
 
+if (languageSelect) {
+  languageSelect.addEventListener('change', () => {
+    currentLanguage = supportedLanguages.includes(languageSelect.value) ? languageSelect.value : 'es';
+    saveLanguageSetting();
+    applyLanguage();
+  });
+}
+
 [
   { input: masterVolumeControl, output: masterVolumeValue, setting: 'master' },
   { input: musicVolumeControl, output: musicVolumeValue, setting: 'music' },
@@ -8744,6 +9016,7 @@ menuButton.addEventListener('click', returnToMenu);
 loadAudioSettings();
 syncAudioSettingsUI();
 syncDebugControls();
+applyLanguage();
 migrateUnlocksFromExistingAchievements();
 syncAchievementsUI();
 syncStatisticsUI();
