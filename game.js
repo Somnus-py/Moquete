@@ -6699,25 +6699,32 @@ function handleMenuSecretInput(event) {
   if (targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select') return;
   if (event.key.length !== 1) return;
 
-  menuSecretBuffer = `${menuSecretBuffer}${event.key.toLowerCase()}`.slice(-18);
+  menuSecretBuffer = `${menuSecretBuffer}${event.key.toLowerCase()}`.slice(-32);
+  const normalizedSecretBuffer = menuSecretBuffer.replace(/[^a-z0-9]/g, '');
 
-  if (menuSecretBuffer.endsWith('cheater')) {
+  if (normalizedSecretBuffer.endsWith('secretguide1')) {
+    menuSecretBuffer = '';
+    openSecretGuide();
+  } else if (normalizedSecretBuffer.endsWith('secretguide2')) {
+    menuSecretBuffer = '';
+    openEventGuide();
+  } else if (normalizedSecretBuffer.endsWith('cheater')) {
     menuSecretBuffer = '';
     openDebug();
-  } else if (menuSecretBuffer.endsWith('codex')) {
+  } else if (normalizedSecretBuffer.endsWith('codex')) {
     menuSecretBuffer = '';
     unlockCodexOpinion();
-  } else if (menuSecretBuffer.endsWith('old')) {
+  } else if (normalizedSecretBuffer.endsWith('old')) {
     menuSecretBuffer = '';
     openOldDays();
-  } else if (menuSecretBuffer.endsWith('blind')) {
+  } else if (normalizedSecretBuffer.endsWith('blind')) {
     menuSecretBuffer = '';
     activateBlindMode();
-  } else if (menuSecretBuffer.endsWith('overheat')) {
+  } else if (normalizedSecretBuffer.endsWith('overheat')) {
     menuSecretBuffer = '';
     characterSecretModes.fireMasterOverheat = true;
     unlockAchievement('codeBreaker');
-  } else if (menuSecretBuffer.endsWith('ironwall')) {
+  } else if (normalizedSecretBuffer.endsWith('ironwall')) {
     menuSecretBuffer = '';
     characterSecretModes.tankIronWall = true;
     unlockAchievement('codeBreaker');
@@ -6727,20 +6734,20 @@ function handleMenuSecretInput(event) {
       }
     });
     updateHealthBars();
-  } else if (menuSecretBuffer.endsWith('deadeye')) {
+  } else if (normalizedSecretBuffer.endsWith('deadeye')) {
     menuSecretBuffer = '';
     characterSecretModes.cowboyDeadeye = true;
     unlockAchievement('codeBreaker');
-  } else if (menuSecretBuffer.endsWith('mirrorluck')) {
+  } else if (normalizedSecretBuffer.endsWith('mirrorluck')) {
     menuSecretBuffer = '';
     characterSecretModes.reflecterMirrorLuck = true;
     unlockAchievement('codeBreaker');
-  } else if (menuSecretBuffer.endsWith('kaioken')) {
+  } else if (normalizedSecretBuffer.endsWith('kaioken')) {
     menuSecretBuffer = '';
     characterSecretModes.normalKaioken = true;
     unlockAchievement('codeBreaker');
     updateCooldownIndicators();
-  } else if (menuSecretBuffer.endsWith('upgrade')) {
+  } else if (normalizedSecretBuffer.endsWith('upgrade')) {
     menuSecretBuffer = '';
     characterSecretModes.reflecterUpgrade = true;
     unlockAchievement('codeBreaker');
@@ -6751,7 +6758,7 @@ function handleMenuSecretInput(event) {
       }
     });
     updateHealthBars();
-  } else if (menuSecretBuffer.endsWith('prism')) {
+  } else if (normalizedSecretBuffer.endsWith('prism')) {
     menuSecretBuffer = '';
     characterSecretModes.switcherPrism = true;
     unlockAchievement('codeBreaker');
@@ -6762,7 +6769,7 @@ function handleMenuSecretInput(event) {
       }
     });
     updateCooldownIndicators();
-  } else if (menuSecretBuffer.endsWith('fulladapt')) {
+  } else if (normalizedSecretBuffer.endsWith('fulladapt')) {
     menuSecretBuffer = '';
     if (!isDivineGeneralUnlocked()) return;
     characterSecretModes.divineFullAdapt = true;
@@ -6779,16 +6786,10 @@ function handleMenuSecretInput(event) {
     });
     syncDivineGeneralUnlockUI();
     updateCooldownIndicators();
-  } else if (menuSecretBuffer.endsWith('lightsout')) {
+  } else if (normalizedSecretBuffer.endsWith('lightsout')) {
     menuSecretBuffer = '';
     unlockDarkRoomMap();
-  } else if (menuSecretBuffer.endsWith('secretguide1')) {
-    menuSecretBuffer = '';
-    openSecretGuide();
-  } else if (menuSecretBuffer.endsWith('secretguide2')) {
-    menuSecretBuffer = '';
-    openEventGuide();
-  } else if (menuSecretBuffer.endsWith('clear')) {
+  } else if (normalizedSecretBuffer.endsWith('clear')) {
     menuSecretBuffer = '';
     clearActiveCodes();
   }
