@@ -40,6 +40,14 @@ const fireBeamCooldown = 1200;
 const infernoSplitCooldown = 1500;
 const infernoSplitFireballDamageMultiplier = 0.75;
 const infernoSplitBeamDamageMultiplier = 0.72;
+const superFireMasterHealth = 160;
+const superFireballDamage = 25;
+const superFireBeamDamage = 85;
+const superFireKamehamehaChargeDuration = 300;
+const superFireKamehamehaDuration = 300;
+const superFireKamehamehaSpeed = playerMoveSpeed * 10;
+const superFireKamehamehaTickDamage = 5;
+const superFireKamehamehaTickInterval = 3;
 const cowboyHealth = 80;
 const cowboyBulletDamage = 10;
 const cowboyBulletSpeed = fireBeamSpeed;
@@ -216,6 +224,7 @@ const achievementIds = [
   'absoluteDominance',
   'ghostUnlocked',
   'divineGeneralUnlocked',
+  'superFireMasterUnlocked',
 ];
 const divineGeneralTrialAchievements = [
   'perfectDuel',
@@ -260,6 +269,10 @@ const achievementDetailsByLanguage = {
       title: 'Juicio del general',
       description: 'Completa los 7 sellos dificiles para desbloquear a Divine General.',
     },
+    superFireMasterUnlocked: {
+      title: 'Super Fire Master',
+      description: 'Gana como Fire Master durante Mana Meltdown.',
+    },
   },
   en: {
     firstWin: { title: 'First Moquete', description: 'Win your first fight.' },
@@ -290,6 +303,10 @@ const achievementDetailsByLanguage = {
     divineGeneralUnlocked: {
       title: 'General Judgment',
       description: 'Complete the 7 difficult seals to unlock Divine General.',
+    },
+    superFireMasterUnlocked: {
+      title: 'Super Fire Master',
+      description: 'Win as Fire Master during Mana Meltdown.',
     },
   },
   pt: {
@@ -324,6 +341,10 @@ const achievementDetailsByLanguage = {
     divineGeneralUnlocked: {
       title: 'Julgamento do general',
       description: 'Complete os 7 selos dificeis para desbloquear Divine General.',
+    },
+    superFireMasterUnlocked: {
+      title: 'Super Fire Master',
+      description: 'Venca como Fire Master durante Mana Meltdown.',
     },
   },
 };
@@ -549,6 +570,8 @@ let currentLanguage = 'es';
 let animationId = null;
 let fireballs = [];
 let fireBeams = [];
+let superFireKamehamehaCharges = [];
+let superFireKamehamehas = [];
 let tankShells = [];
 let cowboyBullets = [];
 let sorcererOrbs = [];
@@ -1016,6 +1039,7 @@ function syncAchievementsUI() {
     achievementCard.classList.toggle('unlocked', Boolean(unlockedAchievements[achievementId]));
   });
   syncAchievementText();
+  syncSuperFireMasterUnlockUI();
   syncGhostUnlockUI();
   syncDivineGeneralUnlockUI();
 }
@@ -1733,6 +1757,7 @@ class Fighter {
     this.damageMultiplier = 1;
     this.specialCooldown = 0;
     this.fireBeamCooldown = 0;
+    this.superFireKamehamehaCharging = false;
     this.tankAttackCooldown = 0;
     this.tankShellCooldown = 0;
     this.cowboyBurstCooldown = 0;
@@ -3028,9 +3053,9 @@ class Fighter {
         width: 70,
         height: 30,
       };
-      this.setMaxHealth(120);
-      this.color = '#fb8c00';
-      this.attackColor = hexToRgba('#fb8c00', 0.65);
+      this.setMaxHealth(getFireMasterHealth(this));
+      this.color = isSuperFireMaster(this) ? '#ff3d00' : '#fb8c00';
+      this.attackColor = hexToRgba(isSuperFireMaster(this) ? '#ffea00' : '#fb8c00', 0.65);
       return;
     }
 
@@ -3239,6 +3264,7 @@ class Fighter {
     this.strongAttackCooldown = 0;
     this.specialCooldown = 0;
     this.fireBeamCooldown = 0;
+    this.superFireKamehamehaCharging = false;
     this.tankAttackCooldown = 0;
     this.tankShellCooldown = 0;
     this.cowboyBurstCooldown = 0;
@@ -3369,6 +3395,127 @@ class FireBeam {
     this.draw();
 
     if (this.position.x + this.width < 0 || this.position.x > canvas.width) {
+      this.active = false;
+    }
+  }
+}
+
+class SuperFireKamehamehaCharge {
+  constructor({ attacker, target }) {
+    this.attacker = attacker;
+    this.target = target;
+    this.timer = 0;
+    this.duration = superFireKamehamehaChargeDuration;
+    this.active = true;
+    this.attacker.superFireKamehamehaCharging = true;
+  }
+
+  draw() {
+    const centerX = this.attacker.position.x + this.attacker.width / 2;
+    const centerY = this.attacker.position.y + this.attacker.height / 2;
+    const progress = Math.max(0, Math.min(1, this.timer / this.duration));
+    const radius = 18 + progress * 58;
+
+    ctx.save();
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = `rgba(255, 109, 0, ${0.18 + progress * 0.32})`;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff3e0';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+    ctx.stroke();
+    ctx.fillStyle = '#ff6d00';
+    ctx.fillRect(centerX - 18, centerY - 18, 36, 36);
+    ctx.fillStyle = '#fff176';
+    ctx.fillRect(centerX - 9, centerY - 9, 18, 18);
+    ctx.restore();
+  }
+
+  update() {
+    if (!this.attacker || !this.target || this.attacker.health <= 0 || gameOver) {
+      if (this.attacker) this.attacker.superFireKamehamehaCharging = false;
+      this.active = false;
+      return;
+    }
+
+    this.attacker.velocity.x = 0;
+    this.attacker.isAttacking = false;
+    this.attacker.attackTimer = 0;
+    this.draw();
+    this.timer += 1;
+
+    if (this.timer >= this.duration) {
+      superFireKamehamehas.push(new SuperFireKamehameha({ attacker: this.attacker, target: this.target }));
+      this.attacker.superFireKamehamehaCharging = false;
+      this.active = false;
+      playSound('fireBeam');
+    }
+  }
+}
+
+class SuperFireKamehameha {
+  constructor({ attacker, target }) {
+    const attackerCenterX = attacker.position.x + attacker.width / 2;
+    const targetCenterX = target.position.x + target.width / 2;
+    this.attacker = attacker;
+    this.target = target;
+    this.direction = targetCenterX >= attackerCenterX ? 1 : -1;
+    this.origin = {
+      x: this.direction > 0 ? attacker.position.x + attacker.width : attacker.position.x,
+      y: attacker.position.y + attacker.height / 2,
+    };
+    this.length = 0;
+    this.height = 86;
+    this.maxLength = canvas.width + 220;
+    this.duration = superFireKamehamehaDuration;
+    this.timer = 0;
+    this.damageTickTimer = 0;
+    this.active = true;
+  }
+
+  get x() {
+    return this.direction > 0 ? this.origin.x : this.origin.x - this.length;
+  }
+
+  get y() {
+    return this.origin.y - this.height / 2;
+  }
+
+  get width() {
+    return this.length;
+  }
+
+  draw() {
+    const x = this.x;
+    const y = this.y;
+    const width = this.width;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 245, 157, 0.96)';
+    ctx.fillRect(x, y + 22, width, this.height - 44);
+    ctx.fillStyle = 'rgba(255, 109, 0, 0.88)';
+    ctx.fillRect(x, y + 8, width, this.height - 16);
+    ctx.fillStyle = 'rgba(230, 81, 0, 0.72)';
+    ctx.fillRect(x, y, width, this.height);
+    ctx.fillStyle = 'rgba(255, 238, 88, 0.95)';
+    ctx.fillRect(x, y + 28, width, this.height - 56);
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.86)';
+    ctx.lineWidth = 5;
+    ctx.strokeRect(x, y + 4, width, this.height - 8);
+    ctx.restore();
+  }
+
+  update() {
+    this.timer += 1;
+    this.length = Math.min(this.maxLength, this.length + getDebugProjectileSpeed(superFireKamehamehaSpeed, this.attacker));
+    this.damageTickTimer = Math.max(0, this.damageTickTimer - 1);
+    this.draw();
+
+    if (this.timer >= this.duration) {
       this.active = false;
     }
   }
@@ -4069,6 +4216,25 @@ function isFireMasterOverheat(fighter) {
   return hasSecretVariant(fighter, 'fireMasterOverheat', characterSecretModes.fireMasterOverheat);
 }
 
+function isSuperFireMaster(fighter) {
+  return hasSecretVariant(fighter, 'superFireMaster');
+}
+
+function isSuperFireMasterUnlocked() {
+  return Boolean(unlockedAchievements.superFireMasterUnlocked);
+}
+
+function syncSuperFireMasterUnlockUI() {
+  if (!fireMasterCharacterButton) return;
+  fireMasterCharacterButton.title = isSuperFireMasterUnlocked()
+    ? 'Click izquierdo: Fire Master. Click derecho: Super Fire Master.'
+    : 'Gana con Fire Master durante Mana Meltdown para desbloquear Super Fire Master.';
+}
+
+function getFireMasterHealth(fighter) {
+  return isSuperFireMaster(fighter) ? superFireMasterHealth : 120;
+}
+
 function isTankIronWall(fighter) {
   return hasSecretVariant(fighter, 'tankIronwall', characterSecretModes.tankIronWall);
 }
@@ -4258,6 +4424,10 @@ function getGamblerLuckWaveProgress(timer, fighter = null) {
 }
 
 function getFireMasterSecretDamage(attacker, damage) {
+  if (isSuperFireMaster(attacker)) {
+    if (damage === fireballDamage) return superFireballDamage;
+    if (damage === fireBeamDamage) return superFireBeamDamage;
+  }
   return isFireMasterOverheat(attacker) ? damage * 1.35 : damage;
 }
 
@@ -4483,7 +4653,13 @@ function getOpponent(fighter) {
 }
 
 function canFighterAct(fighter) {
-  return fighter && fighter.chronoTimeStopTimer <= 0 && fighter.divineAdaptTimer <= 0 && !fighter.divineWorldCutCharging;
+  return (
+    fighter &&
+    fighter.chronoTimeStopTimer <= 0 &&
+    fighter.divineAdaptTimer <= 0 &&
+    !fighter.divineWorldCutCharging &&
+    !fighter.superFireKamehamehaCharging
+  );
 }
 
 function getPlayerStats(fighter) {
@@ -6057,6 +6233,10 @@ function updateFightAchievements(winnerPlayer, fightTime) {
     unlockAchievement('meltdownMaster');
   }
 
+  if (fightAchievementFlags.manaMeltdownActive && winnerPlayer.characterType === 'fireMaster') {
+    unlockAchievement('superFireMasterUnlocked');
+  }
+
   if (fightAchievementFlags.tankClashActive && winnerPlayer.characterType === 'tank') {
     unlockAchievement('tankCommander');
   }
@@ -6115,6 +6295,8 @@ function resetFight() {
   botAttackCooldown = 0;
   fireballs = [];
   fireBeams = [];
+  superFireKamehamehaCharges = [];
+  superFireKamehamehas = [];
   tankShells = [];
   cowboyBullets = [];
   sorcererOrbs = [];
@@ -6152,6 +6334,8 @@ function returnToMenu() {
   botAttackCooldown = 0;
   fireballs = [];
   fireBeams = [];
+  superFireKamehamehaCharges = [];
+  superFireKamehamehas = [];
   tankShells = [];
   cowboyBullets = [];
   sorcererOrbs = [];
@@ -6229,6 +6413,8 @@ function animate() {
   updateAbsoluteAdaptation();
   updateFireballs();
   updateFireBeams();
+  updateSuperFireKamehamehaCharges();
+  updateSuperFireKamehamehas();
   updateTankShells();
   updateCowboyBullets();
   updateSorcererOrbs();
@@ -6332,6 +6518,7 @@ function updateHealthBars() {
 function getCharacterDisplayName(fighter) {
   const baseName = characterDisplayNames[fighter.characterType] || 'Normal';
   if (fighter.characterType === 'normal' && isNormalKaioken(fighter) && fighter.kaiokenTimer > 0) return 'Kaioken';
+  if (fighter.characterType === 'fireMaster' && isSuperFireMaster(fighter)) return 'Super Fire Master';
   if (fighter.characterType === 'fireMaster' && isFireMasterOverheat(fighter)) return 'Fire Master+';
   if (fighter.characterType === 'tank' && isTankIronWall(fighter)) return 'Iron Tank';
   if (fighter.characterType === 'reflecter' && isReflecterUpgrade(fighter)) return 'Reflecter EX';
@@ -6405,13 +6592,19 @@ function getPlayerAbilityCooldowns(player) {
           active: true,
           name: 'Bola de fuego',
           remaining: player.specialCooldown,
-          max: getDebugCooldown(getFireMasterSecretCooldown(player, fireballCooldown), player),
+          max: Math.max(
+            getDebugCooldown(getFireMasterSecretCooldown(player, fireballCooldown), player),
+            isSuperFireMaster(player) ? getDebugCooldown(superFireKamehamehaChargeDuration + superFireKamehamehaDuration, player) : 0
+          ),
         },
         f: {
           active: true,
           name: 'Fire beam',
           remaining: player.fireBeamCooldown,
-          max: getDebugCooldown(getFireMasterSecretCooldown(player, fireBeamCooldown), player),
+          max: Math.max(
+            getDebugCooldown(getFireMasterSecretCooldown(player, fireBeamCooldown), player),
+            isSuperFireMaster(player) ? getDebugCooldown(superFireKamehamehaChargeDuration + superFireKamehamehaDuration, player) : 0
+          ),
         },
       };
     case 'tank':
@@ -6575,6 +6768,32 @@ function updateFireBeams() {
   });
 
   fireBeams = fireBeams.filter((fireBeam) => fireBeam.active);
+}
+
+function updateSuperFireKamehamehaCharges() {
+  superFireKamehamehaCharges.forEach((charge) => charge.update());
+  superFireKamehamehaCharges = superFireKamehamehaCharges.filter((charge) => charge.active);
+}
+
+function updateSuperFireKamehamehas() {
+  superFireKamehamehas.forEach((beam) => {
+    beam.update();
+    if (
+      beam.active &&
+      beam.target &&
+      rectangularCollision({ rectangle1: beam, rectangle2: beam.target }) &&
+      beam.damageTickTimer <= 0
+    ) {
+      applyDamage(beam.attacker, beam.target, superFireKamehamehaTickDamage, {
+        isSpecial: true,
+        damageType: 'superFireKamehameha',
+      });
+      beam.damageTickTimer = superFireKamehamehaTickInterval;
+      beam.target.velocity.x = getDebugKnockback(beam.direction * 3, beam.target);
+    }
+  });
+
+  superFireKamehamehas = superFireKamehamehas.filter((beam) => beam.active);
 }
 
 function updateTankShells() {
@@ -7156,7 +7375,7 @@ window.addEventListener('keyup', (event) => {
 });
 
 function updateMovements() {
-  if (player1.gamblerStunTimer > 0 || player1.divineWorldCutCharging) {
+  if (player1.gamblerStunTimer > 0 || player1.divineWorldCutCharging || player1.superFireKamehamehaCharging) {
     player1.velocity.x = 0;
   } else if (keys.a) {
     player1.velocity.x = -getDebugMoveSpeed(player1);
@@ -7170,7 +7389,7 @@ function updateMovements() {
     return;
   }
 
-  if (player2.gamblerStunTimer > 0 || player2.divineWorldCutCharging) {
+  if (player2.gamblerStunTimer > 0 || player2.divineWorldCutCharging || player2.superFireKamehamehaCharging) {
     player2.velocity.x = 0;
   } else if (keys.ArrowLeft) {
     player2.velocity.x = -getDebugMoveSpeed(player2);
@@ -7259,6 +7478,30 @@ function launchInfernoSplit(attacker, target) {
   recordSpecialUsed(attacker);
   attacker.specialCooldown = getDebugCooldown(getFireMasterSecretCooldown(attacker, infernoSplitCooldown), attacker);
   attacker.fireBeamCooldown = getDebugCooldown(getFireMasterSecretCooldown(attacker, infernoSplitCooldown), attacker);
+  return true;
+}
+
+function activateSuperFireKamehameha(attacker, target) {
+  if (!canFighterAct(attacker)) return false;
+  if (
+    attacker.characterType !== 'fireMaster' ||
+    !isSuperFireMaster(attacker) ||
+    attacker.specialCooldown > 0 ||
+    attacker.fireBeamCooldown > 0 ||
+    gameOver
+  ) {
+    return false;
+  }
+
+  attacker.specialCooldown = getDebugCooldown(superFireKamehamehaChargeDuration + superFireKamehamehaDuration, attacker);
+  attacker.fireBeamCooldown = attacker.specialCooldown;
+  attacker.velocity.x = 0;
+  attacker.isAttacking = false;
+  attacker.attackTimer = 0;
+  attacker.superFireKamehamehaCharging = true;
+  superFireKamehamehaCharges.push(new SuperFireKamehamehaCharge({ attacker, target }));
+  recordSpecialUsed(attacker);
+  playSound('fireball');
   return true;
 }
 
@@ -7687,7 +7930,11 @@ function handleFireMasterSpecialKey(attacker, target, specialType, comboPressed,
   if (comboPressed) {
     if (getQfPendingSpecial(playerNumber)) {
       clearQfPendingSpecial(playerNumber);
-      launchInfernoSplit(attacker, target);
+      if (isSuperFireMaster(attacker)) {
+        activateSuperFireKamehameha(attacker, target);
+      } else {
+        launchInfernoSplit(attacker, target);
+      }
       return true;
     }
   }
@@ -8737,12 +8984,15 @@ function getVisibleStatisticsCharacterTypes() {
   );
 }
 
-function selectCharacter(characterType) {
+function selectCharacter(characterType, secretVariant = null) {
+  if (secretVariant === 'superFireMaster' && !isSuperFireMasterUnlocked()) return;
+
   const selectedCharacterType = blindMode ? blindCharacterMix[characterType] || characterType : characterType;
+  const selectedSecretVariant = blindMode ? null : secretVariant;
   if (selectedCharacterType === 'ghost' && !isGhostUnlocked()) return;
   if (selectedCharacterType === 'divineGeneral' && !isDivineGeneralUnlocked()) return;
   if (characterSelectionPlayer === 1) {
-    player1.setCharacterType(selectedCharacterType);
+    player1.setCharacterType(selectedCharacterType, selectedSecretVariant);
     if (blindMode) applyBlindFighterLook(player1);
     characterSelectionPlayer = 2;
     characterSelectTitle.innerText = 'Personaje Jugador 2';
@@ -8750,7 +9000,7 @@ function selectCharacter(characterType) {
     return;
   }
 
-  player2.setCharacterType(selectedCharacterType);
+  player2.setCharacterType(selectedCharacterType, selectedSecretVariant);
   if (blindMode) applyBlindFighterLook(player2);
   openMapSelect();
 }
@@ -9200,7 +9450,7 @@ function applyBotDifficulty() {
 }
 
 function getCharacterMaxHealth(characterType, fighter = null) {
-  if (characterType === 'fireMaster') return 120;
+  if (characterType === 'fireMaster') return getFireMasterHealth(fighter);
   if (characterType === 'tank') return isTankIronWall(fighter) ? 260 : 200;
   if (characterType === 'cowboy') return cowboyHealth;
   if (characterType === 'reflecter') return getReflecterHealth(fighter);
@@ -9295,6 +9545,10 @@ oldDaysPlayButton.addEventListener('click', startOldDaysGame);
 oldDaysBackButton.addEventListener('click', closeOldDays);
 normalCharacterButton.addEventListener('click', () => selectCharacter('normal'));
 fireMasterCharacterButton.addEventListener('click', () => selectCharacter('fireMaster'));
+fireMasterCharacterButton.addEventListener('contextmenu', (event) => {
+  event.preventDefault();
+  selectCharacter('fireMaster', 'superFireMaster');
+});
 tankCharacterButton.addEventListener('click', () => selectCharacter('tank'));
 cowboyCharacterButton.addEventListener('click', () => selectCharacter('cowboy'));
 reflecterCharacterButton.addEventListener('click', () => selectCharacter('reflecter'));
