@@ -136,6 +136,17 @@ const divineFullAdaptMinStacks = 6;
 const divineFullAdaptMaxStacks = 10;
 const divineGeneralCounterCooldown = 420;
 const divineGeneralCounterRange = 260;
+const divineWorldCutChargeDuration = 600;
+const divineWorldCutCooldown = 1200;
+const divineWorldCutDamageMax = 100;
+const divineWorldCutFullPowerStacks = 6;
+const divineWorldCutSpeed = playerMoveSpeed * 10;
+const divineWorldCutPhrases = [
+  'Antes del primer reino,',
+  'mi espada aprendio tu forma;',
+  'cuando el juicio despierte,',
+  'el mundo sera cortado.',
+];
 const divineFullAdaptTypes = [
   'melee',
   'meleeCombo',
@@ -151,6 +162,7 @@ const divineFullAdaptTypes = [
   'spiritPhase',
   'luck',
   'prismStrike',
+  'divineWorldCut',
 ];
 const switcherModes = ['green', 'red', 'blue', 'yellow'];
 const switcherModeColors = {
@@ -545,6 +557,8 @@ let sorcererGravityOrbs = [];
 let sorcererSecretOrbs = [];
 let chronoBlades = [];
 let chronoZones = [];
+let divineWorldCutCharges = [];
+let divineWorldCuts = [];
 let characterSelectionPlayer = 1;
 let selectedMap = 'foundry';
 let player1QfPendingSpecial = null;
@@ -1747,6 +1761,8 @@ class Fighter {
     this.divineAdaptTimer = 0;
     this.divineAdaptations = {};
     this.divineCounterCooldown = 0;
+    this.divineWorldCutCooldown = 0;
+    this.divineWorldCutCharging = false;
     this.cowboyBurstShotsRemaining = 0;
     this.cowboyBurstTimer = 0;
     this.copycatShieldCooldown = 0;
@@ -2830,6 +2846,9 @@ class Fighter {
     if (this.divineCounterCooldown > 0) {
       this.divineCounterCooldown -= 1;
     }
+    if (this.divineWorldCutCooldown > 0) {
+      this.divineWorldCutCooldown -= 1;
+    }
 
     if (this.copycatShieldCooldown > 0) {
       this.copycatShieldCooldown -= 1;
@@ -3248,6 +3267,8 @@ class Fighter {
     this.divineAdaptTimer = 0;
     this.divineAdaptations = {};
     this.divineCounterCooldown = 0;
+    this.divineWorldCutCooldown = 0;
+    this.divineWorldCutCharging = false;
     this.cowboyBurstShotsRemaining = 0;
     this.cowboyBurstTimer = 0;
     this.copycatShieldCooldown = 0;
@@ -3853,6 +3874,158 @@ class ChronoZone {
   }
 }
 
+class DivineWorldCutCharge {
+  constructor({ attacker, target }) {
+    this.attacker = attacker;
+    this.target = target;
+    this.timer = 0;
+    this.duration = divineWorldCutChargeDuration;
+    this.active = true;
+    this.attacker.divineWorldCutCharging = true;
+  }
+
+  get currentPhrase() {
+    const phaseLength = Math.max(1, this.duration / divineWorldCutPhrases.length);
+    const phraseIndex = Math.min(divineWorldCutPhrases.length - 1, Math.floor(this.timer / phaseLength));
+    return divineWorldCutPhrases[phraseIndex];
+  }
+
+  draw() {
+    if (!this.attacker) return;
+
+    const progress = Math.max(0, Math.min(1, this.timer / Math.max(1, this.duration)));
+    const centerX = this.attacker.position.x + this.attacker.width / 2;
+    const centerY = this.attacker.position.y + this.attacker.height / 2;
+    const radius = 34 + progress * 70;
+
+    ctx.save();
+    ctx.globalAlpha = 0.75;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.78)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.92)';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(centerX - radius * 0.8, centerY + radius * 0.35);
+    ctx.lineTo(centerX + radius * 0.8, centerY - radius * 0.35);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.68)';
+    ctx.fillRect(canvas.width / 2 - 330, 82, 660, 52);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(canvas.width / 2 - 330, 82, 660, 52);
+    ctx.fillStyle = '#f5f5f5';
+    ctx.font = '900 24px "Courier New", Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(this.currentPhrase, canvas.width / 2, 116);
+    ctx.restore();
+  }
+
+  update() {
+    if (!this.attacker || !this.target || this.attacker.health <= 0 || gameOver) {
+      if (this.attacker) this.attacker.divineWorldCutCharging = false;
+      this.active = false;
+      return;
+    }
+
+    this.attacker.velocity.x = 0;
+    this.attacker.isAttacking = false;
+    this.attacker.attackTimer = 0;
+    this.draw();
+    this.timer += 1;
+
+    if (this.timer >= this.duration) {
+      divineWorldCuts.push(new DivineWorldCut({ attacker: this.attacker, target: this.target }));
+      playSound('reflectShield');
+      this.attacker.divineWorldCutCharging = false;
+      this.active = false;
+    }
+  }
+}
+
+class DivineWorldCut {
+  constructor({ attacker, target }) {
+    const attackerCenterX = attacker.position.x + attacker.width / 2;
+    const targetCenterX = target.position.x + target.width / 2;
+    const direction = targetCenterX >= attackerCenterX ? 1 : -1;
+    this.attacker = attacker;
+    this.target = target;
+    this.direction = direction;
+    this.width = 230;
+    this.height = 54;
+    this.position = {
+      x: direction > 0 ? attacker.position.x + attacker.width : attacker.position.x - this.width,
+      y: attacker.position.y + attacker.height / 2 - this.height / 2,
+    };
+    this.velocity = { x: direction * getDebugProjectileSpeed(divineWorldCutSpeed, attacker), y: 0 };
+    this.active = true;
+    this.damage = getDivineWorldCutDamage(attacker);
+  }
+
+  get x() {
+    return this.position.x;
+  }
+
+  get y() {
+    return this.position.y;
+  }
+
+  draw() {
+    const x = this.position.x;
+    const y = this.position.y;
+    const d = this.direction;
+
+    ctx.save();
+    ctx.translate(x + this.width / 2, y + this.height / 2);
+    ctx.scale(d, 1);
+    ctx.rotate(-0.08);
+
+    ctx.strokeStyle = '#f5f5f5';
+    ctx.lineWidth = 9;
+    ctx.lineJoin = 'miter';
+    ctx.beginPath();
+    ctx.moveTo(-this.width / 2, 8);
+    ctx.lineTo(this.width * 0.18, -this.height / 2);
+    ctx.lineTo(this.width / 2, 0);
+    ctx.lineTo(this.width * 0.18, this.height / 2);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.fillStyle = '#050505';
+    ctx.beginPath();
+    ctx.moveTo(-this.width / 2, 8);
+    ctx.lineTo(this.width * 0.18, -this.height / 2);
+    ctx.lineTo(this.width / 2, 0);
+    ctx.lineTo(this.width * 0.18, this.height / 2);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 4; i += 1) {
+      const offset = -22 + i * 14;
+      ctx.beginPath();
+      ctx.moveTo(-this.width / 2 + i * 26, offset);
+      ctx.lineTo(this.width / 2 - 38, offset - 10);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  update() {
+    this.position.x += this.velocity.x;
+    this.draw();
+
+    if (this.position.x + this.width < 0 || this.position.x > canvas.width) {
+      this.active = false;
+    }
+  }
+}
+
 const player1 = new Fighter({ x: 120, y: 0, color: '#42a5f5', attacksToTheRight: true });
 const player2 = new Fighter({ x: 820, y: 0, color: '#ef5350', attacksToTheRight: false });
 player1.target = player2;
@@ -4198,6 +4371,8 @@ function clearActiveCodes() {
     } else if (fighter.characterType === 'divineGeneral') {
       fighter.setCharacterType('divineGeneral');
     }
+    fighter.divineWorldCutCooldown = 0;
+    fighter.divineWorldCutCharging = false;
   });
 
   resetDebugSettings();
@@ -4308,7 +4483,7 @@ function getOpponent(fighter) {
 }
 
 function canFighterAct(fighter) {
-  return fighter && fighter.chronoTimeStopTimer <= 0 && fighter.divineAdaptTimer <= 0;
+  return fighter && fighter.chronoTimeStopTimer <= 0 && fighter.divineAdaptTimer <= 0 && !fighter.divineWorldCutCharging;
 }
 
 function getPlayerStats(fighter) {
@@ -4384,6 +4559,12 @@ function getDivineTotalAdaptationStacks(fighter) {
 
 function getDivineBaseDamageMultiplier(fighter) {
   return 1 + getDivineTotalAdaptationStacks(fighter) * divineGeneralAdaptReduction;
+}
+
+function getDivineWorldCutDamage(fighter) {
+  const stacks = getDivineTotalAdaptationStacks(fighter);
+  if (stacks <= 0) return 0;
+  return Math.min(divineWorldCutDamageMax, Math.round((stacks / divineWorldCutFullPowerStacks) * divineWorldCutDamageMax));
 }
 
 function getDominantDivineAdaptation(fighter) {
@@ -5941,6 +6122,8 @@ function resetFight() {
   sorcererSecretOrbs = [];
   chronoBlades = [];
   chronoZones = [];
+  divineWorldCutCharges = [];
+  divineWorldCuts = [];
   clearQfPendingSpecial(1);
   clearQfPendingSpecial(2);
   clearSorcererPendingSpecial(1);
@@ -5976,6 +6159,8 @@ function returnToMenu() {
   sorcererSecretOrbs = [];
   chronoBlades = [];
   chronoZones = [];
+  divineWorldCutCharges = [];
+  divineWorldCuts = [];
   clearQfPendingSpecial(1);
   clearQfPendingSpecial(2);
   clearSorcererPendingSpecial(1);
@@ -6051,6 +6236,8 @@ function animate() {
   updateSorcererSecretOrbs();
   updateChronoBlades();
   updateChronoZones();
+  updateDivineWorldCutCharges();
+  updateDivineWorldCuts();
 
   if (
     player1.isAttacking &&
@@ -6297,14 +6484,17 @@ function getPlayerAbilityCooldowns(player) {
         q: {
           active: true,
           name: 'Adaptacion',
-          remaining: Math.max(player.divineAdaptCooldown, player.divineAdaptTimer),
-          max: getDebugDuration(divineGeneralAdaptDuration, player) + getDivineAdaptCooldownMax(player),
+          remaining: Math.max(player.divineAdaptCooldown, player.divineAdaptTimer, player.divineWorldCutCooldown),
+          max: Math.max(
+            getDebugDuration(divineGeneralAdaptDuration, player) + getDivineAdaptCooldownMax(player),
+            getDebugCooldown(divineWorldCutCooldown, player)
+          ),
         },
         f: {
           active: true,
           name: 'Contra adaptativa',
-          remaining: player.divineCounterCooldown,
-          max: getDivineCounterCooldownMax(player),
+          remaining: Math.max(player.divineCounterCooldown, player.divineWorldCutCooldown),
+          max: Math.max(getDivineCounterCooldownMax(player), getDebugCooldown(divineWorldCutCooldown, player)),
         },
       };
     default:
@@ -6568,6 +6758,36 @@ function updateChronoZones() {
   chronoZones = chronoZones.filter((chronoZone) => chronoZone.active);
 }
 
+function updateDivineWorldCutCharges() {
+  divineWorldCutCharges.forEach((charge) => charge.update());
+  divineWorldCutCharges = divineWorldCutCharges.filter((charge) => charge.active);
+}
+
+function updateDivineWorldCuts() {
+  divineWorldCuts.forEach((worldCut) => {
+    if (!updateProjectileIfNotTimeStopped(worldCut)) return;
+
+    if (
+      worldCut.active &&
+      worldCut.target &&
+      rectangularCollision({ rectangle1: worldCut, rectangle2: worldCut.target })
+    ) {
+      const actualDamage = applyDamage(worldCut.attacker, worldCut.target, worldCut.damage, {
+        isSpecial: true,
+        damageType: 'divineWorldCut',
+        ignoreInvincible: true,
+      });
+      if (actualDamage > 0) {
+        worldCut.target.velocity.x = getDebugKnockback(worldCut.direction * 24, worldCut.target);
+        worldCut.target.velocity.y = getDebugKnockback(-10, worldCut.target);
+      }
+      worldCut.active = false;
+    }
+  });
+
+  divineWorldCuts = divineWorldCuts.filter((worldCut) => worldCut.active);
+}
+
 function drawChronoTimeStopEffect() {
   const stoppedFighters = [player1, player2].filter((fighter) => fighter.chronoTimeStopTimer > 0);
   if (stoppedFighters.length === 0) return;
@@ -6769,6 +6989,7 @@ function handleMenuSecretInput(event) {
         fillDivineAdaptations(fighter);
         fighter.divineAdaptCooldown = 0;
         fighter.divineCounterCooldown = 0;
+        fighter.divineWorldCutCooldown = 0;
       }
     });
     syncDivineGeneralUnlockUI();
@@ -6814,6 +7035,7 @@ window.addEventListener('keydown', (event) => {
       if (handleChronoSpecialKey(player1, player2, 'blade', keys.f, 1)) break;
       if (handleGamblerSpecialKey(player1, 'roll', keys.f, 1)) break;
       if (handleFireMasterSpecialKey(player1, player2, 'fireball', keys.f, 1)) break;
+      if (handleDivineSpecialKey(player1, player2, 'adapt', keys.f, 1)) break;
       activateKaiokenCombo(player1);
       if (handleSorcererSpecialKey(player1, player2, 'orb', keys.f, 1)) break;
       cycleSwitcherMode(player1);
@@ -6825,7 +7047,6 @@ window.addEventListener('keydown', (event) => {
       activateGamblerRoll(player1);
       launchChronoBlade(player1, player2);
       activateGhostPhase(player1);
-      activateDivineAdaptation(player1);
       break;
     case 'f':
     case 'F':
@@ -6834,6 +7055,7 @@ window.addEventListener('keydown', (event) => {
       if (handleChronoSpecialKey(player1, player2, 'slow', keys.q, 1)) break;
       if (handleGamblerSpecialKey(player1, 'luck', keys.q, 1)) break;
       if (handleFireMasterSpecialKey(player1, player2, 'beam', keys.q, 1)) break;
+      if (handleDivineSpecialKey(player1, player2, 'counter', keys.q, 1)) break;
       if (handleSorcererSpecialKey(player1, player2, 'gravity', keys.q, 1)) break;
       launchFireBeam(player1, player2);
       launchSorcererGravityOrb(player1, player2);
@@ -6841,7 +7063,6 @@ window.addEventListener('keydown', (event) => {
       activateGamblerLuckIncrementer(player1);
       activateKaioken(player1);
       activateChronoSlow(player1, player2);
-      activateDivineCounter(player1, player2);
       break;
     case 'ArrowLeft':
       if (!botEnabled) keys.ArrowLeft = true;
@@ -6865,6 +7086,7 @@ window.addEventListener('keydown', (event) => {
         if (handleChronoSpecialKey(player2, player1, 'blade', keys.period, 2)) break;
         if (handleGamblerSpecialKey(player2, 'roll', keys.period, 2)) break;
         if (handleFireMasterSpecialKey(player2, player1, 'fireball', keys.period, 2)) break;
+        if (handleDivineSpecialKey(player2, player1, 'adapt', keys.period, 2)) break;
         activateKaiokenCombo(player2);
         if (handleSorcererSpecialKey(player2, player1, 'orb', keys.period, 2)) break;
         launchFireball(player2, player1);
@@ -6876,7 +7098,6 @@ window.addEventListener('keydown', (event) => {
         activateGamblerRoll(player2);
         launchChronoBlade(player2, player1);
         activateGhostPhase(player2);
-        activateDivineAdaptation(player2);
       }
       break;
     case '.':
@@ -6886,6 +7107,7 @@ window.addEventListener('keydown', (event) => {
         if (handleChronoSpecialKey(player2, player1, 'slow', keys.slash, 2)) break;
         if (handleGamblerSpecialKey(player2, 'luck', keys.slash, 2)) break;
         if (handleFireMasterSpecialKey(player2, player1, 'beam', keys.slash, 2)) break;
+        if (handleDivineSpecialKey(player2, player1, 'counter', keys.slash, 2)) break;
         if (handleSorcererSpecialKey(player2, player1, 'gravity', keys.slash, 2)) break;
         launchFireBeam(player2, player1);
         launchSorcererGravityOrb(player2, player1);
@@ -6893,7 +7115,6 @@ window.addEventListener('keydown', (event) => {
         activateGamblerLuckIncrementer(player2);
         activateKaioken(player2);
         activateChronoSlow(player2, player1);
-        activateDivineCounter(player2, player1);
       }
       break;
     case 'r':
@@ -6935,7 +7156,7 @@ window.addEventListener('keyup', (event) => {
 });
 
 function updateMovements() {
-  if (player1.gamblerStunTimer > 0) {
+  if (player1.gamblerStunTimer > 0 || player1.divineWorldCutCharging) {
     player1.velocity.x = 0;
   } else if (keys.a) {
     player1.velocity.x = -getDebugMoveSpeed(player1);
@@ -6949,7 +7170,7 @@ function updateMovements() {
     return;
   }
 
-  if (player2.gamblerStunTimer > 0) {
+  if (player2.gamblerStunTimer > 0 || player2.divineWorldCutCharging) {
     player2.velocity.x = 0;
   } else if (keys.ArrowLeft) {
     player2.velocity.x = -getDebugMoveSpeed(player2);
@@ -7412,6 +7633,51 @@ function activateDivineCounter(attacker, target, ignoreCharacterType = false) {
   target.velocity.x = getDebugKnockback(direction * 14, target);
   target.velocity.y = getDebugKnockback(-8, target);
   playSound('reflectShield');
+  return true;
+}
+
+function activateDivineWorldCut(attacker, target, ignoreCharacterType = false) {
+  if (!canFighterAct(attacker)) return false;
+  if (
+    (!ignoreCharacterType && attacker.characterType !== 'divineGeneral') ||
+    attacker.divineWorldCutCooldown > 0 ||
+    attacker.divineAdaptTimer > 0 ||
+    getDivineTotalAdaptationStacks(attacker) <= 0 ||
+    gameOver
+  ) {
+    return false;
+  }
+
+  attacker.divineWorldCutCooldown = getDebugCooldown(divineWorldCutCooldown, attacker);
+  attacker.divineAdaptCooldown = Math.max(attacker.divineAdaptCooldown, attacker.divineWorldCutCooldown);
+  attacker.divineCounterCooldown = Math.max(attacker.divineCounterCooldown, attacker.divineWorldCutCooldown);
+  attacker.velocity.x = 0;
+  attacker.isAttacking = false;
+  attacker.attackTimer = 0;
+  divineWorldCutCharges.push(new DivineWorldCutCharge({ attacker, target }));
+  recordSpecialUsed(attacker);
+  playSound('gravityOrb');
+  return true;
+}
+
+function handleDivineSpecialKey(attacker, target, specialType, comboPressed, playerNumber) {
+  if (attacker.characterType !== 'divineGeneral') return false;
+
+  if (comboPressed) {
+    if (getQfPendingSpecial(playerNumber)) {
+      clearQfPendingSpecial(playerNumber);
+      activateDivineWorldCut(attacker, target);
+      return true;
+    }
+  }
+
+  queueQfPendingSpecial(playerNumber, attacker, 'divineGeneral', () => {
+    if (specialType === 'adapt') {
+      activateDivineAdaptation(attacker);
+    } else {
+      activateDivineCounter(attacker, target);
+    }
+  });
   return true;
 }
 
@@ -8064,6 +8330,7 @@ function getIncomingBotProjectileThreat(profile) {
     ...sorcererOrbs,
     ...sorcererSecretOrbs,
     ...chronoBlades,
+    ...divineWorldCuts,
   ];
 
   for (const projectile of projectiles) {

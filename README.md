@@ -46,7 +46,7 @@ Jugador 2:
 - Ghost
 - Divine General
 
-Divine General se desbloquea completando los 7 sellos dificiles. El codigo `fulladapt` solo funciona despues de desbloquearlo.
+Divine General se desbloquea completando los 7 sellos dificiles. El codigo `fulladapt` solo funciona despues de desbloquearlo. Su Q+F secreto activa Corte Mundial: carga 10 segundos y lanza un corte que escala hasta 100 dano segun sus adaptaciones.
 
 ## Mapas
 
