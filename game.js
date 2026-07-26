@@ -138,8 +138,7 @@ const divineGeneralCounterCooldown = 420;
 const divineGeneralCounterRange = 260;
 const divineWorldCutChargeDuration = 600;
 const divineWorldCutCooldown = 1200;
-const divineWorldCutDamageMax = 100;
-const divineWorldCutFullPowerStacks = 6;
+const divineWorldCutDamagePerStack = 100;
 const divineWorldCutSpeed = playerMoveSpeed * 10;
 const divineWorldCutPhrases = [
   'Antes del primer reino,',
@@ -3913,15 +3912,16 @@ class DivineWorldCutCharge {
     ctx.lineTo(centerX + radius * 0.8, centerY - radius * 0.35);
     ctx.stroke();
 
+    const phraseBoxY = 178;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.68)';
-    ctx.fillRect(canvas.width / 2 - 330, 82, 660, 52);
+    ctx.fillRect(canvas.width / 2 - 330, phraseBoxY, 660, 52);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
     ctx.lineWidth = 3;
-    ctx.strokeRect(canvas.width / 2 - 330, 82, 660, 52);
+    ctx.strokeRect(canvas.width / 2 - 330, phraseBoxY, 660, 52);
     ctx.fillStyle = '#f5f5f5';
     ctx.font = '900 24px "Courier New", Consolas, monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(this.currentPhrase, canvas.width / 2, 116);
+    ctx.fillText(this.currentPhrase, canvas.width / 2, phraseBoxY + 34);
     ctx.restore();
   }
 
@@ -4564,7 +4564,7 @@ function getDivineBaseDamageMultiplier(fighter) {
 function getDivineWorldCutDamage(fighter) {
   const stacks = getDivineTotalAdaptationStacks(fighter);
   if (stacks <= 0) return 0;
-  return Math.min(divineWorldCutDamageMax, Math.round((stacks / divineWorldCutFullPowerStacks) * divineWorldCutDamageMax));
+  return stacks * divineWorldCutDamagePerStack;
 }
 
 function getDominantDivineAdaptation(fighter) {
@@ -5382,7 +5382,7 @@ function drawVictoryTaunt(winner, loser) {
   const characterX = 90;
   const characterY = ground - 168;
   const bubbleX = 190;
-  const bubbleY = 88;
+  const bubbleY = ground - 242;
   const bubbleWidth = 430;
   const bubbleHeight = 100;
 
