@@ -1992,6 +1992,11 @@ class Fighter {
   }
 
   drawFireMasterDetails() {
+    if (isSuperFireMaster(this)) {
+      this.drawSuperFireMasterDetails();
+      return;
+    }
+
     ctx.fillStyle = '#ffb300';
     ctx.fillRect(this.position.x, this.position.y + 78, this.width, 12);
     ctx.fillStyle = '#111';
@@ -2027,6 +2032,83 @@ class Fighter {
       ctx.lineWidth = 3;
       ctx.stroke();
     }
+  }
+
+  drawSuperFireMasterDetails() {
+    const x = this.position.x;
+    const y = this.position.y;
+    const centerX = x + this.width / 2;
+
+    ctx.fillStyle = '#ff8f00';
+    ctx.fillRect(x + 7, y + 34, this.width - 14, 48);
+    ctx.fillStyle = '#e65100';
+    ctx.beginPath();
+    ctx.moveTo(x + 9, y + 34);
+    ctx.lineTo(centerX, y + 58);
+    ctx.lineTo(x + 21, y + 82);
+    ctx.lineTo(x + 7, y + 82);
+    ctx.lineTo(x + 7, y + 34);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + this.width - 9, y + 34);
+    ctx.lineTo(centerX, y + 58);
+    ctx.lineTo(x + this.width - 21, y + 82);
+    ctx.lineTo(x + this.width - 7, y + 82);
+    ctx.lineTo(x + this.width - 7, y + 34);
+    ctx.fill();
+
+    ctx.fillStyle = '#111';
+    ctx.fillRect(x, y + 76, this.width, 13);
+    ctx.strokeStyle = '#ffcc80';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 2, y + 78, this.width - 4, 9);
+
+    ctx.fillStyle = '#ff6d00';
+    ctx.beginPath();
+    ctx.moveTo(centerX, y + 78);
+    ctx.lineTo(centerX + 6, y + 86);
+    ctx.lineTo(centerX + 1, y + 89);
+    ctx.lineTo(centerX - 6, y + 86);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#ffeb3b';
+    ctx.fillRect(centerX - 2, y + 82, 4, 5);
+
+    ctx.fillStyle = '#f2c46d';
+    ctx.beginPath();
+    ctx.moveTo(x - 16, y + 18);
+    ctx.lineTo(centerX, y - 24);
+    ctx.lineTo(x + this.width + 16, y + 18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#6d4c1f';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = '#8d5d1d';
+    ctx.fillRect(x - 10, y + 16, this.width + 20, 7);
+
+    ctx.strokeStyle = 'rgba(255, 235, 59, 0.7)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + 2, y + 30);
+    ctx.lineTo(x + 13, y + 20);
+    ctx.moveTo(x + this.width - 2, y + 30);
+    ctx.lineTo(x + this.width - 13, y + 20);
+    ctx.stroke();
+
+    ctx.fillStyle = '#fff8e1';
+    ctx.fillRect(x + 14, y + 22, 8, 6);
+    ctx.fillRect(x + this.width - 22, y + 22, 8, 6);
+    ctx.fillStyle = '#111';
+    ctx.fillRect(x + 15, y + 24, 7, 3);
+    ctx.fillRect(x + this.width - 22, y + 24, 7, 3);
+
+    ctx.fillStyle = 'rgba(255, 87, 34, 0.34)';
+    ctx.fillRect(x - 6, y + 42, 8, 38);
+    ctx.fillRect(x + this.width - 2, y + 42, 8, 38);
+    ctx.fillStyle = '#ffeb3b';
+    ctx.fillRect(x + 6, y + 94, 7, 18);
+    ctx.fillRect(x + this.width - 13, y + 94, 7, 18);
   }
 
   drawTankDetails() {
@@ -5500,10 +5582,52 @@ function drawVictoryCharacter(fighter, x, y, scale = 1) {
   ctx.fillRect(x + width * 0.16, y + height * 0.1, width * 0.2, height * 0.78);
 
   if (fighter.characterType === 'fireMaster') {
-    ctx.fillStyle = '#ffeb3b';
-    ctx.fillRect(x + width * 0.25, y - height * 0.16, width * 0.5, height * 0.16);
-    ctx.fillStyle = '#d84315';
-    ctx.fillRect(x + width * 0.36, y - height * 0.09, width * 0.28, height * 0.09);
+    if (isSuperFireMaster(fighter)) {
+      ctx.fillStyle = '#ff8f00';
+      ctx.fillRect(x + width * 0.12, y + height * 0.32, width * 0.76, height * 0.3);
+      ctx.fillStyle = '#e65100';
+      ctx.beginPath();
+      ctx.moveTo(x + width * 0.16, y + height * 0.3);
+      ctx.lineTo(x + width * 0.5, y + height * 0.52);
+      ctx.lineTo(x + width * 0.3, y + height * 0.66);
+      ctx.lineTo(x + width * 0.12, y + height * 0.62);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + width * 0.84, y + height * 0.3);
+      ctx.lineTo(x + width * 0.5, y + height * 0.52);
+      ctx.lineTo(x + width * 0.7, y + height * 0.66);
+      ctx.lineTo(x + width * 0.88, y + height * 0.62);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.fillRect(x, y + height * 0.62, width, height * 0.11);
+      ctx.fillStyle = '#ff6d00';
+      ctx.beginPath();
+      ctx.moveTo(x + width * 0.5, y + height * 0.63);
+      ctx.lineTo(x + width * 0.61, y + height * 0.71);
+      ctx.lineTo(x + width * 0.5, y + height * 0.75);
+      ctx.lineTo(x + width * 0.39, y + height * 0.71);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#f2c46d';
+      ctx.beginPath();
+      ctx.moveTo(x - width * 0.28, y + height * 0.06);
+      ctx.lineTo(x + width * 0.5, y - height * 0.22);
+      ctx.lineTo(x + width * 1.28, y + height * 0.06);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#6d4c1f';
+      ctx.lineWidth = 3 * scale;
+      ctx.stroke();
+      ctx.fillStyle = '#8d5d1d';
+      ctx.fillRect(x - width * 0.2, y + height * 0.04, width * 1.4, height * 0.06);
+    } else {
+      ctx.fillStyle = '#ffeb3b';
+      ctx.fillRect(x + width * 0.25, y - height * 0.16, width * 0.5, height * 0.16);
+      ctx.fillStyle = '#d84315';
+      ctx.fillRect(x + width * 0.36, y - height * 0.09, width * 0.28, height * 0.09);
+    }
   } else if (fighter.characterType === 'tank') {
     ctx.fillStyle = '#2f3526';
     ctx.fillRect(x + width * 0.08, y + height * 0.12, width * 0.84, height * 0.2);
@@ -6539,6 +6663,8 @@ function getCharacterDisplayName(fighter) {
 function updateCombatHudIdentity() {
   p1Portrait.dataset.character = player1.characterType;
   p2Portrait.dataset.character = player2.characterType;
+  p1Portrait.dataset.variant = player1.secretVariant || '';
+  p2Portrait.dataset.variant = player2.secretVariant || '';
   p1CharacterName.innerText = getCharacterDisplayName(player1);
   p2CharacterName.innerText = getCharacterDisplayName(player2);
   p1HudTag.innerText = 'P1';

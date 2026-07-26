@@ -2696,6 +2696,32 @@ body.menu-open .instructions {
   width: 0;
 }
 
+.fighter-portrait[data-character='fireMaster'][data-variant='superFireMaster'] {
+  --portrait-main: #ff6d00;
+  --portrait-accent: #f2c46d;
+}
+
+.fighter-portrait[data-character='fireMaster'][data-variant='superFireMaster']::before {
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-bottom: 14px solid #f2c46d;
+  background: transparent;
+  height: 0;
+  left: 3px;
+  top: 4px;
+  width: 0;
+}
+
+.fighter-portrait[data-character='fireMaster'][data-variant='superFireMaster']::after {
+  background:
+    linear-gradient(90deg, transparent 39%, #ff6d00 39% 61%, transparent 61%),
+    #111;
+  bottom: 6px;
+  height: 9px;
+  left: 7px;
+  width: 28px;
+}
+
 .fighter-portrait[data-character='tank'] {
   --portrait-main: #56613f;
   --portrait-accent: #c9b458;
