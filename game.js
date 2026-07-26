@@ -48,6 +48,8 @@ const superFireKamehamehaDuration = 300;
 const superFireKamehamehaSpeed = playerMoveSpeed * 10;
 const superFireKamehamehaTickDamage = 5;
 const superFireKamehamehaTickInterval = 3;
+const superFireMasterUnlockTimeMs = 45000;
+const superFireMasterUnlockHealth = 80;
 const cowboyHealth = 80;
 const cowboyBulletDamage = 10;
 const cowboyBulletSpeed = fireBeamSpeed;
@@ -271,7 +273,7 @@ const achievementDetailsByLanguage = {
     },
     superFireMasterUnlocked: {
       title: 'Super Fire Master',
-      description: 'Gana como Fire Master durante Mana Meltdown.',
+      description: 'Gana Mana Meltdown con Fire Master en menos de 45 segundos y con 80+ vida.',
     },
   },
   en: {
@@ -306,7 +308,7 @@ const achievementDetailsByLanguage = {
     },
     superFireMasterUnlocked: {
       title: 'Super Fire Master',
-      description: 'Win as Fire Master during Mana Meltdown.',
+      description: 'Win Mana Meltdown with Fire Master in under 45 seconds and with 80+ health.',
     },
   },
   pt: {
@@ -344,7 +346,7 @@ const achievementDetailsByLanguage = {
     },
     superFireMasterUnlocked: {
       title: 'Super Fire Master',
-      description: 'Venca como Fire Master durante Mana Meltdown.',
+      description: 'Venca Mana Meltdown com Fire Master em menos de 45 segundos e com 80+ de vida.',
     },
   },
 };
@@ -4228,7 +4230,7 @@ function syncSuperFireMasterUnlockUI() {
   if (!fireMasterCharacterButton) return;
   fireMasterCharacterButton.title = isSuperFireMasterUnlocked()
     ? 'Click izquierdo: Fire Master. Click derecho: Super Fire Master.'
-    : 'Gana con Fire Master durante Mana Meltdown para desbloquear Super Fire Master.';
+    : 'Gana Mana Meltdown con Fire Master en menos de 45 segundos y con 80+ vida para desbloquear Super Fire Master.';
 }
 
 function getFireMasterHealth(fighter) {
@@ -6233,7 +6235,12 @@ function updateFightAchievements(winnerPlayer, fightTime) {
     unlockAchievement('meltdownMaster');
   }
 
-  if (fightAchievementFlags.manaMeltdownActive && winnerPlayer.characterType === 'fireMaster') {
+  if (
+    fightAchievementFlags.manaMeltdownActive &&
+    winnerPlayer.characterType === 'fireMaster' &&
+    fightTime <= superFireMasterUnlockTimeMs &&
+    winnerPlayer.health >= superFireMasterUnlockHealth
+  ) {
     unlockAchievement('superFireMasterUnlocked');
   }
 

@@ -46,7 +46,7 @@ Jugador 2:
 - Ghost
 - Divine General
 
-Super Fire Master se desbloquea ganando como Fire Master durante Mana Meltdown. Despues se elige con click derecho sobre Fire Master.
+Super Fire Master se desbloquea ganando Mana Meltdown con Fire Master en menos de 45 segundos y con 80+ vida. Despues se elige con click derecho sobre Fire Master.
 
 Divine General se desbloquea completando los 7 sellos dificiles. El codigo `fulladapt` solo funciona despues de desbloquearlo. Su Q+F secreto activa Corte Mundial: carga 10 segundos y lanza un corte que hace 100 dano por cada adaptacion total.
 
