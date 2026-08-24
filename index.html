@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Base Juego de Pelea</title>
+  <title>Moquete</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="menu-open">
@@ -25,6 +25,7 @@
         <div class="cooldown-row" id="cooldowns1">
           <div class="cooldown-chip disabled" id="p1CooldownQ"><span>Q</span></div>
           <div class="cooldown-chip disabled" id="p1CooldownF"><span>F</span></div>
+          <div class="cooldown-chip disabled" id="p1CooldownR"><span>R</span></div>
         </div>
       </div>
       <div class="health-panel right">
@@ -43,6 +44,7 @@
         <div class="cooldown-row right" id="cooldowns2">
           <div class="cooldown-chip disabled" id="p2CooldownQ"><span>/</span></div>
           <div class="cooldown-chip disabled" id="p2CooldownF"><span>.</span></div>
+          <div class="cooldown-chip disabled" id="p2CooldownR"><span>Ent</span></div>
         </div>
       </div>
     </div>
@@ -60,6 +62,7 @@
           <button type="button" id="playButton" data-i18n="play">Jugar</button>
         </div>
         <div class="menu-actions secondary-actions">
+          <button type="button" id="gameModesButton" data-i18n="gameModes">Modos de juego</button>
           <button type="button" id="guideButton" data-i18n="guide">Guia</button>
           <button type="button" id="achievementsButton" data-i18n="achievements">Logros</button>
           <button type="button" id="statsButton" data-i18n="stats">Estadisticas</button>
@@ -166,6 +169,16 @@
               <span class="preview-ghost-head"></span>
               <span class="preview-ghost-body"></span>
               <span class="preview-ghost-tail"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option light-warrior-option locked" id="lightWarriorCharacterButton">
+            <span>Light Warrior</span>
+            <span class="character-preview light-warrior-preview" aria-hidden="true">
+              <span class="preview-light-cape"></span>
+              <span class="preview-body"></span>
+              <span class="preview-light-tie"></span>
+              <span class="preview-light-glasses"></span>
+              <span class="preview-arm"></span>
             </span>
           </button>
           <button type="button" class="character-option divine-general-option locked" id="divineGeneralCharacterButton">
@@ -400,6 +413,23 @@
         </div>
         <button type="button" id="backButton" data-i18n="back">Volver</button>
       </div>
+      <div class="menu-screen game-modes-menu hidden" id="gameModesScreen">
+        <h2 data-i18n="gameModes">Modos de juego</h2>
+        <div class="guide-section">
+          <h3>Disponibles</h3>
+          <div class="character-guide">
+            <span><strong>Clasico local</strong> dos jugadores en la misma pantalla. Es el modo principal del juego.</span>
+            <span><strong>Contra bot</strong> activa el bot desde Ajustes y elegi dificultad facil, media o dificil.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Proximamente</h3>
+          <div class="character-guide">
+            <span><strong>Modos especiales</strong> esta pantalla queda preparada para agregar reglas como supervivencia, torneo, entrenamiento o desafios por personaje.</span>
+          </div>
+        </div>
+        <button type="button" id="gameModesBackButton" data-i18n="back">Volver</button>
+      </div>
       <div class="menu-screen debug-menu hidden" id="debugScreen">
         <h2 data-i18n="debugTitle">Pantalla Debug</h2>
         <div class="debug-grid">
@@ -454,6 +484,7 @@
           </div>
           <div class="debug-target-grid">
             <label><input type="checkbox" data-debug-character="normal" checked /> Normal</label>
+            <label><input type="checkbox" data-debug-character="lightWarrior" checked /> Light Warrior</label>
             <label><input type="checkbox" data-debug-character="fireMaster" checked /> Fire Master</label>
             <label><input type="checkbox" data-debug-character="tank" checked /> Tank</label>
             <label><input type="checkbox" data-debug-character="cowboy" checked /> Cowboy</label>
@@ -513,6 +544,7 @@
             <span><strong>Reflecter Mirrorluck</strong> codigo mirrorluck: Reflecter gana diseno casino/espejo, 165 vida, escudo mas largo, menos cooldown y copia de ruleta mucho mas confiable.</span>
             <span><strong>Reflecter 2.0</strong> codigo upgrade: Reflecter pasa a version negra futurista con 300 vida, 20 dano, escudo ampliado y copias dobles.</span>
             <span><strong>Switcher Prism</strong> codigo prism: Switcher gana diseno prism reforzado, cooldown menor, dash mas fuerte, mas curacion y mejor armadura amarilla.</span>
+            <span><strong>Light Warrior</strong> logro Heroe de la luz: gana con Normal contra bot dificil en menos de 20 segundos sin recibir dano.</span>
             <span><strong>Divine General Full Adapt</strong> codigo fulladapt: requiere haber desbloqueado a Divine General; sube a 250 vida y empieza con 6 a 10 adaptaciones contra los tipos principales de golpes, proyectiles y estados.</span>
             <span><strong>Divine General</strong> desafio de los 7 sellos: gana Perfect Duel, Reflectado, Casino Royale, Mana Meltdown, Choque de Titanes, Ejecutor temporal y Dominio absoluto.</span>
           </div>
@@ -634,6 +666,11 @@
             <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
             <strong>Absolute Dominance</strong>
             <span>Win against a hard bot in under 25 seconds without taking damage.</span>
+          </div>
+          <div class="achievement-card" data-achievement="heroOfLight">
+            <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
+            <strong>Heroe de la luz</strong>
+            <span>Unlock Light Warrior: win with Normal against a hard bot in under 20 seconds without taking damage.</span>
           </div>
           <div class="achievement-card" data-achievement="ghostUnlocked">
             <span class="achievement-icon achievement-icon-dark" aria-hidden="true"></span>
@@ -836,6 +873,7 @@
               <span>E golpe fuerte</span>
               <span>Q especial 1</span>
               <span>F especial 2</span>
+              <span>R especial 3</span>
             </div>
             <div>
               <strong>Jugador 2</strong>
@@ -844,6 +882,7 @@
               <span>Shift golpe fuerte</span>
               <span>/ especial 1</span>
               <span>. especial 2</span>
+              <span>Enter especial 3</span>
             </div>
           </div>
         </div>
@@ -851,6 +890,7 @@
           <h3>Personajes</h3>
           <div class="character-guide">
             <span><strong>Normal</strong> 100 vida, golpes basicos. Con kaioken, F activa 12s de aura roja, velocidad, vida y dano; durante Kaioken, Q lanza un combo rapido.</span>
+            <span><strong>Light Warrior</strong> se desbloquea con Heroe de la luz. Tiene 160 vida y 10 dano base. Q dispara 5 tiros de luz de 25 dano cada uno. F le da velocidad temporal y cura vida. R/Enter usa Destello solar. F+R carga un puno blanco: cuanto mas carga, mas dano mete el proximo golpe cuerpo a cuerpo.</span>
             <span><strong>Fire Master</strong> 120 vida, bola de fuego y fire beam. Q+F dispara Inferno Split: tres bolas de fuego y un beam, con cooldown mas largo. Super Fire Master se desbloquea ganando Mana Meltdown con Fire Master en menos de 45 segundos y con 80+ vida; se elige con click derecho, tiene 160 vida, Q de 25 dano, F de 85 dano y Q+F carga 5 segundos un rayo naranja enorme que dura 5 segundos.</span>
             <span><strong>Living Tank</strong> 200 vida, lento, golpes pesados y canon. Con ironwall llega a 260 vida y pega mas fuerte.</span>
             <span><strong>Cowboy</strong> 80 vida, rafaga de 12 balas. Gana si mantiene distancia y corta habilidades antes de que arranquen.</span>

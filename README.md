@@ -22,6 +22,7 @@ Jugador 1:
 - `E`: golpe fuerte
 - `Q`: habilidad 1
 - `F`: habilidad 2
+- `R`: habilidad 3
 
 Jugador 2:
 
@@ -31,10 +32,12 @@ Jugador 2:
 - `Shift`: golpe fuerte
 - `/`: habilidad 1
 - `.`: habilidad 2
+- `Enter`: habilidad 3
 
 ## Personajes
 
 - Normal
+- Light Warrior
 - Fire Master
 - Living Tank
 - Cowboy

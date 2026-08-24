@@ -134,6 +134,26 @@ const ghostPhaseCooldown = 60;
 const ghostPhaseContactDamage = 2;
 const ghostPhaseContactInterval = 6;
 const ghostPhaseSpeedMultiplier = 1.65;
+const lightWarriorHealth = 160;
+const lightWarriorDamage = 10;
+const lightWarriorShotDamage = 25;
+const lightWarriorShotSpeed = playerMoveSpeed * 6.4;
+const lightWarriorBurstShots = 5;
+const lightWarriorBurstInterval = 7;
+const lightWarriorBurstCooldown = 720;
+const lightWarriorSpeedDuration = 360;
+const lightWarriorSpeedCooldown = 900;
+const lightWarriorSpeedMultiplier = 2.15;
+const lightWarriorHealAmount = 35;
+const lightWarriorSolarFlashDamage = 40;
+const lightWarriorSolarFlashRange = 165;
+const lightWarriorSolarFlashCooldown = 780;
+const lightWarriorSolarFlashVisualDuration = 24;
+const lightWarriorRadiantPunchMinDamage = 45;
+const lightWarriorRadiantPunchMaxDamage = 170;
+const lightWarriorRadiantPunchMaxCharge = 180;
+const lightWarriorRadiantPunchReadyDuration = 360;
+const lightWarriorRadiantPunchCooldown = 1080;
 const divineGeneralHealth = 200;
 const divineGeneralDamage = 7;
 const divineGeneralMoveSpeed = playerMoveSpeed * 0.68;
@@ -164,6 +184,9 @@ const divineFullAdaptTypes = [
   'fireBeam',
   'tankShell',
   'bullet',
+  'lightShot',
+  'lightFlash',
+  'radiantPunch',
   'arcaneOrb',
   'arcaneSecret',
   'temporalBlade',
@@ -188,7 +211,7 @@ const switcherModeStats = {
 };
 const switcherPrismCooldownMultiplier = 0.66;
 const switcherPrismOverdriveCooldownMultiplier = 0.55;
-const characterTypes = ['normal', 'fireMaster', 'tank', 'cowboy', 'reflecter', 'switcher', 'sorcerer', 'gambler', 'chrono', 'ghost', 'divineGeneral'];
+const characterTypes = ['normal', 'fireMaster', 'tank', 'cowboy', 'reflecter', 'switcher', 'sorcerer', 'gambler', 'chrono', 'ghost', 'lightWarrior', 'divineGeneral'];
 const hiddenCharacterTypes = ['divineGeneral'];
 const debugAffectedCharacters = Object.fromEntries(characterTypes.map((characterType) => [characterType, true]));
 const defaultDebugSettings = {
@@ -224,6 +247,7 @@ const achievementIds = [
   'specialist',
   'timeExecutioner',
   'absoluteDominance',
+  'heroOfLight',
   'ghostUnlocked',
   'divineGeneralUnlocked',
   'superFireMasterUnlocked',
@@ -263,6 +287,10 @@ const achievementDetailsByLanguage = {
       title: 'Dominio absoluto',
       description: 'Gana contra un bot dificil en menos de 25 segundos sin recibir dano.',
     },
+    heroOfLight: {
+      title: 'Heroe de la luz',
+      description: 'Desbloquea a Light Warrior: gana con Normal contra un bot dificil en menos de 20 segundos sin recibir dano.',
+    },
     ghostUnlocked: {
       title: 'Espectro del Dark Room',
       description: 'Desbloquea a Ghost despues de jugar una partida en Dark Room.',
@@ -301,6 +329,10 @@ const achievementDetailsByLanguage = {
       title: 'Absolute Dominance',
       description: 'Win against a hard bot in under 25 seconds without taking damage.',
     },
+    heroOfLight: {
+      title: 'Hero of Light',
+      description: 'Unlock Light Warrior: win with Normal against a hard bot in under 20 seconds without taking damage.',
+    },
     ghostUnlocked: { title: 'Dark Room Wraith', description: 'Unlock Ghost after playing a match in Dark Room.' },
     divineGeneralUnlocked: {
       title: 'General Judgment',
@@ -336,6 +368,10 @@ const achievementDetailsByLanguage = {
       title: 'Dominio absoluto',
       description: 'Venca contra um bot dificil em menos de 25 segundos sem receber dano.',
     },
+    heroOfLight: {
+      title: 'Heroi da luz',
+      description: 'Desbloqueie Light Warrior: venca com Normal contra um bot dificil em menos de 20 segundos sem receber dano.',
+    },
     ghostUnlocked: {
       title: 'Espectro do Dark Room',
       description: 'Desbloqueie Ghost depois de jogar uma partida no Dark Room.',
@@ -355,6 +391,7 @@ const uiTranslations = {
     achievementToastLabel: 'Logro obtenido',
     menuSubtitle: 'Juego de pelea local',
     play: 'Jugar',
+    gameModes: 'Modos de juego',
     guide: 'Guia',
     achievements: 'Logros',
     stats: 'Estadisticas',
@@ -391,6 +428,8 @@ const uiTranslations = {
     unlocked: 'Obtenido',
     ghostUnlockedTitle: 'Ghost desbloqueado',
     ghostLockedTitle: 'Juega una partida en Dark Room para usar Ghost',
+    lightWarriorUnlockedTitle: 'Light Warrior desbloqueado',
+    lightWarriorLockedTitle: 'Logro Heroe de la luz: gana con Normal contra bot dificil en menos de 20s sin recibir dano',
     divineUnlockedTitle: 'Divine General desbloqueado',
     divineLockedTitle: 'Completa los 7 sellos dificiles para usar Divine General',
   },
@@ -398,6 +437,7 @@ const uiTranslations = {
     achievementToastLabel: 'Achievement unlocked',
     menuSubtitle: 'Local fighting game',
     play: 'Play',
+    gameModes: 'Game modes',
     guide: 'Guide',
     achievements: 'Achievements',
     stats: 'Stats',
@@ -434,6 +474,8 @@ const uiTranslations = {
     unlocked: 'Unlocked',
     ghostUnlockedTitle: 'Ghost unlocked',
     ghostLockedTitle: 'Play a match in Dark Room to use Ghost',
+    lightWarriorUnlockedTitle: 'Light Warrior unlocked',
+    lightWarriorLockedTitle: 'Hero of Light achievement: win with Normal against a hard bot in under 20s without taking damage',
     divineUnlockedTitle: 'Divine General unlocked',
     divineLockedTitle: 'Complete the 7 difficult seals to use Divine General',
   },
@@ -441,6 +483,7 @@ const uiTranslations = {
     achievementToastLabel: 'Conquista obtida',
     menuSubtitle: 'Jogo de luta local',
     play: 'Jogar',
+    gameModes: 'Modos de jogo',
     guide: 'Guia',
     achievements: 'Conquistas',
     stats: 'Estatisticas',
@@ -477,6 +520,8 @@ const uiTranslations = {
     unlocked: 'Obtido',
     ghostUnlockedTitle: 'Ghost desbloqueado',
     ghostLockedTitle: 'Jogue uma partida no Dark Room para usar Ghost',
+    lightWarriorUnlockedTitle: 'Light Warrior desbloqueado',
+    lightWarriorLockedTitle: 'Conquista Heroi da luz: venca com Normal contra bot dificil em menos de 20s sem receber dano',
     divineUnlockedTitle: 'Divine General desbloqueado',
     divineLockedTitle: 'Complete os 7 selos dificeis para usar Divine General',
   },
@@ -572,6 +617,7 @@ let currentLanguage = 'es';
 let animationId = null;
 let fireballs = [];
 let fireBeams = [];
+let lightShots = [];
 let superFireKamehamehaCharges = [];
 let superFireKamehamehas = [];
 let tankShells = [];
@@ -587,6 +633,8 @@ let characterSelectionPlayer = 1;
 let selectedMap = 'foundry';
 let player1QfPendingSpecial = null;
 let player2QfPendingSpecial = null;
+let player1FrPendingSpecial = null;
+let player2FrPendingSpecial = null;
 let player1SorcererPendingSpecial = null;
 let player2SorcererPendingSpecial = null;
 const mainMenu = document.getElementById('mainMenu');
@@ -597,6 +645,7 @@ const characterSelectTitle = document.getElementById('characterSelectTitle');
 const mapScreen = document.getElementById('mapScreen');
 const darkRoomMapButton = document.getElementById('darkRoomMapButton');
 const settingsScreen = document.getElementById('settingsScreen');
+const gameModesScreen = document.getElementById('gameModesScreen');
 const guideScreen = document.getElementById('guideScreen');
 const achievementsScreen = document.getElementById('achievementsScreen');
 const statsScreen = document.getElementById('statsScreen');
@@ -610,6 +659,7 @@ const playButton = document.getElementById('playButton');
 const oldDaysPlayButton = document.getElementById('oldDaysPlayButton');
 const oldDaysBackButton = document.getElementById('oldDaysBackButton');
 const normalCharacterButton = document.getElementById('normalCharacterButton');
+const lightWarriorCharacterButton = document.getElementById('lightWarriorCharacterButton');
 const fireMasterCharacterButton = document.getElementById('fireMasterCharacterButton');
 const tankCharacterButton = document.getElementById('tankCharacterButton');
 const cowboyCharacterButton = document.getElementById('cowboyCharacterButton');
@@ -625,12 +675,14 @@ const characterBackButton = document.getElementById('characterBackButton');
 const mapBackButton = document.getElementById('mapBackButton');
 const mapOptionButtons = document.querySelectorAll('.map-option');
 const settingsButton = document.getElementById('settingsButton');
+const gameModesButton = document.getElementById('gameModesButton');
 const guideButton = document.getElementById('guideButton');
 const achievementsButton = document.getElementById('achievementsButton');
 const statsButton = document.getElementById('statsButton');
 const infoButton = document.getElementById('infoButton');
 const opinionButton = document.getElementById('opinionButton');
 const backButton = document.getElementById('backButton');
+const gameModesBackButton = document.getElementById('gameModesBackButton');
 const guideBackButton = document.getElementById('guideBackButton');
 const achievementsBackButton = document.getElementById('achievementsBackButton');
 const statsBackButton = document.getElementById('statsBackButton');
@@ -691,6 +743,7 @@ const characterButtons = [
   { button: gamblerCharacterButton, originalName: 'Gambler', characterType: 'gambler' },
   { button: chronoCharacterButton, originalName: 'Chrono', characterType: 'chrono' },
   { button: ghostCharacterButton, originalName: 'Ghost', characterType: 'ghost' },
+  { button: lightWarriorCharacterButton, originalName: 'Light Warrior', characterType: 'lightWarrior' },
   { button: divineGeneralCharacterButton, originalName: 'Divine General', characterType: 'divineGeneral' },
 ];
 const debugControls = [
@@ -771,6 +824,7 @@ const botDifficultySettings = {
 
 const characterDisplayNames = {
   normal: 'Normal',
+  lightWarrior: 'Light Warrior',
   fireMaster: 'Fire Master',
   tank: 'Living Tank',
   cowboy: 'Cowboy',
@@ -803,6 +857,25 @@ const victoryPhrases = {
     reflecter: ['No reflejaste lo unico que importaba: mis punos.'],
     switcher: ['Cambiaste de modo, yo cambie tu cara.'],
     sorcerer: ['Mucha magia, poca guardia.'],
+  },
+  lightWarrior: {
+    default: [
+      'Peleaste bien. Con un poco mas de calma, vas a llegar lejos.',
+      'Tenes buena energia. Solo te falto elegir mejor el momento de atacar.',
+      'Fue una buena pelea. Segui practicando la defensa y vas a mejorar rapido.',
+    ],
+    normal: ['Tus fundamentos son buenos. Trabaja un poco el timing y vas a ser peligroso.'],
+    lightWarrior: ['Llevas bien la luz. Solo te falto paciencia para cargar el golpe correcto.'],
+    fireMaster: ['Tu fuego fue fuerte. Si cuidas mas la distancia, vas a quemar mejor.'],
+    tank: ['Tu resistencia es admirable. Proba variar el ritmo para que no te lean tan facil.'],
+    cowboy: ['Tenes buena punteria. Si esperas medio segundo mas, tus disparos van a doler mas.'],
+    reflecter: ['Tu defensa fue inteligente. Te falto elegir mejor que habilidad reflejar.'],
+    switcher: ['Cambiaste muy bien de plan. Solo necesitabas cerrar mejor la oportunidad.'],
+    sorcerer: ['Tu magia tiene potencial. Protegete mejor mientras preparas tus hechizos.'],
+    gambler: ['Jugaste con confianza. Equilibra mejor riesgo y defensa y vas a ganar mas.'],
+    chrono: ['Tu control del tiempo fue bueno. Te falto aprovechar mejor cada segundo.'],
+    ghost: ['Te moviste muy bien. Si atacas despues de desaparecer, vas a sorprender mas.'],
+    divineGeneral: ['Tu adaptacion fue impresionante. Contra la luz, solo necesitabas esperar menos.'],
   },
   fireMaster: {
     default: [
@@ -1043,6 +1116,7 @@ function syncAchievementsUI() {
   syncAchievementText();
   syncSuperFireMasterUnlockUI();
   syncGhostUnlockUI();
+  syncLightWarriorUnlockUI();
   syncDivineGeneralUnlockUI();
 }
 
@@ -1054,6 +1128,10 @@ function isDivineGeneralUnlocked() {
   return Boolean(unlockedAchievements.divineGeneralUnlocked);
 }
 
+function isLightWarriorUnlocked() {
+  return Boolean(unlockedAchievements.heroOfLight);
+}
+
 function syncGhostUnlockUI() {
   if (!ghostCharacterButton) return;
 
@@ -1061,6 +1139,15 @@ function syncGhostUnlockUI() {
   ghostCharacterButton.classList.toggle('locked', !unlocked);
   ghostCharacterButton.disabled = !unlocked;
   ghostCharacterButton.title = unlocked ? t('ghostUnlockedTitle') : t('ghostLockedTitle');
+}
+
+function syncLightWarriorUnlockUI() {
+  if (!lightWarriorCharacterButton) return;
+
+  const unlocked = isLightWarriorUnlocked();
+  lightWarriorCharacterButton.classList.toggle('locked', !unlocked);
+  lightWarriorCharacterButton.disabled = !unlocked;
+  lightWarriorCharacterButton.title = unlocked ? t('lightWarriorUnlockedTitle') : t('lightWarriorLockedTitle');
 }
 
 function syncDivineGeneralUnlockUI() {
@@ -1736,8 +1823,10 @@ const keys = {
   s: false,
   q: false,
   f: false,
+  r: false,
   slash: false,
   period: false,
+  enter: false,
   ArrowLeft: false,
   ArrowRight: false,
   ArrowUp: false,
@@ -1783,6 +1872,19 @@ class Fighter {
     this.ghostPhaseCooldown = 0;
     this.ghostPhaseTimer = 0;
     this.ghostPhaseContactTimer = 0;
+    this.lightWarriorBurstCooldown = 0;
+    this.lightWarriorBurstShotsRemaining = 0;
+    this.lightWarriorBurstTimer = 0;
+    this.lightWarriorSpeedCooldown = 0;
+    this.lightWarriorSpeedTimer = 0;
+    this.lightWarriorSolarFlashCooldown = 0;
+    this.lightWarriorSolarFlashTimer = 0;
+    this.lightWarriorRadiantPunchCooldown = 0;
+    this.lightWarriorRadiantPunchChargeTimer = 0;
+    this.lightWarriorRadiantPunchReadyTimer = 0;
+    this.lightWarriorRadiantPunchDamage = 0;
+    this.lightWarriorRadiantPunchCharging = false;
+    this.lightWarriorRadiantPunchAttackActive = false;
     this.divineAdaptCooldown = 0;
     this.divineAdaptTimer = 0;
     this.divineAdaptations = {};
@@ -1871,6 +1973,10 @@ class Fighter {
       this.drawNormalDetails();
     }
 
+    if (this.characterType === 'lightWarrior') {
+      this.drawLightWarriorDetails();
+    }
+
     if (this.characterType === 'fireMaster') {
       this.drawFireMasterDetails();
     }
@@ -1921,7 +2027,7 @@ class Fighter {
 
     if (this.isAttacking) {
       const attack = this.attackArea;
-      ctx.fillStyle = this.attackColor;
+      ctx.fillStyle = this.lightWarriorRadiantPunchAttackActive ? 'rgba(255, 255, 255, 0.9)' : this.attackColor;
       ctx.fillRect(attack.x, attack.y, attack.width, attack.height);
     }
 
@@ -1989,6 +2095,101 @@ class Fighter {
     ctx.moveTo(x + this.width - 2, y + 42);
     ctx.lineTo(x + this.width - 16, y + 28);
     ctx.stroke();
+  }
+
+  drawLightWarriorDetails() {
+    const x = this.position.x;
+    const y = this.position.y;
+    const centerX = x + this.width / 2;
+    const boosted = this.lightWarriorSpeedTimer > 0;
+
+    ctx.fillStyle = '#ffeb3b';
+    ctx.beginPath();
+    ctx.moveTo(x - 14, y + 38);
+    ctx.lineTo(x + 8, y + 42);
+    ctx.lineTo(x + 5, y + 114);
+    ctx.lineTo(x - 20, y + 120);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = '#fdd835';
+    ctx.fillRect(x + 7, y + 36, this.width - 14, 56);
+    ctx.fillStyle = '#fff8e1';
+    ctx.fillRect(x + 18, y + 40, this.width - 36, 47);
+    ctx.fillStyle = '#111';
+    ctx.fillRect(x + 8, y + 76, this.width - 16, 6);
+    ctx.fillStyle = '#c9a227';
+    ctx.fillRect(centerX - 5, y + 42, 10, 38);
+
+    ctx.fillStyle = '#111';
+    ctx.fillRect(x + 7, y + 21, this.width - 14, 10);
+    ctx.fillStyle = '#fdd835';
+    ctx.fillRect(x + 14, y + 35, this.width - 28, 8);
+    ctx.fillStyle = '#fffde7';
+    ctx.fillRect(x + 16, y + 18, 9, 6);
+    ctx.fillRect(x + this.width - 25, y + 18, 9, 6);
+    ctx.fillStyle = '#b8860b';
+    ctx.fillRect(x + 15, y + 20, 10, 3);
+    ctx.fillRect(x + this.width - 25, y + 20, 10, 3);
+
+    if (boosted) {
+      const pulse = 1 + Math.sin(this.lightWarriorSpeedTimer * 0.32) * 0.08;
+      ctx.strokeStyle = 'rgba(255, 235, 59, 0.88)';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.ellipse(centerX, y + this.height / 2, 46 * pulse, 76 * pulse, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 5; i += 1) {
+        const sparkX = x - 16 + ((i * 29 + this.lightWarriorSpeedTimer * 4) % (this.width + 32));
+        ctx.beginPath();
+        ctx.moveTo(sparkX, y + 14);
+        ctx.lineTo(sparkX + 10, y + 2);
+        ctx.stroke();
+      }
+    }
+
+    if (this.lightWarriorSolarFlashTimer > 0) {
+      const progress = this.lightWarriorSolarFlashTimer / lightWarriorSolarFlashVisualDuration;
+      ctx.fillStyle = `rgba(255, 235, 59, ${0.22 * progress})`;
+      ctx.beginPath();
+      ctx.arc(centerX, y + this.height / 2, lightWarriorSolarFlashRange * (1 - progress * 0.35), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 * progress})`;
+      ctx.lineWidth = 5;
+      ctx.stroke();
+    }
+
+    if (this.lightWarriorRadiantPunchCharging || this.lightWarriorRadiantPunchReadyTimer > 0) {
+      const progress = this.lightWarriorRadiantPunchCharging
+        ? getLightWarriorRadiantPunchChargeProgress(this)
+        : Math.min(1, Math.max(0.25, this.lightWarriorRadiantPunchDamage / lightWarriorRadiantPunchMaxDamage));
+      const pulse = 1 + Math.sin((this.lightWarriorRadiantPunchChargeTimer + this.lightWarriorRadiantPunchReadyTimer) * 0.4) * 0.08;
+      const fistX = centerX + (this.attacksToTheRight ? 26 : -26);
+      const fistY = y + 58;
+      const radius = (16 + progress * 24) * pulse;
+
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.26 + progress * 0.34})`;
+      ctx.beginPath();
+      ctx.arc(fistX, fistY, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.72 + progress * 0.2})`;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.strokeStyle = `rgba(255, 235, 59, ${0.42 + progress * 0.3})`;
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 6; i += 1) {
+        const angle = (Math.PI * 2 * i) / 6 + this.lightWarriorRadiantPunchChargeTimer * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(fistX + Math.cos(angle) * (radius + 4), fistY + Math.sin(angle) * (radius + 4));
+        ctx.lineTo(fistX + Math.cos(angle) * (radius + 18), fistY + Math.sin(angle) * (radius + 18));
+        ctx.stroke();
+      }
+    }
   }
 
   drawFireMasterDetails() {
@@ -2857,6 +3058,7 @@ class Fighter {
       if (this.attackTimer > this.attackDuration) {
         this.isAttacking = false;
         this.attackTimer = 0;
+        this.lightWarriorRadiantPunchAttackActive = false;
       }
     }
 
@@ -2948,6 +3150,47 @@ class Fighter {
       this.ghostPhaseContactTimer -= 1;
     }
 
+    if (this.lightWarriorBurstCooldown > 0) {
+      this.lightWarriorBurstCooldown -= 1;
+    }
+
+    if (this.lightWarriorSpeedCooldown > 0) {
+      this.lightWarriorSpeedCooldown -= 1;
+    }
+
+    if (this.lightWarriorSpeedTimer > 0) {
+      this.lightWarriorSpeedTimer -= 1;
+    }
+
+    if (this.lightWarriorSolarFlashCooldown > 0) {
+      this.lightWarriorSolarFlashCooldown -= 1;
+    }
+
+    if (this.lightWarriorSolarFlashTimer > 0) {
+      this.lightWarriorSolarFlashTimer -= 1;
+    }
+
+    if (this.lightWarriorRadiantPunchCooldown > 0) {
+      this.lightWarriorRadiantPunchCooldown -= 1;
+    }
+
+    if (this.lightWarriorRadiantPunchCharging) {
+      this.lightWarriorRadiantPunchChargeTimer = Math.min(
+        lightWarriorRadiantPunchMaxCharge,
+        this.lightWarriorRadiantPunchChargeTimer + 1
+      );
+      if (this.lightWarriorRadiantPunchChargeTimer >= lightWarriorRadiantPunchMaxCharge) {
+        finishLightWarriorRadiantPunchCharge(this);
+      }
+    }
+
+    if (this.lightWarriorRadiantPunchReadyTimer > 0) {
+      this.lightWarriorRadiantPunchReadyTimer -= 1;
+      if (this.lightWarriorRadiantPunchReadyTimer === 0) {
+        this.lightWarriorRadiantPunchDamage = 0;
+      }
+    }
+
     if (this.divineAdaptCooldown > 0) {
       this.divineAdaptCooldown -= 1;
     }
@@ -3028,6 +3271,7 @@ class Fighter {
 
     this.updateKaiokenCombo();
     this.updateCowboyBurst();
+    this.updateLightWarriorBurst();
   }
 
   updateKaiokenCombo() {
@@ -3062,6 +3306,19 @@ class Fighter {
     this.cowboyBurstTimer = cowboyBurstInterval;
   }
 
+  updateLightWarriorBurst() {
+    if (this.lightWarriorBurstShotsRemaining <= 0) return;
+
+    if (this.lightWarriorBurstTimer > 0) {
+      this.lightWarriorBurstTimer -= 1;
+      return;
+    }
+
+    shootLightWarriorShot(this, this.target);
+    this.lightWarriorBurstShotsRemaining -= 1;
+    this.lightWarriorBurstTimer = lightWarriorBurstInterval;
+  }
+
   updateGhostPhaseContact() {
     if (this.characterType !== 'ghost' || this.ghostPhaseContactTimer > 0) return;
 
@@ -3092,6 +3349,12 @@ class Fighter {
     this.isAttacking = true;
     this.attackTimer = 0;
     this.currentAttackDamage = getAttackDamage(this, isStrong);
+    if (this.characterType === 'lightWarrior' && this.lightWarriorRadiantPunchReadyTimer > 0 && this.lightWarriorRadiantPunchDamage > 0) {
+      this.currentAttackDamage += this.lightWarriorRadiantPunchDamage;
+      this.lightWarriorRadiantPunchReadyTimer = 0;
+      this.lightWarriorRadiantPunchDamage = 0;
+      this.lightWarriorRadiantPunchAttackActive = true;
+    }
 
     if (isStrong) {
       this.strongAttackCooldown = getDebugCooldown(70, this);
@@ -3108,6 +3371,7 @@ class Fighter {
       this.characterType === 'fireMaster' ||
       this.characterType === 'tank' ||
       this.characterType === 'reflecter' ||
+      this.characterType === 'lightWarrior' ||
       this.characterType === 'sorcerer' ||
       this.characterType === 'chrono' ||
       this.characterType === 'ghost' ||
@@ -3157,6 +3421,23 @@ class Fighter {
       this.setMaxHealth(cowboyHealth);
       this.color = this.baseColor;
       this.attackColor = hexToRgba(this.baseColor, 0.65);
+      return;
+    }
+
+    if (characterType === 'lightWarrior') {
+      this.width = 60;
+      this.height = 120;
+      this.moveSpeed = playerMoveSpeed;
+      this.damageMultiplier = 1;
+      this.attackDuration = 12;
+      this.attackBox = {
+        offset: { x: this.attacksToTheRight ? this.width : -70, y: 20 },
+        width: 70,
+        height: 30,
+      };
+      this.setMaxHealth(lightWarriorHealth);
+      this.color = '#fdd835';
+      this.attackColor = 'rgba(255, 235, 59, 0.72)';
       return;
     }
 
@@ -3372,6 +3653,19 @@ class Fighter {
     this.ghostPhaseCooldown = 0;
     this.ghostPhaseTimer = 0;
     this.ghostPhaseContactTimer = 0;
+    this.lightWarriorBurstCooldown = 0;
+    this.lightWarriorBurstShotsRemaining = 0;
+    this.lightWarriorBurstTimer = 0;
+    this.lightWarriorSpeedCooldown = 0;
+    this.lightWarriorSpeedTimer = 0;
+    this.lightWarriorSolarFlashCooldown = 0;
+    this.lightWarriorSolarFlashTimer = 0;
+    this.lightWarriorRadiantPunchCooldown = 0;
+    this.lightWarriorRadiantPunchChargeTimer = 0;
+    this.lightWarriorRadiantPunchReadyTimer = 0;
+    this.lightWarriorRadiantPunchDamage = 0;
+    this.lightWarriorRadiantPunchCharging = false;
+    this.lightWarriorRadiantPunchAttackActive = false;
     this.divineAdaptCooldown = 0;
     this.divineAdaptTimer = 0;
     this.divineAdaptations = {};
@@ -3472,6 +3766,44 @@ class FireBeam {
     ctx.fillRect(this.position.x, this.position.y + 4, this.width, this.height - 8);
     ctx.fillStyle = '#d50000';
     ctx.fillRect(this.position.x + (this.velocity.x > 0 ? 0 : this.width - 12), this.position.y + 2, 12, this.height - 4);
+  }
+
+  update() {
+    this.position.x += this.velocity.x;
+    this.draw();
+
+    if (this.position.x + this.width < 0 || this.position.x > canvas.width) {
+      this.active = false;
+    }
+  }
+}
+
+class LightShot {
+  constructor({ x, y, direction, target, attacker }) {
+    this.position = { x, y };
+    this.velocity = { x: getDebugProjectileSpeed(lightWarriorShotSpeed, attacker) * direction, y: 0 };
+    this.target = target;
+    this.attacker = attacker;
+    this.width = 28;
+    this.height = 10;
+    this.active = true;
+  }
+
+  get x() {
+    return this.position.x;
+  }
+
+  get y() {
+    return this.position.y;
+  }
+
+  draw() {
+    ctx.fillStyle = '#fffde7';
+    ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+    ctx.fillStyle = '#fdd835';
+    ctx.fillRect(this.position.x + (this.velocity.x > 0 ? this.width - 10 : 0), this.position.y - 3, 10, this.height + 6);
+    ctx.fillStyle = 'rgba(255, 235, 59, 0.35)';
+    ctx.fillRect(this.position.x - (this.velocity.x > 0 ? 10 : -this.width), this.position.y + 2, this.width, this.height - 4);
   }
 
   update() {
@@ -4276,6 +4608,7 @@ function rectangularCollision({ rectangle1, rectangle2 }) {
 
 function getAttackDamage(attacker, isStrong = false) {
   if (attacker.characterType === 'ghost') return ghostDamage;
+  if (attacker.characterType === 'lightWarrior') return (isStrong ? lightWarriorDamage * 1.5 : lightWarriorDamage) * (1 + attacker.gamblerDamageBoost);
   if (attacker.characterType === 'divineGeneral') {
     const eventMultiplier = isAbsoluteAdaptationActive() ? 1.2 : 1;
     return (isStrong ? divineGeneralDamage * 2 : divineGeneralDamage) * getDivineBaseDamageMultiplier(attacker) * eventMultiplier;
@@ -4471,7 +4804,8 @@ function getDebugMoveSpeed(fighter) {
   const kaiokenMultiplier = isNormalKaioken(fighter) && fighter.characterType === 'normal' && fighter.kaiokenTimer > 0 ? kaiokenSecretSpeedMultiplier : 1;
   const chronoMultiplier = fighter.chronoSlowTimer > 0 ? chronoSlowFactor : 1;
   const ghostMultiplier = fighter.characterType === 'ghost' && fighter.ghostPhaseTimer > 0 ? ghostPhaseSpeedMultiplier : 1;
-  return fighter.moveSpeed * getDebugMultiplier('moveMultiplier', fighter) * (1 + fighter.gamblerSpeedBoost) * kaiokenMultiplier * chronoMultiplier * ghostMultiplier;
+  const lightWarriorMultiplier = fighter.characterType === 'lightWarrior' && fighter.lightWarriorSpeedTimer > 0 ? lightWarriorSpeedMultiplier : 1;
+  return fighter.moveSpeed * getDebugMultiplier('moveMultiplier', fighter) * (1 + fighter.gamblerSpeedBoost) * kaiokenMultiplier * chronoMultiplier * ghostMultiplier * lightWarriorMultiplier;
 }
 
 function getDebugJumpSpeed(jumpSpeed, fighter = null) {
@@ -4682,6 +5016,9 @@ function replicateAbility(copycat, source) {
     case 'cowboy':
       copyCowboyAbility(copycat, source);
       break;
+    case 'lightWarrior':
+      copyLightWarriorAbility(copycat, source);
+      break;
     case 'switcher':
       copySwitcherAbility(copycat, source);
       break;
@@ -4742,6 +5079,7 @@ function canFighterAct(fighter) {
     fighter.chronoTimeStopTimer <= 0 &&
     fighter.divineAdaptTimer <= 0 &&
     !fighter.divineWorldCutCharging &&
+    !fighter.lightWarriorRadiantPunchCharging &&
     !fighter.superFireKamehamehaCharging
   );
 }
@@ -5837,6 +6175,22 @@ function getDarkRoomLightSources() {
       pushRectLight(lights, fighter.switcherRedStrikeArea, 120, 'rgba(239, 83, 80, 0.9)');
     }
 
+    if (
+      fighter.lightWarriorSpeedTimer > 0 ||
+      fighter.lightWarriorSolarFlashTimer > 0 ||
+      fighter.lightWarriorRadiantPunchCharging ||
+      fighter.lightWarriorRadiantPunchReadyTimer > 0
+    ) {
+      pushLight(lights, {
+        x: fighter.position.x + fighter.width / 2,
+        y: fighter.position.y + fighter.height / 2,
+        radius: fighter.lightWarriorSolarFlashTimer > 0 ? 190 : fighter.lightWarriorRadiantPunchCharging ? 145 : 115,
+        color: fighter.lightWarriorRadiantPunchCharging || fighter.lightWarriorRadiantPunchReadyTimer > 0
+          ? 'rgba(255, 255, 255, 0.94)'
+          : 'rgba(255, 235, 59, 0.92)',
+      });
+    }
+
     if (fighter.gamblerRollTimer > 0) {
       pushLight(lights, {
         x: fighter.position.x + fighter.width / 2,
@@ -5876,6 +6230,7 @@ function getDarkRoomLightSources() {
 
   fireballs.forEach((fireball) => pushRectLight(lights, fireball, 82, 'rgba(255, 179, 0, 0.95)'));
   fireBeams.forEach((fireBeam) => pushRectLight(lights, fireBeam, 150, 'rgba(255, 109, 0, 0.95)'));
+  lightShots.forEach((lightShot) => pushRectLight(lights, lightShot, 86, 'rgba(255, 235, 59, 0.95)'));
   tankShells.forEach((tankShell) =>
     pushRectLight(lights, tankShell, tankShell.empowered ? 115 : 72, tankShell.empowered ? 'rgba(255, 235, 59, 0.95)' : 'rgba(201, 180, 88, 0.9)')
   );
@@ -6388,6 +6743,17 @@ function updateFightAchievements(winnerPlayer, fightTime) {
   ) {
     unlockAchievement('absoluteDominance');
   }
+
+  if (
+    winnerPlayer === player1 &&
+    winnerPlayer.characterType === 'normal' &&
+    botEnabled &&
+    botDifficulty === 'hard' &&
+    fightTime <= 20000 &&
+    fightStats.player1.damageTaken <= 0
+  ) {
+    unlockAchievement('heroOfLight');
+  }
 }
 
 function finishFight() {
@@ -6426,6 +6792,7 @@ function resetFight() {
   botAttackCooldown = 0;
   fireballs = [];
   fireBeams = [];
+  lightShots = [];
   superFireKamehamehaCharges = [];
   superFireKamehamehas = [];
   tankShells = [];
@@ -6439,6 +6806,8 @@ function resetFight() {
   divineWorldCuts = [];
   clearQfPendingSpecial(1);
   clearQfPendingSpecial(2);
+  clearFrPendingSpecial(1);
+  clearFrPendingSpecial(2);
   clearSorcererPendingSpecial(1);
   clearSorcererPendingSpecial(2);
   resetFightEvents();
@@ -6465,6 +6834,7 @@ function returnToMenu() {
   botAttackCooldown = 0;
   fireballs = [];
   fireBeams = [];
+  lightShots = [];
   superFireKamehamehaCharges = [];
   superFireKamehamehas = [];
   tankShells = [];
@@ -6478,6 +6848,8 @@ function returnToMenu() {
   divineWorldCuts = [];
   clearQfPendingSpecial(1);
   clearQfPendingSpecial(2);
+  clearFrPendingSpecial(1);
+  clearFrPendingSpecial(2);
   clearSorcererPendingSpecial(1);
   clearSorcererPendingSpecial(2);
   resetFightEvents();
@@ -6544,6 +6916,7 @@ function animate() {
   updateAbsoluteAdaptation();
   updateFireballs();
   updateFireBeams();
+  updateLightShots();
   updateSuperFireKamehamehaCharges();
   updateSuperFireKamehamehas();
   updateTankShells();
@@ -6563,6 +6936,7 @@ function animate() {
   ) {
     if (handleCopycatShieldHit(player2, player1)) {
       player1.isAttacking = false;
+      player1.lightWarriorRadiantPunchAttackActive = false;
       return;
     }
   }
@@ -6574,13 +6948,18 @@ function animate() {
   ) {
     if (handleCopycatShieldHit(player2, player1)) {
       player1.isAttacking = false;
+      player1.lightWarriorRadiantPunchAttackActive = false;
       return;
     }
 
-    applyDamage(player1, player2, player1.currentAttackDamage, { damageType: 'melee' });
+    applyDamage(player1, player2, player1.currentAttackDamage, {
+      isSpecial: player1.lightWarriorRadiantPunchAttackActive,
+      damageType: player1.lightWarriorRadiantPunchAttackActive ? 'radiantPunch' : 'melee',
+    });
     player2.velocity.x = getDebugKnockback(8, player2);
     player2.velocity.y = getDebugKnockback(-8, player2);
     player1.isAttacking = false;
+    player1.lightWarriorRadiantPunchAttackActive = false;
   }
 
   if (
@@ -6590,6 +6969,7 @@ function animate() {
   ) {
     if (handleCopycatShieldHit(player1, player2)) {
       player2.isAttacking = false;
+      player2.lightWarriorRadiantPunchAttackActive = false;
       return;
     }
   }
@@ -6601,13 +6981,18 @@ function animate() {
   ) {
     if (handleCopycatShieldHit(player1, player2)) {
       player2.isAttacking = false;
+      player2.lightWarriorRadiantPunchAttackActive = false;
       return;
     }
 
-    applyDamage(player2, player1, player2.currentAttackDamage, { damageType: 'melee' });
+    applyDamage(player2, player1, player2.currentAttackDamage, {
+      isSpecial: player2.lightWarriorRadiantPunchAttackActive,
+      damageType: player2.lightWarriorRadiantPunchAttackActive ? 'radiantPunch' : 'melee',
+    });
     player1.velocity.x = getDebugKnockback(-8, player1);
     player1.velocity.y = getDebugKnockback(-8, player1);
     player2.isAttacking = false;
+    player2.lightWarriorRadiantPunchAttackActive = false;
   }
 
   drawDarkRoomLightingOverlay();
@@ -6675,10 +7060,12 @@ function updateCooldownIndicators() {
   updatePlayerCooldownIndicators(player1, {
     q: document.getElementById('p1CooldownQ'),
     f: document.getElementById('p1CooldownF'),
+    r: document.getElementById('p1CooldownR'),
   });
   updatePlayerCooldownIndicators(player2, {
     q: document.getElementById('p2CooldownQ'),
     f: document.getElementById('p2CooldownF'),
+    r: document.getElementById('p2CooldownR'),
   });
 }
 
@@ -6686,25 +7073,29 @@ function updatePlayerCooldownIndicators(player, elements) {
   const cooldowns = getPlayerAbilityCooldowns(player);
   updateCooldownChip(elements.q, cooldowns.q);
   updateCooldownChip(elements.f, cooldowns.f);
+  updateCooldownChip(elements.r, cooldowns.r || { active: false });
 }
 
 function updateCooldownChip(element, cooldown) {
   if (!element) return;
+  const inactiveCooldown = { active: false };
+  const currentCooldown = cooldown || inactiveCooldown;
 
-  element.classList.toggle('disabled', !cooldown.active);
-  if (!cooldown.active) {
+  element.classList.toggle('disabled', !currentCooldown.active);
+  if (!currentCooldown.active) {
+    element.classList.remove('cooling');
     element.style.setProperty('--ready', '0%');
     element.title = 'Sin habilidad';
     return;
   }
 
   const readyPercent =
-    cooldown.max <= 0 ? 100 : Math.max(0, Math.min(100, ((cooldown.max - cooldown.remaining) / cooldown.max) * 100));
-  const isCooling = cooldown.remaining > 0;
+    currentCooldown.max <= 0 ? 100 : Math.max(0, Math.min(100, ((currentCooldown.max - currentCooldown.remaining) / currentCooldown.max) * 100));
+  const isCooling = currentCooldown.remaining > 0;
 
   element.classList.toggle('cooling', isCooling);
   element.style.setProperty('--ready', `${readyPercent}%`);
-  element.title = isCooling ? `${cooldown.name}: recargando` : `${cooldown.name}: listo`;
+  element.title = isCooling ? `${currentCooldown.name}: recargando` : `${currentCooldown.name}: listo`;
 }
 
 function getPlayerAbilityCooldowns(player) {
@@ -6737,6 +7128,34 @@ function getPlayerAbilityCooldowns(player) {
           max: Math.max(
             getDebugCooldown(getFireMasterSecretCooldown(player, fireBeamCooldown), player),
             isSuperFireMaster(player) ? getDebugCooldown(superFireKamehamehaChargeDuration + superFireKamehamehaDuration, player) : 0
+          ),
+        },
+      };
+    case 'lightWarrior':
+      return {
+        q: {
+          active: true,
+          name: 'Rafaga de luz',
+          remaining: Math.max(player.lightWarriorBurstCooldown, player.lightWarriorBurstShotsRemaining > 0 ? getDebugCooldown(lightWarriorBurstCooldown, player) : 0),
+          max: getDebugCooldown(lightWarriorBurstCooldown, player),
+        },
+        f: {
+          active: true,
+          name: 'Velocidad luminosa',
+          remaining: Math.max(player.lightWarriorSpeedCooldown, player.lightWarriorSpeedTimer, player.lightWarriorRadiantPunchCooldown),
+          max: Math.max(
+            getDebugDuration(lightWarriorSpeedDuration, player) + getDebugCooldown(lightWarriorSpeedCooldown, player),
+            getDebugCooldown(lightWarriorRadiantPunchCooldown, player)
+          ),
+        },
+        r: {
+          active: true,
+          name: 'Destello solar',
+          remaining: Math.max(player.lightWarriorSolarFlashCooldown, player.lightWarriorSolarFlashTimer, player.lightWarriorRadiantPunchCooldown),
+          max: Math.max(
+            getDebugCooldown(lightWarriorSolarFlashCooldown, player),
+            getDebugDuration(lightWarriorSolarFlashVisualDuration, player),
+            getDebugCooldown(lightWarriorRadiantPunchCooldown, player)
           ),
         },
       };
@@ -6901,6 +7320,30 @@ function updateFireBeams() {
   });
 
   fireBeams = fireBeams.filter((fireBeam) => fireBeam.active);
+}
+
+function updateLightShots() {
+  lightShots.forEach((lightShot) => {
+    if (!updateProjectileIfNotTimeStopped(lightShot)) return;
+
+    if (
+      lightShot.active &&
+      (rectangularCopycatShieldCollision(lightShot.target, lightShot) ||
+        rectangularCollision({ rectangle1: lightShot, rectangle2: lightShot.target }))
+    ) {
+      if (handleCopycatShieldHit(lightShot.target, lightShot.attacker)) {
+        lightShot.active = false;
+        return;
+      }
+
+      applyDamage(lightShot.attacker, lightShot.target, lightWarriorShotDamage, { isSpecial: true, damageType: 'lightShot' });
+      lightShot.target.velocity.x = getDebugKnockback(lightShot.velocity.x > 0 ? 8 : -8, lightShot.target);
+      lightShot.target.velocity.y = getDebugKnockback(-4, lightShot.target);
+      lightShot.active = false;
+    }
+  });
+
+  lightShots = lightShots.filter((lightShot) => lightShot.active);
 }
 
 function updateSuperFireKamehamehaCharges() {
@@ -7394,6 +7837,7 @@ window.addEventListener('keydown', (event) => {
       launchFireball(player1, player2);
       launchTankShell(player1, player2);
       launchCowboyBurst(player1);
+      launchLightWarriorBarrage(player1, player2);
       launchSorcererOrb(player1, player2);
       activateCopycatShield(player1);
       activateGamblerRoll(player1);
@@ -7408,13 +7852,26 @@ window.addEventListener('keydown', (event) => {
       if (handleGamblerSpecialKey(player1, 'luck', keys.q, 1)) break;
       if (handleFireMasterSpecialKey(player1, player2, 'beam', keys.q, 1)) break;
       if (handleDivineSpecialKey(player1, player2, 'counter', keys.q, 1)) break;
+      if (handleLightWarriorFrSpecialKey(player1, player2, 'speed', keys.r, 1)) break;
       if (handleSorcererSpecialKey(player1, player2, 'gravity', keys.q, 1)) break;
       launchFireBeam(player1, player2);
       launchSorcererGravityOrb(player1, player2);
       activateSwitcherAbility(player1);
       activateGamblerLuckIncrementer(player1);
+      activateLightWarriorSpeed(player1);
       activateKaioken(player1);
       activateChronoSlow(player1, player2);
+      break;
+    case 'r':
+    case 'R':
+      if (gameOver) {
+        resetFight();
+        break;
+      }
+      if (keys.r) break;
+      keys.r = true;
+      if (handleLightWarriorFrSpecialKey(player1, player2, 'flash', keys.f, 1)) break;
+      activateLightWarriorSolarFlash(player1, player2);
       break;
     case 'ArrowLeft':
       if (!botEnabled) keys.ArrowLeft = true;
@@ -7444,6 +7901,7 @@ window.addEventListener('keydown', (event) => {
         launchFireball(player2, player1);
         launchTankShell(player2, player1);
         launchCowboyBurst(player2);
+        launchLightWarriorBarrage(player2, player1);
         launchSorcererOrb(player2, player1);
         activateCopycatShield(player2);
         cycleSwitcherMode(player2);
@@ -7460,18 +7918,24 @@ window.addEventListener('keydown', (event) => {
         if (handleGamblerSpecialKey(player2, 'luck', keys.slash, 2)) break;
         if (handleFireMasterSpecialKey(player2, player1, 'beam', keys.slash, 2)) break;
         if (handleDivineSpecialKey(player2, player1, 'counter', keys.slash, 2)) break;
+        if (handleLightWarriorFrSpecialKey(player2, player1, 'speed', keys.enter, 2)) break;
         if (handleSorcererSpecialKey(player2, player1, 'gravity', keys.slash, 2)) break;
         launchFireBeam(player2, player1);
         launchSorcererGravityOrb(player2, player1);
         activateSwitcherAbility(player2);
         activateGamblerLuckIncrementer(player2);
+        activateLightWarriorSpeed(player2);
         activateKaioken(player2);
         activateChronoSlow(player2, player1);
       }
       break;
-    case 'r':
-    case 'R':
-      if (gameOver) resetFight();
+    case 'Enter':
+      if (keys.enter) break;
+      keys.enter = true;
+      if (!botEnabled) {
+        if (handleLightWarriorFrSpecialKey(player2, player1, 'flash', keys.period, 2)) break;
+        activateLightWarriorSolarFlash(player2, player1);
+      }
       break;
   }
 });
@@ -7491,12 +7955,23 @@ window.addEventListener('keyup', (event) => {
     case 'f':
     case 'F':
       keys.f = false;
+      finishLightWarriorRadiantPunchCharge(player1);
+      break;
+    case 'r':
+    case 'R':
+      keys.r = false;
+      finishLightWarriorRadiantPunchCharge(player1);
       break;
     case '/':
       keys.slash = false;
       break;
     case '.':
       keys.period = false;
+      finishLightWarriorRadiantPunchCharge(player2);
+      break;
+    case 'Enter':
+      keys.enter = false;
+      finishLightWarriorRadiantPunchCharge(player2);
       break;
     case 'ArrowLeft':
       keys.ArrowLeft = false;
@@ -7508,7 +7983,7 @@ window.addEventListener('keyup', (event) => {
 });
 
 function updateMovements() {
-  if (player1.gamblerStunTimer > 0 || player1.divineWorldCutCharging || player1.superFireKamehamehaCharging) {
+  if (player1.gamblerStunTimer > 0 || player1.divineWorldCutCharging || player1.lightWarriorRadiantPunchCharging || player1.superFireKamehamehaCharging) {
     player1.velocity.x = 0;
   } else if (keys.a) {
     player1.velocity.x = -getDebugMoveSpeed(player1);
@@ -7522,7 +7997,7 @@ function updateMovements() {
     return;
   }
 
-  if (player2.gamblerStunTimer > 0 || player2.divineWorldCutCharging || player2.superFireKamehamehaCharging) {
+  if (player2.gamblerStunTimer > 0 || player2.divineWorldCutCharging || player2.lightWarriorRadiantPunchCharging || player2.superFireKamehamehaCharging) {
     player2.velocity.x = 0;
   } else if (keys.ArrowLeft) {
     player2.velocity.x = -getDebugMoveSpeed(player2);
@@ -7563,6 +8038,125 @@ function launchFireBeam(attacker, target) {
   playSound('fireBeam');
   recordSpecialUsed(attacker);
   attacker.fireBeamCooldown = getDebugCooldown(getFireMasterSecretCooldown(attacker, fireBeamCooldown), attacker);
+}
+
+function launchLightWarriorBarrage(attacker, target) {
+  if (!canFighterAct(attacker)) return;
+  if (
+    attacker.characterType !== 'lightWarrior' ||
+    attacker.lightWarriorBurstCooldown > 0 ||
+    attacker.lightWarriorBurstShotsRemaining > 0 ||
+    gameOver
+  ) {
+    return;
+  }
+
+  attacker.lightWarriorBurstShotsRemaining = lightWarriorBurstShots;
+  attacker.lightWarriorBurstTimer = 0;
+  attacker.lightWarriorBurstCooldown = getDebugCooldown(lightWarriorBurstCooldown, attacker);
+  recordSpecialUsed(attacker);
+  playSound('fireball');
+}
+
+function shootLightWarriorShot(attacker, target) {
+  if (!target) return;
+
+  const attackerCenterX = attacker.position.x + attacker.width / 2;
+  const targetCenterX = target.position.x + target.width / 2;
+  const direction = targetCenterX >= attackerCenterX ? 1 : -1;
+  const startX = direction > 0 ? attacker.position.x + attacker.width : attacker.position.x - 28;
+  const shotIndex = lightWarriorBurstShots - attacker.lightWarriorBurstShotsRemaining;
+  const startY = attacker.position.y + 34 + (shotIndex % 3) * 15;
+
+  lightShots.push(new LightShot({ x: startX, y: startY, direction, target, attacker }));
+}
+
+function activateLightWarriorSpeed(attacker) {
+  if (!canFighterAct(attacker)) return;
+  if (attacker.characterType !== 'lightWarrior' || attacker.lightWarriorSpeedCooldown > 0 || gameOver) return;
+
+  attacker.lightWarriorSpeedTimer = getDebugDuration(lightWarriorSpeedDuration, attacker);
+  attacker.lightWarriorSpeedCooldown = attacker.lightWarriorSpeedTimer + getDebugCooldown(lightWarriorSpeedCooldown, attacker);
+  attacker.health = Math.min(attacker.maxHealth, attacker.health + getDebugDamage(lightWarriorHealAmount, attacker));
+  recordSpecialUsed(attacker);
+  playSound('switcher');
+}
+
+function activateLightWarriorSolarFlash(attacker, target) {
+  if (!canFighterAct(attacker)) return;
+  if (attacker.characterType !== 'lightWarrior' || attacker.lightWarriorSolarFlashCooldown > 0 || gameOver) return;
+
+  const attackerCenterX = attacker.position.x + attacker.width / 2;
+  const attackerCenterY = attacker.position.y + attacker.height / 2;
+  const targetCenterX = target.position.x + target.width / 2;
+  const targetCenterY = target.position.y + target.height / 2;
+  const distance = Math.hypot(targetCenterX - attackerCenterX, targetCenterY - attackerCenterY);
+  const direction = targetCenterX >= attackerCenterX ? 1 : -1;
+
+  attacker.lightWarriorSolarFlashCooldown = getDebugCooldown(lightWarriorSolarFlashCooldown, attacker);
+  attacker.lightWarriorSolarFlashTimer = getDebugDuration(lightWarriorSolarFlashVisualDuration, attacker);
+  recordSpecialUsed(attacker);
+  playSound('gravityOrb');
+
+  if (distance > lightWarriorSolarFlashRange) return;
+  if (handleCopycatShieldHit(target, attacker)) return;
+
+  const actualDamage = applyDamage(attacker, target, lightWarriorSolarFlashDamage, { isSpecial: true, damageType: 'lightFlash' });
+  if (actualDamage > 0) {
+    target.velocity.x = getDebugKnockback(direction * 15, target);
+    target.velocity.y = getDebugKnockback(-8, target);
+  }
+}
+
+function getLightWarriorRadiantPunchChargeProgress(attacker) {
+  if (!attacker) return 0;
+  return Math.max(0, Math.min(1, attacker.lightWarriorRadiantPunchChargeTimer / lightWarriorRadiantPunchMaxCharge));
+}
+
+function getLightWarriorRadiantPunchDamage(attacker) {
+  const progress = getLightWarriorRadiantPunchChargeProgress(attacker);
+  return Math.round(
+    lightWarriorRadiantPunchMinDamage +
+      (lightWarriorRadiantPunchMaxDamage - lightWarriorRadiantPunchMinDamage) * progress
+  );
+}
+
+function startLightWarriorRadiantPunchCharge(attacker) {
+  if (!canFighterAct(attacker)) return false;
+  if (
+    attacker.characterType !== 'lightWarrior' ||
+    attacker.lightWarriorRadiantPunchCooldown > 0 ||
+    attacker.lightWarriorSpeedCooldown > 0 ||
+    attacker.lightWarriorSolarFlashCooldown > 0 ||
+    gameOver
+  ) {
+    return false;
+  }
+
+  attacker.lightWarriorRadiantPunchCharging = true;
+  attacker.lightWarriorRadiantPunchChargeTimer = 0;
+  attacker.lightWarriorRadiantPunchReadyTimer = 0;
+  attacker.lightWarriorRadiantPunchDamage = 0;
+  attacker.lightWarriorRadiantPunchAttackActive = false;
+  attacker.velocity.x = 0;
+  attacker.isAttacking = false;
+  attacker.attackTimer = 0;
+  attacker.lightWarriorRadiantPunchCooldown = getDebugCooldown(lightWarriorRadiantPunchCooldown, attacker);
+  attacker.lightWarriorSpeedCooldown = Math.max(attacker.lightWarriorSpeedCooldown, attacker.lightWarriorRadiantPunchCooldown);
+  attacker.lightWarriorSolarFlashCooldown = Math.max(attacker.lightWarriorSolarFlashCooldown, attacker.lightWarriorRadiantPunchCooldown);
+  recordSpecialUsed(attacker);
+  playSound('gravityOrb');
+  return true;
+}
+
+function finishLightWarriorRadiantPunchCharge(attacker) {
+  if (!attacker || !attacker.lightWarriorRadiantPunchCharging) return false;
+
+  attacker.lightWarriorRadiantPunchCharging = false;
+  attacker.lightWarriorRadiantPunchDamage = getLightWarriorRadiantPunchDamage(attacker);
+  attacker.lightWarriorRadiantPunchReadyTimer = getDebugDuration(lightWarriorRadiantPunchReadyDuration, attacker);
+  playSound('switcher');
+  return true;
 }
 
 function launchInfernoSplit(attacker, target) {
@@ -8159,6 +8753,62 @@ function setQfPendingSpecial(playerNumber, pending) {
   }
 }
 
+function handleLightWarriorFrSpecialKey(attacker, target, specialType, comboPressed, playerNumber) {
+  if (attacker.characterType !== 'lightWarrior') return false;
+
+  if (comboPressed) {
+    if (getFrPendingSpecial(playerNumber)) {
+      clearFrPendingSpecial(playerNumber);
+    }
+    startLightWarriorRadiantPunchCharge(attacker);
+    return true;
+  }
+
+  queueFrPendingSpecial(playerNumber, attacker, () => {
+    if (specialType === 'speed') {
+      activateLightWarriorSpeed(attacker);
+    } else {
+      activateLightWarriorSolarFlash(attacker, target);
+    }
+  });
+  return true;
+}
+
+function queueFrPendingSpecial(playerNumber, attacker, action) {
+  clearFrPendingSpecial(playerNumber);
+
+  const pending = {
+    timerId: window.setTimeout(() => {
+      if (!gameOver && attacker.characterType === 'lightWarrior' && canFighterAct(attacker)) {
+        action();
+      }
+      setFrPendingSpecial(playerNumber, null);
+    }, qfComboWindow),
+  };
+
+  setFrPendingSpecial(playerNumber, pending);
+}
+
+function clearFrPendingSpecial(playerNumber) {
+  const pending = getFrPendingSpecial(playerNumber);
+  if (!pending) return;
+
+  window.clearTimeout(pending.timerId);
+  setFrPendingSpecial(playerNumber, null);
+}
+
+function getFrPendingSpecial(playerNumber) {
+  return playerNumber === 1 ? player1FrPendingSpecial : player2FrPendingSpecial;
+}
+
+function setFrPendingSpecial(playerNumber, pending) {
+  if (playerNumber === 1) {
+    player1FrPendingSpecial = pending;
+  } else {
+    player2FrPendingSpecial = pending;
+  }
+}
+
 function handleSorcererSpecialKey(attacker, target, specialType, comboPressed, playerNumber) {
   if (!canFighterAct(attacker)) {
     return false;
@@ -8364,6 +9014,20 @@ function copyCowboyAbility(copycat, source) {
   copycat.target = source;
   copycat.cowboyBurstShotsRemaining = getCowboySecretBurstShots(source) * getReflecterCopyDamageMultiplier(copycat);
   copycat.cowboyBurstTimer = 0;
+}
+
+function copyLightWarriorAbility(copycat, source) {
+  const target = source;
+  const attackerCenterX = copycat.position.x + copycat.width / 2;
+  const targetCenterX = target.position.x + target.width / 2;
+  const direction = targetCenterX >= attackerCenterX ? 1 : -1;
+  const startX = direction > 0 ? copycat.position.x + copycat.width : copycat.position.x - 28;
+  const startY = copycat.position.y + 44;
+  const copiedShots = Math.max(1, Math.round(lightWarriorBurstShots * getReflecterCopyDamageMultiplier(copycat)));
+
+  for (let i = 0; i < copiedShots; i += 1) {
+    lightShots.push(new LightShot({ x: startX - direction * i * 12, y: startY + (i % 3) * 12, direction, target, attacker: copycat }));
+  }
 }
 
 function copySwitcherAbility(copycat, source) {
@@ -8683,6 +9347,7 @@ function getBotMoveSpeed() {
 
 function getBotPreferredRange() {
   if (player2.characterType === 'cowboy') return 390;
+  if (player2.characterType === 'lightWarrior') return 360;
   if (player2.characterType === 'chrono') return 340;
   if (player2.characterType === 'sorcerer') return 360;
   if (player2.characterType === 'fireMaster') return 320;
@@ -8705,6 +9370,7 @@ function getIncomingBotProjectileThreat(profile) {
   const projectiles = [
     ...fireballs,
     ...fireBeams,
+    ...lightShots,
     ...tankShells,
     ...cowboyBullets,
     ...sorcererOrbs,
@@ -8868,6 +9534,36 @@ function updateBotSpecials(profile, absDistance, threat) {
   }
 
   if (
+    player2.characterType === 'lightWarrior' &&
+    player2.lightWarriorSolarFlashCooldown === 0 &&
+    absDistance < lightWarriorSolarFlashRange &&
+    shouldBotUseSpecial(profile, closePressure ? 0.85 : 0.35)
+  ) {
+    activateLightWarriorSolarFlash(player2, player1);
+    return true;
+  }
+
+  if (
+    player2.characterType === 'lightWarrior' &&
+    player2.lightWarriorSpeedCooldown === 0 &&
+    (lowHealth || closePressure || shouldBotUseSpecial(profile, 0.35))
+  ) {
+    activateLightWarriorSpeed(player2);
+    return true;
+  }
+
+  if (
+    player2.characterType === 'lightWarrior' &&
+    player2.lightWarriorBurstCooldown === 0 &&
+    player2.lightWarriorBurstShotsRemaining === 0 &&
+    absDistance < 680 &&
+    shouldBotUseSpecial(profile)
+  ) {
+    launchLightWarriorBarrage(player2, player1);
+    return true;
+  }
+
+  if (
     player2.characterType === 'tank' &&
     player2.tankShellCooldown === 0 &&
     absDistance < 620 &&
@@ -9012,6 +9708,7 @@ function updateBotMovement(profile, distanceX, absDistance) {
   const canPlaySpacing = Math.random() < profile.spacingChance;
   const rangedBot =
     player2.characterType === 'cowboy' ||
+    player2.characterType === 'lightWarrior' ||
     player2.characterType === 'fireMaster' ||
     player2.characterType === 'sorcerer' ||
     player2.characterType === 'chrono';
@@ -9106,6 +9803,7 @@ function getSelectableCharacterTypes() {
   return characterTypes.filter(
     (characterType) =>
       (!hiddenCharacterTypes.includes(characterType) || (characterType === 'divineGeneral' && isDivineGeneralUnlocked())) &&
+      (characterType !== 'lightWarrior' || isLightWarriorUnlocked()) &&
       (characterType !== 'ghost' || isGhostUnlocked()) &&
       (characterType !== 'divineGeneral' || isDivineGeneralUnlocked())
   );
@@ -9122,6 +9820,7 @@ function selectCharacter(characterType, secretVariant = null) {
 
   const selectedCharacterType = blindMode ? blindCharacterMix[characterType] || characterType : characterType;
   const selectedSecretVariant = blindMode ? null : secretVariant;
+  if (selectedCharacterType === 'lightWarrior' && !isLightWarriorUnlocked()) return;
   if (selectedCharacterType === 'ghost' && !isGhostUnlocked()) return;
   if (selectedCharacterType === 'divineGeneral' && !isDivineGeneralUnlocked()) return;
   if (characterSelectionPlayer === 1) {
@@ -9178,6 +9877,7 @@ function openCharacterSelect() {
   titleScreen.classList.add('hidden');
   oldDaysScreen.classList.add('hidden');
   mapScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
@@ -9196,6 +9896,7 @@ function closeCharacterSelect() {
   characterScreen.classList.remove('selecting-player2');
   characterScreen.classList.add('hidden');
   mapScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
@@ -9213,6 +9914,7 @@ function openSettings() {
   titleScreen.classList.add('hidden');
   oldDaysScreen.classList.add('hidden');
   mapScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
@@ -9227,6 +9929,7 @@ function openSettings() {
 
 function closeSettings() {
   settingsScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
   infoScreen.classList.add('hidden');
@@ -9238,12 +9941,37 @@ function closeSettings() {
   titleScreen.classList.remove('hidden');
 }
 
+function openGameModes() {
+  titleScreen.classList.add('hidden');
+  oldDaysScreen.classList.add('hidden');
+  characterScreen.classList.add('hidden');
+  mapScreen.classList.add('hidden');
+  settingsScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
+  guideScreen.classList.add('hidden');
+  achievementsScreen.classList.add('hidden');
+  statsScreen.classList.add('hidden');
+  infoScreen.classList.add('hidden');
+  opinionScreen.classList.add('hidden');
+  debugScreen.classList.add('hidden');
+  secretGuideScreen.classList.add('hidden');
+  secretCharactersScreen.classList.add('hidden');
+  eventGuideScreen.classList.add('hidden');
+  gameModesScreen.classList.remove('hidden');
+}
+
+function closeGameModes() {
+  gameModesScreen.classList.add('hidden');
+  titleScreen.classList.remove('hidden');
+}
+
 function openGuide() {
   titleScreen.classList.add('hidden');
   oldDaysScreen.classList.add('hidden');
   characterScreen.classList.add('hidden');
   mapScreen.classList.add('hidden');
   settingsScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
@@ -9256,6 +9984,7 @@ function openGuide() {
 
 function closeGuide() {
   guideScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
   infoScreen.classList.add('hidden');
@@ -9273,6 +10002,7 @@ function openAchievements() {
   mapScreen.classList.add('hidden');
   settingsScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
   infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
@@ -9297,6 +10027,7 @@ function openStatistics() {
   mapScreen.classList.add('hidden');
   settingsScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
   infoScreen.classList.add('hidden');
@@ -9322,6 +10053,7 @@ function openInfo() {
   settingsScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
@@ -9353,6 +10085,7 @@ function openOpinion() {
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   infoScreen.classList.add('hidden');
   debugScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
@@ -9385,6 +10118,7 @@ function openDebug() {
   statsScreen.classList.add('hidden');
   infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   secretGuideScreen.classList.add('hidden');
   secretCharactersScreen.classList.add('hidden');
   eventGuideScreen.classList.add('hidden');
@@ -9412,6 +10146,7 @@ function openOldDays() {
   settingsScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
   infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
@@ -9438,6 +10173,7 @@ function openSecretGuide() {
   settingsScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
+  gameModesScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
   infoScreen.classList.add('hidden');
   opinionScreen.classList.add('hidden');
@@ -9566,6 +10302,7 @@ function applyBotDifficulty() {
     player2.setMaxHealth(
       player2.characterType === 'tank' ||
       player2.characterType === 'cowboy' ||
+      player2.characterType === 'lightWarrior' ||
       player2.characterType === 'reflecter' ||
       player2.characterType === 'switcher' ||
       player2.characterType === 'sorcerer' ||
@@ -9584,6 +10321,7 @@ function applyBotDifficulty() {
 
 function getCharacterMaxHealth(characterType, fighter = null) {
   if (characterType === 'fireMaster') return getFireMasterHealth(fighter);
+  if (characterType === 'lightWarrior') return lightWarriorHealth;
   if (characterType === 'tank') return isTankIronWall(fighter) ? 260 : 200;
   if (characterType === 'cowboy') return cowboyHealth;
   if (characterType === 'reflecter') return getReflecterHealth(fighter);
@@ -9677,6 +10415,7 @@ playButton.addEventListener('click', openCharacterSelect);
 oldDaysPlayButton.addEventListener('click', startOldDaysGame);
 oldDaysBackButton.addEventListener('click', closeOldDays);
 normalCharacterButton.addEventListener('click', () => selectCharacter('normal'));
+lightWarriorCharacterButton.addEventListener('click', () => selectCharacter('lightWarrior'));
 fireMasterCharacterButton.addEventListener('click', () => selectCharacter('fireMaster'));
 fireMasterCharacterButton.addEventListener('contextmenu', (event) => {
   event.preventDefault();
@@ -9695,12 +10434,14 @@ randomCharacterButton.addEventListener('click', selectRandomCharacter);
 characterBackButton.addEventListener('click', closeCharacterSelect);
 mapBackButton.addEventListener('click', closeMapSelect);
 settingsButton.addEventListener('click', openSettings);
+gameModesButton.addEventListener('click', openGameModes);
 guideButton.addEventListener('click', openGuide);
 achievementsButton.addEventListener('click', openAchievements);
 statsButton.addEventListener('click', openStatistics);
 infoButton.addEventListener('click', openInfo);
 opinionButton.addEventListener('click', openOpinion);
 backButton.addEventListener('click', closeSettings);
+gameModesBackButton.addEventListener('click', closeGameModes);
 guideBackButton.addEventListener('click', closeGuide);
 achievementsBackButton.addEventListener('click', closeAchievements);
 statsBackButton.addEventListener('click', closeStatistics);

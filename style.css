@@ -1175,6 +1175,10 @@ body.menu-open .instructions {
   --accent: #42a5f5;
 }
 
+.light-warrior-option {
+  --accent: #fdd835;
+}
+
 .fire-master-option {
   --accent: #fb8c00;
 }
@@ -1615,6 +1619,53 @@ body.menu-open .instructions {
 .selecting-player2 .preview-body,
 .selecting-player2 .preview-arm {
   background: var(--player2);
+}
+
+.light-warrior-preview .preview-body,
+.light-warrior-preview .preview-arm,
+.selecting-player2 .light-warrior-preview .preview-body,
+.selecting-player2 .light-warrior-preview .preview-arm {
+  background: #fdd835;
+}
+
+.light-warrior-preview .preview-body {
+  box-shadow: inset 12px 0 0 #fff8e1, inset -12px 0 0 #fff8e1, inset 0 -18px 0 #c9a227;
+}
+
+.preview-light-cape {
+  background: #ffeb3b;
+  border: 3px solid #111;
+  bottom: 0;
+  display: block;
+  height: 68px;
+  left: 5px;
+  position: absolute;
+  transform: skewX(-10deg);
+  width: 28px;
+}
+
+.preview-light-tie {
+  background: #111;
+  bottom: 34px;
+  display: block;
+  height: 29px;
+  left: 33px;
+  position: absolute;
+  width: 5px;
+  z-index: 2;
+}
+
+.preview-light-glasses {
+  background:
+    linear-gradient(90deg, #b8860b 0 13px, #111 13px 17px, #b8860b 17px 30px);
+  border: 2px solid #111;
+  display: block;
+  height: 8px;
+  left: 20px;
+  position: absolute;
+  top: 18px;
+  width: 30px;
+  z-index: 2;
 }
 
 .normal-kaioken-mode .normal-option .preview-body {
@@ -2683,6 +2734,29 @@ body.menu-open .instructions {
 .fighter-portrait[data-character='fireMaster'] {
   --portrait-main: #fb8c00;
   --portrait-accent: #ffeb3b;
+}
+
+.fighter-portrait[data-character='lightWarrior'] {
+  --portrait-main: #fdd835;
+  --portrait-accent: #fff8e1;
+}
+
+.fighter-portrait[data-character='lightWarrior']::before {
+  background:
+    linear-gradient(90deg, #b8860b 0 8px, #111 8px 11px, #b8860b 11px 19px);
+  height: 7px;
+  left: 11px;
+  top: 9px;
+  width: 20px;
+}
+
+.fighter-portrait[data-character='lightWarrior']::after {
+  background:
+    linear-gradient(90deg, #ffeb3b 0 8px, #fff8e1 8px 18px, #fdd835 18px 28px);
+  bottom: 5px;
+  height: 20px;
+  left: 7px;
+  width: 28px;
 }
 
 .fighter-portrait[data-character='fireMaster']::before {
