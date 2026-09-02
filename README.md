@@ -72,18 +72,9 @@ Los codigos se escriben directamente desde el menu:
 - `cheater`: abre la Pantalla Debug
 - `Old`: abre la version Alpha edition
 - `blind`: activa modo guess who
-- `overheat`: potencia a Fire Master
-- `ironwall`: potencia a Living Tank
-- `deadeye`: potencia a Cowboy
-- `mirrorluck`: potencia a Reflecter
-- `kaioken`: desbloquea Kaioken para Normal
-- `upgrade`: convierte a Reflecter en Reflecter 2.0
-- `prism`: potencia a Switcher
-- `fulladapt`: requiere Divine General desbloqueado; le da 250 vida y 6 a 10 adaptaciones por tipo principal
-- `lightsout`: desbloquea Dark Room por una partida
-- `secretguide1`: abre la guia de codigos
-- `secretguide2`: abre la guia de eventos
 - `clear`: limpia codigos activos
+
+Hay mas codigos que puedes descubrirlos jugando o preguntandole a alguien
 
 ## Pantalla Debug
 

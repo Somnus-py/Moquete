@@ -12,7 +12,9 @@ let jackpotTrack = null;
 let jackpotTrackPlayToken = 0;
 let jackpotTrackFallbackTimer = null;
 let jackpotTrackStopTimer = null;
+let omegaBattleTrack = null;
 const jackpotTrackSource = 'assets/audio/jackpot.mp3';
+const omegaBattleTrackSource = 'assetsaudio/34.wav';
 const jackpotTrackStartTime = 67;
 const jackpotTrackEndTime = 106;
 const defaultAudioSettings = {
@@ -25,6 +27,7 @@ const gravity = 0.6;
 const ground = 520;
 const attackDamage = 5;
 const heavyAttackDamage = 15;
+const basicAttackCooldown = 8;
 const playerMoveSpeed = 5;
 const tankDamage = 25;
 const tankAttackCooldown = 55;
@@ -48,9 +51,14 @@ const superFireKamehamehaDuration = 300;
 const superFireKamehamehaSpeed = playerMoveSpeed * 10;
 const superFireKamehamehaTickDamage = 5;
 const superFireKamehamehaTickInterval = 3;
+const lightWarriorBeamChargeDuration = 240;
+const lightWarriorBeamDuration = 300;
+const lightWarriorBeamTickDamage = 8;
+const lightWarriorBeamTickInterval = 3;
 const superFireMasterUnlockTimeMs = 45000;
 const superFireMasterUnlockHealth = 80;
 const cowboyHealth = 80;
+const deadeyeCowboyHealth = 110;
 const cowboyBulletDamage = 10;
 const cowboyBulletSpeed = fireBeamSpeed;
 const cowboyBurstShots = 12;
@@ -63,8 +71,8 @@ const reflecterShieldCooldown = 600;
 const reflecterHealAmount = 35;
 const mirrorLuckReflecterHealth = 165;
 const upgradedReflecterHealth = 300;
-const upgradedReflecterDamage = 20;
-const upgradedReflecterShieldDuration = 420;
+const upgradedReflecterDamage = 15;
+const upgradedReflecterShieldDuration = 300;
 const upgradedReflecterShieldCooldown = 420;
 const mirrorLuckReflecterShieldDuration = 360;
 const mirrorLuckReflecterShieldCooldown = 520;
@@ -84,9 +92,10 @@ const kaiokenSecretComboHits = 7;
 const kaiokenSecretComboDamage = 7;
 const switcherHealth = 120;
 const switcherAbilityCooldown = 360;
+const switcherModeCooldown = 10;
 const gamblerHealth = 150;
 const gamblerRollCooldown = 120;
-const gamblerLuckCooldown = 300;
+const gamblerLuckCooldown = 180;
 const gamblerLuckStep = 0.05;
 const gamblerLuckCap = 1;
 const gamblerLuckWaveDuration = 24;
@@ -130,30 +139,43 @@ const qfComboWindow = 110;
 const ghostHealth = 50;
 const ghostDamage = 1;
 const ghostPhaseDuration = 300;
-const ghostPhaseCooldown = 60;
+const ghostPhaseCooldown = 150;
 const ghostPhaseContactDamage = 2;
-const ghostPhaseContactInterval = 6;
-const ghostPhaseSpeedMultiplier = 1.65;
+const ghostPhaseContactInterval = 2;
+const ghostPhaseSpeedMultiplier = 1.50;
 const lightWarriorHealth = 160;
 const lightWarriorDamage = 10;
 const lightWarriorShotDamage = 25;
+const lightWarriorOmegaHealth = 2000;
+const lightWarriorOmegaDamage = 15;
+const lightWarriorOmegaDamageMultiplier = 1.25;
+const lightWarriorOmegaTransformationDuration = 600;
+const lightWarriorOmegaAnnouncementTimer = 190;
+const lightWarriorOmegaActivationDelay = 120;
+const lightWarriorOmegaStateDuration = 3600;
+const lightWarriorOmegaTransformationHealth = 2000;
+const lightWarriorOmegaFlashDuration = 34;
+const lightWarriorOmegaFlightUsesMax = 10;
+const lightWarriorOmegaFlightChargeDuration = 90;
+const lightWarriorOmegaFlightDuration = 110;
+const lightWarriorOmegaFlightDamage = 500;
 const lightWarriorShotSpeed = playerMoveSpeed * 6.4;
 const lightWarriorBurstShots = 5;
 const lightWarriorBurstInterval = 7;
 const lightWarriorBurstCooldown = 720;
 const lightWarriorSpeedDuration = 360;
-const lightWarriorSpeedCooldown = 900;
-const lightWarriorSpeedMultiplier = 2.15;
+const lightWarriorSpeedCooldown = 600;
+const lightWarriorSpeedMultiplier = 2.25;
 const lightWarriorHealAmount = 35;
 const lightWarriorSolarFlashDamage = 40;
 const lightWarriorSolarFlashRange = 165;
-const lightWarriorSolarFlashCooldown = 780;
+const lightWarriorSolarFlashCooldown = 500;
 const lightWarriorSolarFlashVisualDuration = 24;
 const lightWarriorRadiantPunchMinDamage = 45;
 const lightWarriorRadiantPunchMaxDamage = 170;
-const lightWarriorRadiantPunchMaxCharge = 180;
+const lightWarriorRadiantPunchMaxCharge = 215;
 const lightWarriorRadiantPunchReadyDuration = 360;
-const lightWarriorRadiantPunchCooldown = 1080;
+const lightWarriorRadiantPunchCooldown = 800;
 const divineGeneralHealth = 200;
 const divineGeneralDamage = 7;
 const divineGeneralMoveSpeed = playerMoveSpeed * 0.68;
@@ -223,9 +245,25 @@ const defaultDebugSettings = {
   projectileMultiplier: 1,
   durationMultiplier: 1,
   knockbackMultiplier: 1,
+  restoreAttackSpam: false,
 };
 const debugSettings = { ...defaultDebugSettings };
 const achievementStorageKey = 'moqueteAchievements';
+const normalArcadeProgressStorageKey = 'moqueteNormalArcadeProgress';
+const normalArcadeLevelButtons = document.querySelectorAll('[data-arcade-level]');
+const normalArcadeEnemyName = 'Bruto Gris';
+const normalArcadeEnemyHealth = 65;
+const normalArcadeEnemyDamageMultiplier = 0.65;
+const normalArcadeBossName = 'Jefe de la Banda';
+const normalArcadeBossHealth = 140;
+const normalArcadeBossDamageMultiplier = 1.3;
+const normalArcadeBossSpeed = 3.1;
+const normalArcadeBossShockwaveDamage = 20;
+const normalArcadeBossShockwaveCooldown = 420;
+let selectedNormalArcadeLevel = 1;
+let normalArcadeActive = false;
+let normalArcadeEnemiesRemaining = 0;
+let normalArcadeEnemyIndex = 0;
 const statisticsStorageKey = 'moqueteStatistics';
 const supportedLanguages = ['es', 'en', 'pt'];
 const achievementIds = [
@@ -251,6 +289,7 @@ const achievementIds = [
   'ghostUnlocked',
   'divineGeneralUnlocked',
   'superFireMasterUnlocked',
+  'normalArcadeCompleted',
 ];
 const divineGeneralTrialAchievements = [
   'perfectDuel',
@@ -303,6 +342,10 @@ const achievementDetailsByLanguage = {
       title: 'Super Fire Master',
       description: 'Gana Mana Meltdown con Fire Master en menos de 45 segundos y con 80+ vida.',
     },
+    normalArcadeCompleted: {
+      title: 'El desafio de Normal',
+      description: 'Completa el capitulo de Normal en el modo Arcade.',
+    },
   },
   en: {
     firstWin: { title: 'First Moquete', description: 'Win your first fight.' },
@@ -341,6 +384,10 @@ const achievementDetailsByLanguage = {
     superFireMasterUnlocked: {
       title: 'Super Fire Master',
       description: 'Win Mana Meltdown with Fire Master in under 45 seconds and with 80+ health.',
+    },
+    normalArcadeCompleted: {
+      title: 'Normal\'s Challenge',
+      description: 'Complete Normal\'s chapter in Arcade mode.',
     },
   },
   pt: {
@@ -384,6 +431,10 @@ const achievementDetailsByLanguage = {
       title: 'Super Fire Master',
       description: 'Venca Mana Meltdown com Fire Master em menos de 45 segundos e com 80+ de vida.',
     },
+    normalArcadeCompleted: {
+      title: 'Desafio do Normal',
+      description: 'Complete o capitulo do Normal no modo Arcade.',
+    },
   },
 };
 const uiTranslations = {
@@ -395,7 +446,7 @@ const uiTranslations = {
     guide: 'Guia',
     achievements: 'Logros',
     stats: 'Estadisticas',
-    information: 'Informacion',
+    information: 'Changelog',
     opinion: 'Opinion de Codex',
     settings: 'Ajustes',
     settingsTitle: 'Ajustes',
@@ -441,7 +492,7 @@ const uiTranslations = {
     guide: 'Guide',
     achievements: 'Achievements',
     stats: 'Stats',
-    information: 'Information',
+    information: 'Changelog',
     opinion: 'Codex Opinion',
     settings: 'Settings',
     settingsTitle: 'Settings',
@@ -487,7 +538,7 @@ const uiTranslations = {
     guide: 'Guia',
     achievements: 'Conquistas',
     stats: 'Estatisticas',
-    information: 'Informacao',
+    information: 'Changelog',
     opinion: 'Opiniao do Codex',
     settings: 'Ajustes',
     settingsTitle: 'Ajustes',
@@ -540,6 +591,7 @@ const characterSecretModes = {
   reflecterUpgrade: false,
   switcherPrism: false,
   divineFullAdapt: false,
+  lightWarriorOmega: false,
 };
 const desertCowboyDuelMinStillFrames = 300;
 const desertCowboyDuelMaxStillFrames = 1200;
@@ -621,6 +673,8 @@ let lightShots = [];
 let superFireKamehamehaCharges = [];
 let superFireKamehamehas = [];
 let tankShells = [];
+let arcadeBossShockwaves = [];
+let lightWarriorOmegaTransformation = null;
 let cowboyBullets = [];
 let sorcererOrbs = [];
 let sorcererGravityOrbs = [];
@@ -683,6 +737,12 @@ const infoButton = document.getElementById('infoButton');
 const opinionButton = document.getElementById('opinionButton');
 const backButton = document.getElementById('backButton');
 const gameModesBackButton = document.getElementById('gameModesBackButton');
+const arcadeModeButton = document.getElementById('arcadeModeButton');
+const arcadeChaptersScreen = document.getElementById('arcadeChaptersScreen');
+const normalArcadeChapterButton = document.getElementById('normalArcadeChapterButton');
+const arcadeChaptersBackButton = document.getElementById('arcadeChaptersBackButton');
+const arcadeLevelsScreen = document.getElementById('arcadeLevelsScreen');
+const arcadeLevelsBackButton = document.getElementById('arcadeLevelsBackButton');
 const guideBackButton = document.getElementById('guideBackButton');
 const achievementsBackButton = document.getElementById('achievementsBackButton');
 const statsBackButton = document.getElementById('statsBackButton');
@@ -731,6 +791,7 @@ const player1ColorInputs = document.querySelectorAll('input[name="player1Color"]
 const player2ColorInputs = document.querySelectorAll('input[name="player2Color"]');
 const botDifficultyInputs = document.querySelectorAll('input[name="botDifficulty"]');
 const debugAffectAllInput = document.getElementById('debugAffectAll');
+const debugRestoreAttackSpamInput = document.getElementById('debugRestoreAttackSpam');
 const debugAffectedCharacterInputs = document.querySelectorAll('[data-debug-character]');
 const characterButtons = [
   { button: normalCharacterButton, originalName: 'Normal', characterType: 'normal' },
@@ -1349,7 +1410,7 @@ function renderCharacterStatisticsRows() {
 }
 
 function recordPersistentFightStatistics(winnerPlayer, fightTime) {
-  if (currentFightStatisticsRecorded || fightStartedAt <= 0) return;
+  if (normalArcadeActive || currentFightStatisticsRecorded || fightStartedAt <= 0) return;
 
   const characterStats = ensureCharacterStatistic(player1.characterType);
   persistentStatistics.totalPlayTimeMs += Math.max(0, fightTime);
@@ -1374,7 +1435,7 @@ function recordPersistentFightStatistics(winnerPlayer, fightTime) {
 }
 
 function recordPersistentPlayTimeOnly(fightTime) {
-  if (currentFightStatisticsRecorded || fightStartedAt <= 0) return;
+  if (normalArcadeActive || currentFightStatisticsRecorded || fightStartedAt <= 0) return;
 
   persistentStatistics.totalPlayTimeMs += Math.max(0, fightTime);
   currentFightStatisticsRecorded = true;
@@ -1684,6 +1745,25 @@ function stopJackpotTrack() {
   }
 }
 
+function playOmegaBattleTrack() {
+  if (typeof Audio === 'undefined') return;
+  if (!omegaBattleTrack) {
+    omegaBattleTrack = new Audio(omegaBattleTrackSource);
+    omegaBattleTrack.preload = 'auto';
+    omegaBattleTrack.loop = true;
+  }
+  omegaBattleTrack.volume = audioSettings.master * audioSettings.music;
+  omegaBattleTrack.currentTime = 0;
+  const playPromise = omegaBattleTrack.play();
+  if (playPromise && playPromise.catch) playPromise.catch(() => {});
+}
+
+function stopOmegaBattleTrack() {
+  if (!omegaBattleTrack) return;
+  omegaBattleTrack.pause();
+  omegaBattleTrack.currentTime = 0;
+}
+
 function playSound(soundName, options = {}) {
   if (soundName === 'menuMove') {
     playTone({ frequency: 760, duration: 0.035, type: 'triangle', volume: 0.055, slideTo: 980 });
@@ -1849,8 +1929,19 @@ class Fighter {
     this.specialCooldown = 0;
     this.fireBeamCooldown = 0;
     this.superFireKamehamehaCharging = false;
+    this.lightWarriorBeamCharging = false;
+    this.lightWarriorOmegaTransformed = false;
+    this.lightWarriorOmegaStateTimer = 0;
+    this.lightWarriorOmegaFlightUsesRemaining = lightWarriorOmegaFlightUsesMax;
+    this.lightWarriorOmegaFlightChargeAvailable = true;
+    this.lightWarriorOmegaFlightCharging = false;
+    this.lightWarriorOmegaFlightChargeTimer = 0;
+    this.lightWarriorOmegaFlightTraveling = false;
+    this.lightWarriorOmegaFlightTimer = 0;
+    this.lightWarriorOmegaFlightDirection = 1;
     this.tankAttackCooldown = 0;
     this.tankShellCooldown = 0;
+    this.arcadeBossShockwaveCooldown = 0;
     this.cowboyBurstCooldown = 0;
     this.kaiokenCooldown = 0;
     this.kaiokenComboCooldown = 0;
@@ -1880,6 +1971,14 @@ class Fighter {
     this.lightWarriorSolarFlashCooldown = 0;
     this.lightWarriorSolarFlashTimer = 0;
     this.lightWarriorRadiantPunchCooldown = 0;
+    this.lightWarriorOmegaFlightUsesRemaining = lightWarriorOmegaFlightUsesMax;
+    this.lightWarriorOmegaFlightChargeAvailable = true;
+    this.lightWarriorOmegaFlightCharging = false;
+    this.lightWarriorOmegaFlightChargeTimer = 0;
+    this.lightWarriorOmegaFlightTraveling = false;
+    this.lightWarriorOmegaFlightTimer = 0;
+    this.lightWarriorOmegaFlightDirection = 1;
+    this.lightWarriorBeamCharging = false;
     this.lightWarriorRadiantPunchChargeTimer = 0;
     this.lightWarriorRadiantPunchReadyTimer = 0;
     this.lightWarriorRadiantPunchDamage = 0;
@@ -1910,6 +2009,7 @@ class Fighter {
     this.terrainEffectCooldown = 0;
     this.switcherModeIndex = 0;
     this.switcherAbilityCooldown = 0;
+    this.switcherModeCooldown = 0;
     this.switcherArmorTimer = 0;
     this.switcherRedStrikeTimer = 0;
     this.switcherRedStrikeArea = null;
@@ -1920,7 +2020,9 @@ class Fighter {
     this.maxHealth = 100;
     this.health = 100;
     this.isAttacking = false;
+    this.basicAttackCooldown = 0;
     this.currentAttackDamage = attackDamage;
+    this.basicAttackCooldown = 0;
     this.strongAttackCooldown = 0;
     this.attacksToTheRight = attacksToTheRight;
     this.attackDuration = 12;
@@ -2058,6 +2160,19 @@ class Fighter {
     const y = this.position.y;
     const kaiokenActive = isNormalKaioken(this) && this.kaiokenTimer > 0;
 
+    if (this.arcadeBossVariant) {
+      ctx.fillStyle = '#f48fb1';
+      ctx.fillRect(x + this.width * 0.2, y + this.height * 0.16, this.width * 0.14, this.height * 0.06);
+      ctx.fillRect(x + this.width * 0.66, y + this.height * 0.16, this.width * 0.14, this.height * 0.06);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(x + this.width * 0.18, y + this.height * 0.32, this.width * 0.64, this.height * 0.07);
+      ctx.fillRect(x + this.width * 0.46, y + this.height * 0.2, this.width * 0.08, this.height * 0.2);
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x, y, this.width, this.height);
+      return;
+    }
+
     ctx.fillStyle = kaiokenActive ? '#1a1a1a' : '#111';
     ctx.fillRect(x + 8, y + 22, this.width - 16, 10);
     ctx.fillStyle = kaiokenActive ? '#0d47a1' : '#fdd835';
@@ -2102,6 +2217,55 @@ class Fighter {
     const y = this.position.y;
     const centerX = x + this.width / 2;
     const boosted = this.lightWarriorSpeedTimer > 0;
+
+    if (this.lightWarriorOmegaTransformed) {
+      const omegaPulse = 1 + Math.sin(this.lightWarriorOmegaStateTimer * 0.16) * 0.05;
+
+      ctx.strokeStyle = 'rgba(255, 235, 59, 0.7)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(centerX, y + this.height / 2, 43 * omegaPulse, 76 * omegaPulse, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(centerX, y + this.height / 2, 50 * omegaPulse, 84 * omegaPulse, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x + 7, y + 34, this.width - 14, 62);
+      ctx.fillStyle = '#fffde7';
+      ctx.fillRect(x + 13, y + 96, 14, 24);
+      ctx.fillRect(x + this.width - 27, y + 96, 14, 24);
+      ctx.fillStyle = '#fdd835';
+      ctx.fillRect(x + 4, y + 39, 9, 55);
+      ctx.fillRect(x + this.width - 13, y + 39, 9, 55);
+      ctx.fillRect(x + 8, y + 92, this.width - 16, 7);
+      ctx.strokeStyle = '#fdd835';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(x + 7, y + 34, this.width - 14, 62);
+
+      ctx.fillStyle = '#e8e8e8';
+      ctx.fillRect(x + 8, y + 17, this.width - 16, 18);
+      ctx.fillStyle = '#fdd835';
+      ctx.fillRect(x + 19, y + 13, 11, 25);
+      ctx.fillRect(x + this.width - 30, y + 13, 11, 25);
+      ctx.strokeStyle = '#fff59d';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 8, y + 17, this.width - 16, 18);
+      ctx.fillStyle = '#fdd835';
+      ctx.fillRect(centerX - 4, y - 8, 8, 22);
+      ctx.fillRect(centerX - 22, y - 2, 13, 9);
+      ctx.fillRect(centerX + 9, y - 2, 13, 9);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      for (let i = 0; i < 5; i += 1) {
+        const sparkX = x - 10 + ((i * 23 + this.lightWarriorOmegaStateTimer * 2) % (this.width + 20));
+        const sparkY = y + 8 + ((i * 31 + this.lightWarriorOmegaStateTimer) % 112);
+        ctx.fillRect(sparkX, sparkY, 3, 8);
+      }
+      return;
+    }
 
     ctx.fillStyle = '#ffeb3b';
     ctx.beginPath();
@@ -2187,6 +2351,38 @@ class Fighter {
         ctx.beginPath();
         ctx.moveTo(fistX + Math.cos(angle) * (radius + 4), fistY + Math.sin(angle) * (radius + 4));
         ctx.lineTo(fistX + Math.cos(angle) * (radius + 18), fistY + Math.sin(angle) * (radius + 18));
+        ctx.stroke();
+      }
+    }
+
+    if (this.lightWarriorOmegaFlightCharging || this.lightWarriorOmegaFlightTraveling) {
+      const chargeProgress = this.lightWarriorOmegaFlightCharging
+        ? Math.min(1, this.lightWarriorOmegaFlightChargeTimer / lightWarriorOmegaFlightChargeDuration)
+        : 1;
+      const isChargingFlight = this.lightWarriorOmegaFlightCharging;
+      const glowSize = isChargingFlight ? 10 + chargeProgress * 8 : 42;
+      const flightGlowX = isChargingFlight
+        ? centerX + this.lightWarriorOmegaFlightDirection * 28
+        : centerX + this.lightWarriorOmegaFlightDirection * 22;
+      const flightGlowY = isChargingFlight ? y + 58 : y + this.height / 2 - 16;
+
+      ctx.fillStyle = `rgba(255, 255, 255, ${isChargingFlight ? 0.42 + chargeProgress * 0.22 : 0.7})`;
+      ctx.beginPath();
+      ctx.ellipse(flightGlowX, flightGlowY, glowSize, glowSize * 0.66, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = isChargingFlight ? 'rgba(255, 235, 59, 0.9)' : 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = isChargingFlight ? 2 : 3;
+      ctx.beginPath();
+      ctx.moveTo(centerX + (this.lightWarriorOmegaFlightDirection * (isChargingFlight ? 12 : 18)), y + 30);
+      ctx.lineTo(flightGlowX, flightGlowY);
+      ctx.stroke();
+
+      if (isChargingFlight) {
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.55 + chargeProgress * 0.35})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(flightGlowX, flightGlowY, glowSize + 5, 0, Math.PI * 2);
         ctx.stroke();
       }
     }
@@ -2377,6 +2573,10 @@ class Fighter {
     ctx.fillRect(gunX + (facingRight ? 6 : 12), y + 58, 6, 14);
 
     if (isCowboyDeadeye(this)) {
+      ctx.save();
+      ctx.translate(x + this.width / 2, y + 38);
+      ctx.scale(0.9, 0.9);
+      ctx.translate(-(x + this.width / 2), -(y + 38));
       ctx.fillStyle = '#b71c1c';
       ctx.fillRect(x + 8, y + 34, this.width - 16, 8);
       ctx.strokeStyle = '#fdd835';
@@ -2392,6 +2592,7 @@ class Fighter {
       ctx.stroke();
       ctx.fillStyle = '#fdd835';
       ctx.fillRect(gunX + (facingRight ? 24 : -8), y + 50, 8, 12);
+      ctx.restore();
     }
   }
 
@@ -2469,13 +2670,13 @@ class Fighter {
     const mirrorLuck = isReflecterMirrorLuck(this) && !upgraded;
     const lightColor = getReflecterLightColor(this);
     ctx.strokeStyle = hexToRgba(lightColor, 0.82);
-    ctx.lineWidth = upgraded ? 8 : mirrorLuck ? 7 : 5;
+    ctx.lineWidth = upgraded ? 6 : mirrorLuck ? 7 : 5;
     ctx.beginPath();
     ctx.ellipse(
       this.position.x + this.width / 2,
       this.position.y + this.height / 2,
-      this.width / 2 + (upgraded ? 34 : mirrorLuck ? 24 : 16),
-      this.height / 2 + (upgraded ? 28 : mirrorLuck ? 18 : 12),
+      this.width / 2 + (upgraded ? 22 : mirrorLuck ? 24 : 16),
+      this.height / 2 + (upgraded ? 20 : mirrorLuck ? 18 : 12),
       0,
       0,
       Math.PI * 2
@@ -2483,7 +2684,7 @@ class Fighter {
     ctx.stroke();
     if (upgraded) {
       ctx.strokeStyle = hexToRgba(lightColor, 0.28);
-      ctx.lineWidth = 20;
+      ctx.lineWidth = 14;
       ctx.stroke();
     } else if (mirrorLuck) {
       ctx.strokeStyle = 'rgba(253, 216, 53, 0.36)';
@@ -3066,6 +3267,10 @@ class Fighter {
       this.strongAttackCooldown -= 1;
     }
 
+    if (this.basicAttackCooldown > 0) {
+      this.basicAttackCooldown -= 1;
+    }
+
     if (this.specialCooldown > 0) {
       this.specialCooldown -= 1;
     }
@@ -3080,6 +3285,10 @@ class Fighter {
 
     if (this.tankShellCooldown > 0) {
       this.tankShellCooldown -= 1;
+    }
+
+    if (this.arcadeBossShockwaveCooldown > 0) {
+      this.arcadeBossShockwaveCooldown -= 1;
     }
 
     if (this.cowboyBurstCooldown > 0) {
@@ -3162,6 +3371,48 @@ class Fighter {
       this.lightWarriorSpeedTimer -= 1;
     }
 
+    if (this.lightWarriorOmegaFlightCharging) {
+      this.lightWarriorOmegaFlightChargeTimer += 1;
+      this.velocity.x = 0;
+      this.velocity.y = -1;
+      if (this.lightWarriorOmegaFlightChargeTimer >= lightWarriorOmegaFlightChargeDuration) {
+        this.lightWarriorOmegaFlightCharging = false;
+        this.lightWarriorOmegaFlightTraveling = true;
+        this.lightWarriorOmegaFlightTimer = lightWarriorOmegaFlightDuration;
+      }
+    }
+
+    if (this.lightWarriorOmegaFlightTraveling) {
+      const flightMultiplier = getLightWarriorOmegaFlightSpeedMultiplier(this);
+      const target = this.target || getOpponent(this);
+      if (target) {
+        const targetCenterX = target.position.x + target.width / 2;
+        const targetCenterY = target.position.y + target.height / 2;
+        const attackerCenterX = this.position.x + this.width / 2;
+        const attackerCenterY = this.position.y + this.height / 2;
+        const distance = Math.max(1, Math.hypot(targetCenterX - attackerCenterX, targetCenterY - attackerCenterY));
+        const flightSpeed = playerMoveSpeed * 1.8 * flightMultiplier;
+        this.velocity.x = ((targetCenterX - attackerCenterX) / distance) * flightSpeed;
+        this.velocity.y = ((targetCenterY - attackerCenterY) / distance) * flightSpeed;
+      }
+      if (target && tryParryLightWarriorOmegaFlight(this, target)) {
+        finishLightWarriorOmegaFlight(this, target, true);
+        return;
+      }
+      if (target && rectangularCollision({
+        rectangle1: {
+          x: this.position.x - 55,
+          y: this.position.y - 35,
+          width: this.width + 110,
+          height: this.height + 74,
+        },
+        rectangle2: target,
+      })) {
+        finishLightWarriorOmegaFlight(this, target);
+        return;
+      }
+    }
+
     if (this.lightWarriorSolarFlashCooldown > 0) {
       this.lightWarriorSolarFlashCooldown -= 1;
     }
@@ -3172,6 +3423,17 @@ class Fighter {
 
     if (this.lightWarriorRadiantPunchCooldown > 0) {
       this.lightWarriorRadiantPunchCooldown -= 1;
+    }
+
+    if (this.characterType === 'lightWarrior' && this.lightWarriorOmegaTransformed) {
+      this.lightWarriorOmegaStateTimer = Math.max(0, this.lightWarriorOmegaStateTimer - 1);
+      if (this.lightWarriorOmegaStateTimer === 0) {
+        this.lightWarriorOmegaTransformed = false;
+        this.secretVariant = 'omega';
+        this.setMaxHealth(lightWarriorHealth);
+        this.health = this.maxHealth;
+        this.damageMultiplier = 1;
+      }
     }
 
     if (this.lightWarriorRadiantPunchCharging) {
@@ -3253,6 +3515,10 @@ class Fighter {
 
     if (this.switcherAbilityCooldown > 0) {
       this.switcherAbilityCooldown -= 1;
+    }
+
+    if (this.switcherModeCooldown > 0) {
+      this.switcherModeCooldown -= 1;
     }
 
     if (this.switcherArmorTimer > 0) {
@@ -3343,10 +3609,12 @@ class Fighter {
     if (!canFighterAct(this)) return;
     if (this.gamblerStunTimer > 0) return;
     if (this.characterType === 'cowboy' && isDesertCowboyDuelPreparing()) return;
+    if (this.basicAttackCooldown > 0 && !debugSettings.restoreAttackSpam) return;
     if (this.characterType === 'tank' && this.tankAttackCooldown > 0) return;
     if (isStrong && this.strongAttackCooldown > 0) return;
 
     this.isAttacking = true;
+    this.basicAttackCooldown = getDebugCooldown(basicAttackCooldown, this);
     this.attackTimer = 0;
     this.currentAttackDamage = getAttackDamage(this, isStrong);
     if (this.characterType === 'lightWarrior' && this.lightWarriorRadiantPunchReadyTimer > 0 && this.lightWarriorRadiantPunchDamage > 0) {
@@ -3390,6 +3658,7 @@ class Fighter {
   setCharacterType(characterType, secretVariant = null) {
     this.characterType = characterType;
     this.secretVariant = secretVariant;
+    this.arcadeBossVariant = false;
     if (characterType === 'fireMaster') {
       this.width = 60;
       this.height = 120;
@@ -3418,7 +3687,7 @@ class Fighter {
         width: 70,
         height: 30,
       };
-      this.setMaxHealth(cowboyHealth);
+      this.setMaxHealth(getCowboyHealth(this));
       this.color = this.baseColor;
       this.attackColor = hexToRgba(this.baseColor, 0.65);
       return;
@@ -3428,14 +3697,14 @@ class Fighter {
       this.width = 60;
       this.height = 120;
       this.moveSpeed = playerMoveSpeed;
-      this.damageMultiplier = 1;
+      this.damageMultiplier = isLightWarriorOmega(this) ? lightWarriorOmegaDamageMultiplier : 1;
       this.attackDuration = 12;
       this.attackBox = {
         offset: { x: this.attacksToTheRight ? this.width : -70, y: 20 },
         width: 70,
         height: 30,
       };
-      this.setMaxHealth(lightWarriorHealth);
+      this.setMaxHealth(getLightWarriorHealth(this));
       this.color = '#fdd835';
       this.attackColor = 'rgba(255, 235, 59, 0.72)';
       return;
@@ -3689,6 +3958,7 @@ class Fighter {
     this.gamblerStunTimer = 0;
     this.gamblerInvincibleTimer = 0;
     this.switcherAbilityCooldown = 0;
+    this.switcherModeCooldown = 0;
     this.switcherArmorTimer = 0;
     this.switcherRedStrikeTimer = 0;
     this.switcherRedStrikeArea = null;
@@ -3817,42 +4087,55 @@ class LightShot {
 }
 
 class SuperFireKamehamehaCharge {
-  constructor({ attacker, target }) {
+  constructor({ attacker, target, lightWarrior = false, omega = false }) {
     this.attacker = attacker;
     this.target = target;
+    this.lightWarrior = lightWarrior;
+    this.omega = omega;
     this.timer = 0;
-    this.duration = superFireKamehamehaChargeDuration;
+    this.duration = lightWarrior ? (this.omega ? 90 : lightWarriorBeamChargeDuration) : superFireKamehamehaChargeDuration;
     this.active = true;
-    this.attacker.superFireKamehamehaCharging = true;
+    if (lightWarrior) {
+      this.attacker.lightWarriorBeamCharging = true;
+    } else {
+      this.attacker.superFireKamehamehaCharging = true;
+    }
   }
 
   draw() {
     const centerX = this.attacker.position.x + this.attacker.width / 2;
     const centerY = this.attacker.position.y + this.attacker.height / 2;
     const progress = Math.max(0, Math.min(1, this.timer / this.duration));
-    const radius = 18 + progress * 58;
+    const radius = 18 + progress * (this.omega ? 90 : 58);
 
     ctx.save();
     ctx.globalAlpha = 0.9;
-    ctx.fillStyle = `rgba(255, 109, 0, ${0.18 + progress * 0.32})`;
+    ctx.fillStyle = this.omega
+      ? `rgba(255, 255, 255, ${0.28 + progress * 0.42})`
+      : this.lightWarrior
+        ? `rgba(255, 235, 59, ${0.18 + progress * 0.32})`
+        : `rgba(255, 109, 0, ${0.18 + progress * 0.32})`;
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#fff3e0';
-    ctx.lineWidth = 5;
+    ctx.strokeStyle = this.omega ? '#fff' : '#fff3e0';
+    ctx.lineWidth = this.omega ? 7 : 5;
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
     ctx.stroke();
-    ctx.fillStyle = '#ff6d00';
+    ctx.fillStyle = this.omega ? '#fff' : this.lightWarrior ? '#fdd835' : '#ff6d00';
     ctx.fillRect(centerX - 18, centerY - 18, 36, 36);
-    ctx.fillStyle = '#fff176';
+    ctx.fillStyle = this.omega ? '#f5f5f5' : this.lightWarrior ? '#fffde7' : '#fff176';
     ctx.fillRect(centerX - 9, centerY - 9, 18, 18);
     ctx.restore();
   }
 
   update() {
     if (!this.attacker || !this.target || this.attacker.health <= 0 || gameOver) {
-      if (this.attacker) this.attacker.superFireKamehamehaCharging = false;
+      if (this.attacker) {
+        if (this.lightWarrior) this.attacker.lightWarriorBeamCharging = false;
+        else this.attacker.superFireKamehamehaCharging = false;
+      }
       this.active = false;
       return;
     }
@@ -3864,29 +4147,32 @@ class SuperFireKamehamehaCharge {
     this.timer += 1;
 
     if (this.timer >= this.duration) {
-      superFireKamehamehas.push(new SuperFireKamehameha({ attacker: this.attacker, target: this.target }));
-      this.attacker.superFireKamehamehaCharging = false;
+      superFireKamehamehas.push(new SuperFireKamehameha({ attacker: this.attacker, target: this.target, lightWarrior: this.lightWarrior, omega: this.omega }));
+      if (this.lightWarrior) this.attacker.lightWarriorBeamCharging = false;
+      else this.attacker.superFireKamehamehaCharging = false;
       this.active = false;
-      playSound('fireBeam');
+      playSound(this.omega ? 'gravityOrb' : 'fireBeam');
     }
   }
 }
 
 class SuperFireKamehameha {
-  constructor({ attacker, target }) {
+  constructor({ attacker, target, lightWarrior = false, omega = false }) {
     const attackerCenterX = attacker.position.x + attacker.width / 2;
     const targetCenterX = target.position.x + target.width / 2;
     this.attacker = attacker;
     this.target = target;
+    this.lightWarrior = lightWarrior;
+    this.omega = omega;
     this.direction = targetCenterX >= attackerCenterX ? 1 : -1;
     this.origin = {
       x: this.direction > 0 ? attacker.position.x + attacker.width : attacker.position.x,
       y: attacker.position.y + attacker.height / 2,
     };
     this.length = 0;
-    this.height = 86;
-    this.maxLength = canvas.width + 220;
-    this.duration = superFireKamehamehaDuration;
+    this.height = this.omega ? 120 : 86;
+    this.maxLength = this.omega ? canvas.width + 360 : canvas.width + 220;
+    this.duration = lightWarrior ? (this.omega ? 150 : lightWarriorBeamDuration) : superFireKamehamehaDuration;
     this.timer = 0;
     this.damageTickTimer = 0;
     this.active = true;
@@ -3910,24 +4196,36 @@ class SuperFireKamehameha {
     const width = this.width;
 
     ctx.save();
-    ctx.fillStyle = 'rgba(255, 245, 157, 0.96)';
-    ctx.fillRect(x, y + 22, width, this.height - 44);
-    ctx.fillStyle = 'rgba(255, 109, 0, 0.88)';
-    ctx.fillRect(x, y + 8, width, this.height - 16);
-    ctx.fillStyle = 'rgba(230, 81, 0, 0.72)';
-    ctx.fillRect(x, y, width, this.height);
-    ctx.fillStyle = 'rgba(255, 238, 88, 0.95)';
-    ctx.fillRect(x, y + 28, width, this.height - 56);
+    if (this.omega) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+      ctx.fillRect(x, y + 28, width, this.height - 56);
+      ctx.fillStyle = 'rgba(255, 235, 59, 0.96)';
+      ctx.fillRect(x, y + 12, width, this.height - 24);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.fillRect(x, y + 44, width, this.height - 88);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+      ctx.lineWidth = 7;
+      ctx.strokeRect(x, y + 6, width, this.height - 12);
+    } else {
+      ctx.fillStyle = this.lightWarrior ? 'rgba(255, 255, 255, 0.98)' : 'rgba(255, 245, 157, 0.96)';
+      ctx.fillRect(x, y + 22, width, this.height - 44);
+      ctx.fillStyle = this.lightWarrior ? 'rgba(255, 235, 59, 0.9)' : 'rgba(255, 109, 0, 0.88)';
+      ctx.fillRect(x, y + 8, width, this.height - 16);
+      ctx.fillStyle = this.lightWarrior ? 'rgba(255, 193, 7, 0.76)' : 'rgba(230, 81, 0, 0.72)';
+      ctx.fillRect(x, y, width, this.height);
+      ctx.fillStyle = this.lightWarrior ? 'rgba(255, 255, 224, 0.98)' : 'rgba(255, 238, 88, 0.95)';
+      ctx.fillRect(x, y + 28, width, this.height - 56);
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.86)';
-    ctx.lineWidth = 5;
-    ctx.strokeRect(x, y + 4, width, this.height - 8);
+      ctx.strokeStyle = this.lightWarrior ? 'rgba(255, 255, 255, 0.98)' : 'rgba(255, 255, 255, 0.86)';
+      ctx.lineWidth = 5;
+      ctx.strokeRect(x, y + 4, width, this.height - 8);
+    }
     ctx.restore();
   }
 
   update() {
     this.timer += 1;
-    this.length = Math.min(this.maxLength, this.length + getDebugProjectileSpeed(superFireKamehamehaSpeed, this.attacker));
+    this.length = Math.min(this.maxLength, this.length + getDebugProjectileSpeed(superFireKamehamehaSpeed, this.attacker) * (this.omega ? 2.8 : 1));
     this.damageTickTimer = Math.max(0, this.damageTickTimer - 1);
     this.draw();
 
@@ -3975,6 +4273,64 @@ class TankShell {
     this.draw();
 
     if (this.position.x + this.width < 0 || this.position.x > canvas.width) {
+      this.active = false;
+    }
+  }
+}
+
+class ArcadeBossShockwave {
+  constructor({ target, attacker }) {
+    this.position = {
+      x: attacker.position.x + attacker.width / 2,
+      y: ground - 18,
+    };
+    this.target = target;
+    this.attacker = attacker;
+    this.radius = 12;
+    this.width = this.radius * 2;
+    this.height = 34;
+    this.damage = normalArcadeBossShockwaveDamage / normalArcadeBossDamageMultiplier;
+    this.hitTarget = false;
+    this.active = true;
+  }
+
+  get x() {
+    return this.position.x - this.radius;
+  }
+
+  get y() {
+    return this.position.y - this.height;
+  }
+
+  draw() {
+    ctx.fillStyle = 'rgba(143, 0, 27, 0.7)';
+    ctx.fillRect(this.x, this.y + 12, this.width, this.height - 12);
+    ctx.strokeStyle = '#ff8a9b';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(this.position.x - this.radius, this.position.y);
+    ctx.quadraticCurveTo(this.position.x, this.position.y - this.radius * 1.5, this.position.x + this.radius, this.position.y);
+    ctx.stroke();
+  }
+
+  update() {
+    this.radius += getDebugProjectileSpeed(9, this.attacker);
+    this.width = this.radius * 2;
+    this.draw();
+
+    if (
+      this.active &&
+      !this.hitTarget &&
+      rectangularCollision({ rectangle1: this, rectangle2: this.target })
+    ) {
+      applyDamage(this.attacker, this.target, this.damage, { isSpecial: true, damageType: 'melee' });
+      this.target.velocity.x = getDebugKnockback(this.target.position.x >= this.position.x ? 14 : -14, this.target);
+      this.target.velocity.y = getDebugKnockback(-5, this.target);
+      this.hitTarget = true;
+      this.active = false;
+    }
+
+    if (this.radius > canvas.width) {
       this.active = false;
     }
   }
@@ -4608,7 +4964,7 @@ function rectangularCollision({ rectangle1, rectangle2 }) {
 
 function getAttackDamage(attacker, isStrong = false) {
   if (attacker.characterType === 'ghost') return ghostDamage;
-  if (attacker.characterType === 'lightWarrior') return (isStrong ? lightWarriorDamage * 1.5 : lightWarriorDamage) * (1 + attacker.gamblerDamageBoost);
+  if (attacker.characterType === 'lightWarrior') return getLightWarriorDamage(attacker, isStrong) * (1 + attacker.gamblerDamageBoost);
   if (attacker.characterType === 'divineGeneral') {
     const eventMultiplier = isAbsoluteAdaptationActive() ? 1.2 : 1;
     return (isStrong ? divineGeneralDamage * 2 : divineGeneralDamage) * getDivineBaseDamageMultiplier(attacker) * eventMultiplier;
@@ -4660,6 +5016,10 @@ function isCowboyDeadeye(fighter) {
   return hasSecretVariant(fighter, 'cowboyDeadeye', characterSecretModes.cowboyDeadeye);
 }
 
+function getCowboyHealth(fighter) {
+  return isCowboyDeadeye(fighter) ? deadeyeCowboyHealth : cowboyHealth;
+}
+
 function isNormalKaioken(fighter) {
   return hasSecretVariant(fighter, 'normalKaioken', characterSecretModes.normalKaioken);
 }
@@ -4678,6 +5038,238 @@ function isSwitcherPrism(fighter) {
 
 function isDivineFullAdapt(fighter) {
   return hasSecretVariant(fighter, 'divineFullAdapt', characterSecretModes.divineFullAdapt);
+}
+
+function isLightWarriorOmega(fighter) {
+  return hasSecretVariant(fighter, 'omega', characterSecretModes.lightWarriorOmega);
+}
+
+function getLightWarriorHealth(fighter) {
+  return fighter && fighter.lightWarriorOmegaTransformed ? lightWarriorOmegaHealth : lightWarriorHealth;
+}
+
+function getLightWarriorDamage(fighter, isStrong = false) {
+  const damage = isStrong ? lightWarriorDamage * 1.5 : lightWarriorDamage;
+  return fighter && fighter.lightWarriorOmegaTransformed ? lightWarriorOmegaDamage * (isStrong ? 1.5 : 1) : damage;
+}
+
+function resetLightWarriorOmegaState(fighter) {
+  if (!fighter || fighter.characterType !== 'lightWarrior') return;
+
+  fighter.lightWarriorOmegaTransformed = false;
+  fighter.lightWarriorOmegaStateTimer = 0;
+  fighter.lightWarriorOmegaFlightUsesRemaining = lightWarriorOmegaFlightUsesMax;
+  fighter.lightWarriorOmegaFlightChargeAvailable = true;
+  fighter.lightWarriorOmegaFlightCharging = false;
+  fighter.lightWarriorOmegaFlightChargeTimer = 0;
+  fighter.lightWarriorOmegaFlightTraveling = false;
+  fighter.lightWarriorOmegaFlightTimer = 0;
+  fighter.lightWarriorOmegaFlightDirection = 1;
+  fighter.secretVariant = isLightWarriorOmega(fighter) ? 'omega' : null;
+  fighter.setMaxHealth(lightWarriorHealth);
+  fighter.health = fighter.maxHealth;
+  fighter.damageMultiplier = 1;
+}
+
+function getLightWarriorOmegaFlightUseCount(fighter) {
+  if (!fighter || fighter.characterType !== 'lightWarrior') return 0;
+  return lightWarriorOmegaFlightUsesMax - fighter.lightWarriorOmegaFlightUsesRemaining;
+}
+
+function getLightWarriorOmegaFlightSpeedMultiplier(fighter) {
+  const usesUsed = getLightWarriorOmegaFlightUseCount(fighter);
+  const firstUseSpeed = 0.45;
+  const lastUseSpeed = 1;
+  const progress = Math.max(0, Math.min(1, (usesUsed - 1) / (lightWarriorOmegaFlightUsesMax - 1)));
+  return firstUseSpeed + (lastUseSpeed - firstUseSpeed) * progress;
+}
+
+function finishLightWarriorOmegaFlight(attacker, target, wasParried = false) {
+  if (!attacker || attacker.characterType !== 'lightWarrior') return;
+
+  attacker.lightWarriorOmegaFlightCharging = false;
+  attacker.lightWarriorOmegaFlightTraveling = false;
+  attacker.lightWarriorOmegaFlightTimer = 0;
+  attacker.velocity.x = 0;
+  attacker.velocity.y = 0;
+
+  if (!wasParried && target && target.health > 0 && attacker.lightWarriorOmegaTransformed) {
+    const targetCenterX = target.position.x + target.width / 2;
+    const attackerCenterX = attacker.position.x + attacker.width / 2;
+    applyDamage(attacker, target, lightWarriorOmegaFlightDamage, { isSpecial: true, damageType: 'omegaLightWarriorFlight' });
+    target.velocity.x = getDebugKnockback((targetCenterX >= attackerCenterX ? -1 : 1) * 16, target);
+    target.velocity.y = getDebugKnockback(-10, target);
+  }
+}
+
+function tryParryLightWarriorOmegaFlight(attacker, target) {
+  if (!attacker || !target || attacker.characterType !== 'lightWarrior' || !attacker.lightWarriorOmegaFlightTraveling) return false;
+
+  const flightArea = {
+    x: attacker.position.x - 55,
+    y: attacker.position.y - 35,
+    width: attacker.width + 110,
+    height: attacker.height + 74,
+  };
+
+  const targetAttackArea = target.isAttacking ? target.attackArea : null;
+  if (targetAttackArea && rectangularCollision({ rectangle1: targetAttackArea, rectangle2: flightArea })) {
+    playSound('reflectShield');
+    target.velocity.x = getDebugKnockback((target.position.x + target.width / 2 >= attacker.position.x + attacker.width / 2 ? -1 : 1) * 12, target);
+    target.velocity.y = getDebugKnockback(-6, target);
+    attacker.velocity.x = 0;
+    attacker.velocity.y = 0;
+    attacker.lightWarriorOmegaFlightCharging = false;
+    attacker.lightWarriorOmegaFlightTraveling = false;
+    attacker.lightWarriorOmegaFlightTimer = 0;
+    return true;
+  }
+
+  if (target.characterType === 'reflecter' && rectangularCopycatShieldCollision(target, flightArea)) {
+    if (handleCopycatShieldHit(target, attacker)) {
+      attacker.lightWarriorOmegaFlightCharging = false;
+      attacker.lightWarriorOmegaFlightTraveling = false;
+      attacker.lightWarriorOmegaFlightTimer = 0;
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function activateLightWarriorOmegaFlight(attacker, target) {
+  if (!canFighterAct(attacker)) return false;
+  if (
+    attacker.characterType !== 'lightWarrior' ||
+    !attacker.lightWarriorOmegaTransformed ||
+    attacker.lightWarriorOmegaFlightCharging ||
+    attacker.lightWarriorOmegaFlightTraveling ||
+    attacker.lightWarriorOmegaFlightUsesRemaining <= 0 ||
+    gameOver
+  ) {
+    return false;
+  }
+
+  attacker.lightWarriorOmegaFlightUsesRemaining -= 1;
+  const shouldCharge = attacker.lightWarriorOmegaFlightChargeAvailable;
+  attacker.lightWarriorOmegaFlightChargeAvailable = false;
+  attacker.lightWarriorOmegaFlightCharging = shouldCharge;
+  attacker.lightWarriorOmegaFlightChargeTimer = 0;
+  attacker.lightWarriorOmegaFlightTraveling = !shouldCharge;
+  attacker.lightWarriorOmegaFlightTimer = shouldCharge ? 0 : lightWarriorOmegaFlightDuration;
+  attacker.lightWarriorOmegaFlightDirection = target && target.position.x + target.width / 2 >= attacker.position.x + attacker.width / 2 ? 1 : -1;
+  attacker.velocity.x = 0;
+  attacker.velocity.y = -1.8;
+  attacker.isAttacking = false;
+  attacker.attackTimer = 0;
+  recordSpecialUsed(attacker);
+  playSound('gravityOrb');
+  return true;
+}
+
+function syncLightWarriorOmegaMusic() {
+  const isLightWarriorOmegaActive = (player1.characterType === 'lightWarrior' && isLightWarriorOmega(player1)) || (player2.characterType === 'lightWarrior' && isLightWarriorOmega(player2));
+  if (isLightWarriorOmegaActive) {
+    playOmegaBattleTrack();
+  } else {
+    stopOmegaBattleTrack();
+  }
+}
+
+function getOmegaTransformationCharacters() {
+  const excluded = new Set(['lightWarrior', player2.characterType, 'divineGeneral']);
+  const available = characterTypes.filter((characterType) => !excluded.has(characterType));
+  return Array.from({ length: 6 }, () => available[Math.floor(Math.random() * available.length)]);
+}
+
+function startLightWarriorOmegaTransformation(attacker, playerNumber) {
+  if (!isLightWarriorOmega(attacker) || lightWarriorOmegaTransformation || gameOver) return false;
+
+  attacker.velocity.x = 0;
+  attacker.velocity.y = -5;
+  attacker.isAttacking = false;
+  attacker.attackTimer = 0;
+  lightWarriorOmegaTransformation = {
+    attacker,
+    timer: 0,
+    characters: getOmegaTransformationCharacters(),
+  };
+  clearQfPendingSpecial(playerNumber);
+  clearFrPendingSpecial(playerNumber);
+  playSound('fireBeam');
+  return true;
+}
+
+function updateLightWarriorOmegaTransformation() {
+  const transformation = lightWarriorOmegaTransformation;
+  if (!transformation) return;
+
+  const { attacker } = transformation;
+  transformation.timer += 1;
+  attacker.velocity.x = 0;
+  attacker.velocity.y = transformation.timer < 70 ? -1.8 : 0;
+  attacker.position.y = Math.max(80, attacker.position.y + attacker.velocity.y);
+  attacker.isAttacking = false;
+
+  if (transformation.timer >= lightWarriorOmegaAnnouncementTimer + lightWarriorOmegaActivationDelay) {
+    attacker.lightWarriorOmegaTransformed = true;
+    attacker.lightWarriorOmegaStateTimer = lightWarriorOmegaStateDuration;
+    attacker.secretVariant = 'omegaTransformed';
+    attacker.setMaxHealth(lightWarriorOmegaTransformationHealth);
+    attacker.health = attacker.maxHealth;
+    attacker.damageMultiplier = lightWarriorOmegaDamageMultiplier * 1.15;
+    lightWarriorOmegaTransformation = null;
+    updateHealthBars();
+    updateCombatHudIdentity();
+  }
+}
+
+function drawLightWarriorOmegaTransformation() {
+  const transformation = lightWarriorOmegaTransformation;
+  if (!transformation) return;
+
+  const { attacker, timer, characters } = transformation;
+  const progress = Math.min(1, timer / lightWarriorOmegaTransformationDuration);
+  const centerX = attacker.position.x + attacker.width / 2;
+  const centerY = attacker.position.y + attacker.height / 2;
+  const rotation = timer * 0.16;
+
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.font = '900 25px Courier New, monospace';
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 6;
+  const phrase = timer < lightWarriorOmegaAnnouncementTimer ? 'CON SUS PODERES COMBINADOS SOY...' : 'OMEGA LIGHT WARRIOR!!';
+  ctx.strokeText(phrase, canvas.width / 2, 100);
+  ctx.fillText(phrase, canvas.width / 2, 100);
+
+  if (timer >= lightWarriorOmegaAnnouncementTimer && timer <= lightWarriorOmegaAnnouncementTimer + lightWarriorOmegaActivationDelay) {
+    const flashProgress = (timer - lightWarriorOmegaAnnouncementTimer) / lightWarriorOmegaActivationDelay;
+    ctx.fillStyle = `rgba(255, 255, 255, ${1 - flashProgress})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  ctx.translate(centerX, centerY);
+  for (let index = 0; index < characters.length; index += 1) {
+    const angle = rotation + (Math.PI * 2 * index) / characters.length;
+    const radius = 96 + Math.sin(timer * 0.1 + index) * 12;
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.globalAlpha = 0.28 + progress * 0.18;
+    ctx.fillStyle = switcherModeColors[characters[index]] || ['#42a5f5', '#ef5350', '#66bb6a', '#fdd835'][index % 4];
+    ctx.fillRect(radius, -12, 24, 42);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(radius + 5, -25, 14, 12);
+    ctx.restore();
+  }
+  ctx.restore();
+
+  if (timer > lightWarriorOmegaTransformationDuration - lightWarriorOmegaFlashDuration) {
+    const flashProgress = (timer - (lightWarriorOmegaTransformationDuration - lightWarriorOmegaFlashDuration)) / lightWarriorOmegaFlashDuration;
+    ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, 0.95 - flashProgress)})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 }
 
 function getDivineMaxHealth(fighter) {
@@ -4942,6 +5534,8 @@ function clearActiveCodes() {
 
   [player1, player2].forEach((fighter) => {
     fighter.secretVariant = null;
+    fighter.lightWarriorOmegaTransformed = false;
+    fighter.lightWarriorOmegaStateTimer = 0;
     if (fighter.characterType === 'normal') {
       fighter.kaiokenTimer = 0;
       fighter.kaiokenCooldown = 0;
@@ -5076,11 +5670,13 @@ function getOpponent(fighter) {
 function canFighterAct(fighter) {
   return (
     fighter &&
+    lightWarriorOmegaTransformation?.attacker !== fighter &&
     fighter.chronoTimeStopTimer <= 0 &&
     fighter.divineAdaptTimer <= 0 &&
     !fighter.divineWorldCutCharging &&
     !fighter.lightWarriorRadiantPunchCharging &&
-    !fighter.superFireKamehamehaCharging
+    !fighter.superFireKamehamehaCharging &&
+    !fighter.lightWarriorBeamCharging
   );
 }
 
@@ -5882,6 +6478,10 @@ function formatFightDuration(milliseconds) {
 }
 
 function getVictoryPhrase(fighter, opponent) {
+  if (fighter.characterType === 'lightWarrior' && Math.random() < 0.01) {
+    return 'Jarona!';
+  }
+
   const phraseSet = victoryPhrases[fighter.characterType] || victoryPhrases.normal;
   const phrases = phraseSet[opponent.characterType] || phraseSet.default || victoryPhrases.normal.default;
   const index = Math.floor(Math.random() * phrases.length);
@@ -6079,7 +6679,49 @@ function drawStage() {
     return;
   }
 
+  if (selectedMap === 'normalArcade') {
+    drawNormalArcadeStage();
+    return;
+  }
+
   drawFoundryStage();
+}
+
+function drawNormalArcadeStage() {
+  const skyGradient = ctx.createLinearGradient(0, 0, 0, ground);
+  skyGradient.addColorStop(0, '#240d18');
+  skyGradient.addColorStop(1, '#7a2838');
+  ctx.fillStyle = skyGradient;
+  ctx.fillRect(0, 0, canvas.width, ground);
+
+  ctx.fillStyle = '#160b12';
+  for (let x = 0; x < canvas.width; x += 78) {
+    const buildingHeight = 90 + ((x * 7) % 110);
+    ctx.fillRect(x, ground - buildingHeight - 36, 58, buildingHeight);
+    ctx.fillStyle = '#f7b84b';
+    for (let windowY = ground - buildingHeight - 18; windowY < ground - 52; windowY += 26) {
+      ctx.fillRect(x + 12, windowY, 8, 10);
+      ctx.fillRect(x + 36, windowY, 8, 10);
+    }
+    ctx.fillStyle = '#160b12';
+  }
+
+  ctx.fillStyle = '#311420';
+  ctx.fillRect(0, ground - 36, canvas.width, 36);
+  ctx.fillStyle = '#5a2430';
+  ctx.fillRect(0, ground, canvas.width, canvas.height - ground);
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, ground - 10, canvas.width, 10);
+  ctx.strokeStyle = 'rgba(255, 138, 160, 0.38)';
+  ctx.lineWidth = 3;
+  for (let x = -40; x < canvas.width; x += 100) {
+    ctx.beginPath();
+    ctx.moveTo(x, ground + 20);
+    ctx.lineTo(x + 76, canvas.height);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#e14b61';
+  ctx.fillRect(390, ground - 34, 244, 7);
 }
 
 function drawAlphaStage() {
@@ -6757,6 +7399,14 @@ function updateFightAchievements(winnerPlayer, fightTime) {
 }
 
 function finishFight() {
+  resetLightWarriorOmegaState(player1);
+  resetLightWarriorOmegaState(player2);
+  stopOmegaBattleTrack();
+  if (normalArcadeActive && player1.health > 0 && player2.health <= 0 && normalArcadeEnemiesRemaining > 0) {
+    startNextNormalArcadeEnemy();
+    return;
+  }
+
   const fightTime = performance.now() - fightStartedAt;
   if (selectedMap === 'darkRoom') {
     lockDarkRoomMap();
@@ -6776,6 +7426,12 @@ function finishFight() {
   updateVictoryStats();
   recordPersistentFightStatistics(winnerPlayer, fightTime);
   updateFightAchievements(winnerPlayer, fightTime);
+  if (normalArcadeActive && winnerPlayer === player1) {
+    if (selectedNormalArcadeLevel === 5) {
+      unlockAchievement('normalArcadeCompleted');
+    }
+    unlockNextNormalArcadeLevel(selectedNormalArcadeLevel);
+  }
 }
 
 function resetKeys() {
@@ -6786,6 +7442,9 @@ function resetKeys() {
 
 function resetFight() {
   stopJackpotTrack();
+  resetLightWarriorOmegaState(player1);
+  resetLightWarriorOmegaState(player2);
+  syncLightWarriorOmegaMusic();
   gameOver = false;
   gameStarted = true;
   resetFightStats();
@@ -6795,7 +7454,9 @@ function resetFight() {
   lightShots = [];
   superFireKamehamehaCharges = [];
   superFireKamehamehas = [];
+  lightWarriorOmegaTransformation = null;
   tankShells = [];
+  arcadeBossShockwaves = [];
   cowboyBullets = [];
   sorcererOrbs = [];
   sorcererGravityOrbs = [];
@@ -6824,12 +7485,15 @@ function resetFight() {
 
 function returnToMenu() {
   const shouldConsumeDarkRoom = selectedMap === 'darkRoom';
-  if (gameStarted && !gameOver) {
+  if (gameStarted && !gameOver && !normalArcadeActive) {
     recordPersistentPlayTimeOnly(performance.now() - fightStartedAt);
   }
   deactivateBlindMode();
   gameOver = false;
   gameStarted = false;
+  normalArcadeActive = false;
+  normalArcadeEnemiesRemaining = 0;
+  normalArcadeEnemyIndex = 0;
   resetFightStats();
   botAttackCooldown = 0;
   fireballs = [];
@@ -6837,7 +7501,9 @@ function returnToMenu() {
   lightShots = [];
   superFireKamehamehaCharges = [];
   superFireKamehamehas = [];
+  lightWarriorOmegaTransformation = null;
   tankShells = [];
+  arcadeBossShockwaves = [];
   cowboyBullets = [];
   sorcererOrbs = [];
   sorcererGravityOrbs = [];
@@ -6858,6 +7524,9 @@ function returnToMenu() {
   mainMenu.classList.remove('hidden');
   document.body.classList.add('menu-open');
   stopJackpotTrack();
+  resetLightWarriorOmegaState(player1);
+  resetLightWarriorOmegaState(player2);
+  stopOmegaBattleTrack();
   startMenuMusic();
   titleScreen.classList.remove('hidden');
   oldDaysScreen.classList.add('hidden');
@@ -6919,7 +7588,10 @@ function animate() {
   updateLightShots();
   updateSuperFireKamehamehaCharges();
   updateSuperFireKamehamehas();
+  updateLightWarriorOmegaTransformation();
+  drawLightWarriorOmegaTransformation();
   updateTankShells();
+  updateArcadeBossShockwaves();
   updateCowboyBullets();
   updateSorcererOrbs();
   updateSorcererGravityOrbs();
@@ -6960,6 +7632,26 @@ function animate() {
     player2.velocity.y = getDebugKnockback(-8, player2);
     player1.isAttacking = false;
     player1.lightWarriorRadiantPunchAttackActive = false;
+  }
+
+  if (
+    player1.characterType === 'lightWarrior' &&
+    player1.lightWarriorOmegaFlightTraveling &&
+    player1.target === player2 &&
+    tryParryLightWarriorOmegaFlight(player1, player2)
+  ) {
+    finishLightWarriorOmegaFlight(player1, player2, true);
+    return;
+  }
+
+  if (
+    player2.characterType === 'lightWarrior' &&
+    player2.lightWarriorOmegaFlightTraveling &&
+    player2.target === player1 &&
+    tryParryLightWarriorOmegaFlight(player2, player1)
+  ) {
+    finishLightWarriorOmegaFlight(player2, player1, true);
+    return;
   }
 
   if (
@@ -7032,6 +7724,7 @@ function updateHealthBars() {
 }
 
 function getCharacterDisplayName(fighter) {
+  if (fighter.characterType === 'lightWarrior' && fighter.lightWarriorOmegaTransformed) return 'OMEGA LIGHT WARRIOR!!';
   const baseName = characterDisplayNames[fighter.characterType] || 'Normal';
   if (fighter.characterType === 'normal' && isNormalKaioken(fighter) && fighter.kaiokenTimer > 0) return 'Kaioken';
   if (fighter.characterType === 'fireMaster' && isSuperFireMaster(fighter)) return 'Super Fire Master';
@@ -7051,7 +7744,11 @@ function updateCombatHudIdentity() {
   p1Portrait.dataset.variant = player1.secretVariant || '';
   p2Portrait.dataset.variant = player2.secretVariant || '';
   p1CharacterName.innerText = getCharacterDisplayName(player1);
-  p2CharacterName.innerText = getCharacterDisplayName(player2);
+  p2CharacterName.innerText = normalArcadeActive && selectedNormalArcadeLevel === 5
+    ? normalArcadeBossName
+    : normalArcadeActive && selectedNormalArcadeLevel >= 1 && selectedNormalArcadeLevel <= 4
+      ? normalArcadeEnemyName
+      : getCharacterDisplayName(player2);
   p1HudTag.innerText = 'P1';
   p2HudTag.innerText = botEnabled ? `Bot ${botDifficultyDisplayNames[botDifficulty] || 'media'}` : 'P2';
 }
@@ -7186,7 +7883,7 @@ function getPlayerAbilityCooldowns(player) {
       };
     case 'switcher':
       return {
-        q: { active: true, name: 'Cambiar modo', remaining: 0, max: 0 },
+        q: { active: true, name: 'Cambiar modo', remaining: player.switcherModeCooldown, max: getDebugCooldown(switcherModeCooldown, player) },
         f: { active: true, name: 'Habilidad de modo', remaining: player.switcherAbilityCooldown, max: getSwitcherAbilityCooldownMax(player) },
       };
     case 'sorcerer':
@@ -7336,7 +8033,8 @@ function updateLightShots() {
         return;
       }
 
-      applyDamage(lightShot.attacker, lightShot.target, lightWarriorShotDamage, { isSpecial: true, damageType: 'lightShot' });
+      const shotDamage = isLightWarriorOmega(lightShot.attacker) ? lightWarriorShotDamage * lightWarriorOmegaDamageMultiplier : lightWarriorShotDamage;
+      applyDamage(lightShot.attacker, lightShot.target, shotDamage, { isSpecial: true, damageType: 'lightShot' });
       lightShot.target.velocity.x = getDebugKnockback(lightShot.velocity.x > 0 ? 8 : -8, lightShot.target);
       lightShot.target.velocity.y = getDebugKnockback(-4, lightShot.target);
       lightShot.active = false;
@@ -7360,11 +8058,20 @@ function updateSuperFireKamehamehas() {
       rectangularCollision({ rectangle1: beam, rectangle2: beam.target }) &&
       beam.damageTickTimer <= 0
     ) {
-      applyDamage(beam.attacker, beam.target, superFireKamehamehaTickDamage, {
+      applyDamage(
+        beam.attacker,
+        beam.target,
+        beam.omega
+          ? lightWarriorOmegaDamage * 4
+          : beam.lightWarrior
+            ? lightWarriorBeamTickDamage * (isLightWarriorOmega(beam.attacker) ? lightWarriorOmegaDamageMultiplier : 1)
+            : superFireKamehamehaTickDamage,
+        {
         isSpecial: true,
-        damageType: 'superFireKamehameha',
-      });
-      beam.damageTickTimer = superFireKamehamehaTickInterval;
+        damageType: beam.omega ? 'omegaLightWarriorFinisher' : 'superFireKamehameha',
+        }
+      );
+      beam.damageTickTimer = beam.lightWarrior ? lightWarriorBeamTickInterval : superFireKamehamehaTickInterval;
       beam.target.velocity.x = getDebugKnockback(beam.direction * 3, beam.target);
     }
   });
@@ -7394,6 +8101,11 @@ function updateTankShells() {
   });
 
   tankShells = tankShells.filter((tankShell) => tankShell.active);
+}
+
+function updateArcadeBossShockwaves() {
+  arcadeBossShockwaves.forEach((shockwave) => shockwave.update());
+  arcadeBossShockwaves = arcadeBossShockwaves.filter((shockwave) => shockwave.active);
 }
 
 function updateCowboyBullets() {
@@ -7789,6 +8501,25 @@ function handleMenuSecretInput(event) {
     });
     syncDivineGeneralUnlockUI();
     updateCooldownIndicators();
+  } else if (
+    normalizedSecretBuffer.endsWith('omega') ||
+    normalizedSecretBuffer.endsWith('lightwarrior1') ||
+    normalizedSecretBuffer.endsWith('lightwarrior') ||
+    normalizedSecretBuffer.endsWith('omegalightwarrior')
+  ) {
+    menuSecretBuffer = '';
+    characterSecretModes.lightWarriorOmega = true;
+    [player1, player2].forEach((fighter) => {
+      if (fighter.characterType === 'lightWarrior') {
+        fighter.secretVariant = 'omega';
+        fighter.lightWarriorOmegaTransformed = false;
+        fighter.lightWarriorOmegaStateTimer = 0;
+        fighter.setMaxHealth(lightWarriorHealth);
+        fighter.health = fighter.maxHealth;
+        fighter.damageMultiplier = 1;
+      }
+    });
+    unlockAchievement('codeBreaker');
   } else if (normalizedSecretBuffer.endsWith('lightsout')) {
     menuSecretBuffer = '';
     unlockDarkRoomMap();
@@ -7827,6 +8558,8 @@ window.addEventListener('keydown', (event) => {
     case 'Q':
       if (keys.q) break;
       keys.q = true;
+      if (keys.f && keys.r && startLightWarriorOmegaTransformation(player1, 1)) break;
+      if (handleLightWarriorQfSpecialKey(player1, player2, keys.f, 1)) break;
       if (handleChronoSpecialKey(player1, player2, 'blade', keys.f, 1)) break;
       if (handleGamblerSpecialKey(player1, 'roll', keys.f, 1)) break;
       if (handleFireMasterSpecialKey(player1, player2, 'fireball', keys.f, 1)) break;
@@ -7848,6 +8581,11 @@ window.addEventListener('keydown', (event) => {
     case 'F':
       if (keys.f) break;
       keys.f = true;
+      if (keys.q && keys.r && startLightWarriorOmegaTransformation(player1, 1)) break;
+      if (player1.characterType === 'lightWarrior' && player1.lightWarriorOmegaTransformed && !player1.lightWarriorOmegaFlightCharging && !player1.lightWarriorOmegaFlightTraveling) {
+        if (activateLightWarriorOmegaFlight(player1, player2)) break;
+      }
+      if (handleLightWarriorQfSpecialKey(player1, player2, keys.q, 1)) break;
       if (handleChronoSpecialKey(player1, player2, 'slow', keys.q, 1)) break;
       if (handleGamblerSpecialKey(player1, 'luck', keys.q, 1)) break;
       if (handleFireMasterSpecialKey(player1, player2, 'beam', keys.q, 1)) break;
@@ -7870,6 +8608,10 @@ window.addEventListener('keydown', (event) => {
       }
       if (keys.r) break;
       keys.r = true;
+      if (keys.q && keys.f && startLightWarriorOmegaTransformation(player1, 1)) break;
+      if (player1.characterType === 'lightWarrior' && player1.lightWarriorOmegaTransformed && !player1.lightWarriorOmegaFlightCharging && !player1.lightWarriorOmegaFlightTraveling) {
+        if (activateLightWarriorOmegaFlight(player1, player2)) break;
+      }
       if (handleLightWarriorFrSpecialKey(player1, player2, 'flash', keys.f, 1)) break;
       activateLightWarriorSolarFlash(player1, player2);
       break;
@@ -7891,7 +8633,9 @@ window.addEventListener('keydown', (event) => {
     case '/':
       if (keys.slash) break;
       keys.slash = true;
+      if (keys.period && keys.enter && startLightWarriorOmegaTransformation(player2, 2)) break;
       if (!botEnabled) {
+        if (handleLightWarriorQfSpecialKey(player2, player1, keys.period, 2)) break;
         if (handleChronoSpecialKey(player2, player1, 'blade', keys.period, 2)) break;
         if (handleGamblerSpecialKey(player2, 'roll', keys.period, 2)) break;
         if (handleFireMasterSpecialKey(player2, player1, 'fireball', keys.period, 2)) break;
@@ -7913,7 +8657,12 @@ window.addEventListener('keydown', (event) => {
     case '.':
       if (keys.period) break;
       keys.period = true;
+      if (keys.slash && keys.enter && startLightWarriorOmegaTransformation(player2, 2)) break;
       if (!botEnabled) {
+        if (player2.characterType === 'lightWarrior' && player2.lightWarriorOmegaTransformed && !player2.lightWarriorOmegaFlightCharging && !player2.lightWarriorOmegaFlightTraveling) {
+          if (activateLightWarriorOmegaFlight(player2, player1)) break;
+        }
+        if (handleLightWarriorQfSpecialKey(player2, player1, keys.slash, 2)) break;
         if (handleChronoSpecialKey(player2, player1, 'slow', keys.slash, 2)) break;
         if (handleGamblerSpecialKey(player2, 'luck', keys.slash, 2)) break;
         if (handleFireMasterSpecialKey(player2, player1, 'beam', keys.slash, 2)) break;
@@ -7932,7 +8681,11 @@ window.addEventListener('keydown', (event) => {
     case 'Enter':
       if (keys.enter) break;
       keys.enter = true;
+      if (keys.slash && keys.period && startLightWarriorOmegaTransformation(player2, 2)) break;
       if (!botEnabled) {
+        if (player2.characterType === 'lightWarrior' && player2.lightWarriorOmegaTransformed && !player2.lightWarriorOmegaFlightCharging && !player2.lightWarriorOmegaFlightTraveling) {
+          if (activateLightWarriorOmegaFlight(player2, player1)) break;
+        }
         if (handleLightWarriorFrSpecialKey(player2, player1, 'flash', keys.period, 2)) break;
         activateLightWarriorSolarFlash(player2, player1);
       }
@@ -7983,7 +8736,8 @@ window.addEventListener('keyup', (event) => {
 });
 
 function updateMovements() {
-  if (player1.gamblerStunTimer > 0 || player1.divineWorldCutCharging || player1.lightWarriorRadiantPunchCharging || player1.superFireKamehamehaCharging) {
+  if (player1.lightWarriorOmegaFlightTraveling) {
+  } else if (player1.gamblerStunTimer > 0 || player1.divineWorldCutCharging || player1.lightWarriorRadiantPunchCharging || player1.superFireKamehamehaCharging || player1.lightWarriorOmegaFlightCharging) {
     player1.velocity.x = 0;
   } else if (keys.a) {
     player1.velocity.x = -getDebugMoveSpeed(player1);
@@ -7997,7 +8751,8 @@ function updateMovements() {
     return;
   }
 
-  if (player2.gamblerStunTimer > 0 || player2.divineWorldCutCharging || player2.lightWarriorRadiantPunchCharging || player2.superFireKamehamehaCharging) {
+  if (player2.lightWarriorOmegaFlightTraveling) {
+  } else if (player2.gamblerStunTimer > 0 || player2.divineWorldCutCharging || player2.lightWarriorRadiantPunchCharging || player2.superFireKamehamehaCharging || player2.lightWarriorOmegaFlightCharging) {
     player2.velocity.x = 0;
   } else if (keys.ArrowLeft) {
     player2.velocity.x = -getDebugMoveSpeed(player2);
@@ -8101,7 +8856,8 @@ function activateLightWarriorSolarFlash(attacker, target) {
   if (distance > lightWarriorSolarFlashRange) return;
   if (handleCopycatShieldHit(target, attacker)) return;
 
-  const actualDamage = applyDamage(attacker, target, lightWarriorSolarFlashDamage, { isSpecial: true, damageType: 'lightFlash' });
+  const flashDamage = isLightWarriorOmega(attacker) ? lightWarriorSolarFlashDamage * lightWarriorOmegaDamageMultiplier : lightWarriorSolarFlashDamage;
+  const actualDamage = applyDamage(attacker, target, flashDamage, { isSpecial: true, damageType: 'lightFlash' });
   if (actualDamage > 0) {
     target.velocity.x = getDebugKnockback(direction * 15, target);
     target.velocity.y = getDebugKnockback(-8, target);
@@ -8115,10 +8871,11 @@ function getLightWarriorRadiantPunchChargeProgress(attacker) {
 
 function getLightWarriorRadiantPunchDamage(attacker) {
   const progress = getLightWarriorRadiantPunchChargeProgress(attacker);
-  return Math.round(
+  const damage = Math.round(
     lightWarriorRadiantPunchMinDamage +
       (lightWarriorRadiantPunchMaxDamage - lightWarriorRadiantPunchMinDamage) * progress
   );
+  return isLightWarriorOmega(attacker) ? Math.round(damage * lightWarriorOmegaDamageMultiplier) : damage;
 }
 
 function startLightWarriorRadiantPunchCharge(attacker) {
@@ -8232,6 +8989,34 @@ function activateSuperFireKamehameha(attacker, target) {
   return true;
 }
 
+function activateLightWarriorBeam(attacker, target) {
+  if (!canFighterAct(attacker)) return false;
+  if (
+    attacker.characterType !== 'lightWarrior' ||
+    attacker.lightWarriorRadiantPunchCooldown > 0 ||
+    attacker.lightWarriorSolarFlashCooldown > 0 ||
+    gameOver
+  ) {
+    return false;
+  }
+
+  attacker.lightWarriorRadiantPunchCooldown = getDebugCooldown(lightWarriorBeamChargeDuration + lightWarriorBeamDuration, attacker);
+  attacker.lightWarriorSolarFlashCooldown = attacker.lightWarriorRadiantPunchCooldown;
+  attacker.velocity.x = 0;
+  attacker.isAttacking = false;
+  attacker.attackTimer = 0;
+  attacker.lightWarriorBeamCharging = true;
+  superFireKamehamehaCharges.push(new SuperFireKamehamehaCharge({
+    attacker,
+    target,
+    lightWarrior: true,
+    omega: attacker.lightWarriorOmegaTransformed,
+  }));
+  recordSpecialUsed(attacker);
+  playSound(attacker.lightWarriorOmegaTransformed ? 'gravityOrb' : 'fireball');
+  return true;
+}
+
 function launchTankShell(attacker, target) {
   if (!canFighterAct(attacker)) return;
   if (attacker.characterType !== 'tank' || attacker.tankShellCooldown > 0 || gameOver) return;
@@ -8254,6 +9039,16 @@ function launchTankShell(attacker, target) {
   playSound('tankShell');
   recordSpecialUsed(attacker);
   attacker.tankShellCooldown = getDebugCooldown(tankShellCooldown, attacker);
+}
+
+function launchArcadeBossShockwave(attacker, target) {
+  if (!attacker.arcadeBossVariant || attacker.arcadeBossShockwaveCooldown > 0 || gameOver) return false;
+
+  arcadeBossShockwaves.push(new ArcadeBossShockwave({ target, attacker }));
+  attacker.arcadeBossShockwaveCooldown = getDebugCooldown(normalArcadeBossShockwaveCooldown, attacker);
+  playSound('tankShell');
+  recordSpecialUsed(attacker);
+  return true;
 }
 
 function launchSorcererOrb(attacker, target, ignoreCooldown = false, damageMultiplier = 1) {
@@ -8774,6 +9569,17 @@ function handleLightWarriorFrSpecialKey(attacker, target, specialType, comboPres
   return true;
 }
 
+function handleLightWarriorQfSpecialKey(attacker, target, comboPressed, playerNumber) {
+  if (attacker.characterType !== 'lightWarrior') return false;
+
+  if (comboPressed) {
+    activateLightWarriorBeam(attacker, target);
+    return true;
+  }
+
+  return false;
+}
+
 function queueFrPendingSpecial(playerNumber, attacker, action) {
   clearFrPendingSpecial(playerNumber);
 
@@ -9196,9 +10002,10 @@ function activateGamblerLuckIncrementer(attacker) {
 
 function cycleSwitcherMode(attacker) {
   if (!canFighterAct(attacker)) return;
-  if (attacker.characterType !== 'switcher' || gameOver) return;
+  if (attacker.characterType !== 'switcher' || attacker.switcherModeCooldown > 0 || gameOver) return;
 
   attacker.switcherModeIndex = (attacker.switcherModeIndex + 1) % switcherModes.length;
+  attacker.switcherModeCooldown = getDebugCooldown(switcherModeCooldown, attacker);
   recordSpecialUsed(attacker);
   recordPrismSwitcherUse(attacker);
   attacker.moveSpeed = switcherModeStats[attacker.getSwitcherMode()].moveSpeed;
@@ -9279,7 +10086,7 @@ function useSwitcherBlueDash(attacker, target) {
   const direction = targetCenterX >= attackerCenterX ? 1 : -1;
   attacker.switcherDashDirection = direction;
   attacker.switcherDashTimer = getDebugDuration(isSwitcherPrism(attacker) ? 14 : 10, attacker);
-  attacker.velocity.x = direction * (isPrismOverdriveActive() ? 29 : isSwitcherPrism(attacker) ? 27 : 22) * getDebugMultiplier('moveMultiplier', attacker);
+  attacker.velocity.x = direction * (isPrismOverdriveActive() ? 25 : isSwitcherPrism(attacker) ? 22 : 18) * getDebugMultiplier('moveMultiplier', attacker);
   attacker.velocity.y = Math.min(attacker.velocity.y, isSwitcherPrism(attacker) ? -6 : -3);
 }
 
@@ -9465,6 +10272,16 @@ function updateBotSwitcher(profile, absDistance) {
 function updateBotSpecials(profile, absDistance, threat) {
   const closePressure = absDistance < 180;
   const lowHealth = player2.health < player2.maxHealth * 0.45;
+
+  if (
+    player2.arcadeBossVariant &&
+    player2.arcadeBossShockwaveCooldown === 0 &&
+    absDistance < 680 &&
+    shouldBotUseSpecial(profile, 0.72)
+  ) {
+    launchArcadeBossShockwave(player2, player1);
+    return true;
+  }
 
   if (
     player2.characterType === 'reflecter' &&
@@ -9784,9 +10601,106 @@ function startGame() {
   }
   stopMenuMusic();
   stopJackpotTrack();
+  syncLightWarriorOmegaMusic();
   mainMenu.classList.add('hidden');
   document.body.classList.remove('menu-open');
   resetFight();
+  if (normalArcadeActive) {
+    configureNormalArcadeLevel();
+    updateHealthBars();
+    updateCombatHudIdentity();
+  }
+}
+
+function configureNormalArcadeLevel() {
+  if (!normalArcadeActive) return;
+  if (selectedNormalArcadeLevel === 5) {
+    normalArcadeEnemiesRemaining = 0;
+    normalArcadeEnemyIndex = 0;
+    player1.setCharacterType('normal');
+    player2.setCharacterType('normal');
+    configureNormalArcadeBoss();
+    return;
+  }
+  player1.setCharacterType('normal');
+  player2.setCharacterType('normal');
+  normalArcadeEnemiesRemaining = selectedNormalArcadeLevel >= 3 ? selectedNormalArcadeLevel === 3 ? 1 : 4 : 0;
+  normalArcadeEnemyIndex = 1;
+  botEnabled = true;
+  configureNormalArcadeEnemy();
+}
+
+function configureNormalArcadeBoss() {
+  player2.arcadeBossVariant = true;
+  player2.width = 72;
+  player2.height = 144;
+  player2.moveSpeed = normalArcadeBossSpeed;
+  player2.damageMultiplier = normalArcadeBossDamageMultiplier;
+  player2.attackDuration = 12;
+  player2.attackBox = {
+    offset: { x: player2.attacksToTheRight ? player2.width : -64, y: 18 },
+    width: 64,
+    height: 30,
+  };
+  player2.setColor('#980018');
+  player2.setMaxHealth(normalArcadeBossHealth);
+  player2.health = player2.maxHealth;
+  player2.arcadeBossShockwaveCooldown = 0;
+  botEnabled = true;
+  botDifficulty = 'hard';
+  updateHealthBars();
+  updateCombatHudIdentity();
+}
+
+function getNormalArcadeEnemyDifficulty() {
+  if (selectedNormalArcadeLevel === 1) return 'easy';
+  if (selectedNormalArcadeLevel === 2 || selectedNormalArcadeLevel === 3) return 'medium';
+  if (normalArcadeEnemyIndex === 1) return 'easy';
+  if (normalArcadeEnemyIndex <= 3) return 'medium';
+  return 'hard';
+}
+
+function configureNormalArcadeEnemy() {
+  player2.arcadeBossVariant = false;
+  botDifficulty = getNormalArcadeEnemyDifficulty();
+  player2.setColor('#606060');
+  applyBotDifficulty();
+  player2.health = player2.maxHealth;
+  if (selectedNormalArcadeLevel === 1) {
+    player2.setMaxHealth(normalArcadeEnemyHealth);
+    player2.damageMultiplier = normalArcadeEnemyDamageMultiplier;
+  }
+  updateHealthBars();
+  updateCombatHudIdentity();
+}
+
+function startNextNormalArcadeEnemy() {
+  normalArcadeEnemiesRemaining -= 1;
+  normalArcadeEnemyIndex += 1;
+  player1.health = Math.min(player1.maxHealth, player1.health + 20);
+  player2.reset({ x: 820, y: 0 });
+  configureNormalArcadeEnemy();
+  botAttackCooldown = 0;
+  fireballs = [];
+  fireBeams = [];
+  lightShots = [];
+  superFireKamehamehaCharges = [];
+  superFireKamehamehas = [];
+  tankShells = [];
+  cowboyBullets = [];
+  sorcererOrbs = [];
+  sorcererGravityOrbs = [];
+  sorcererSecretOrbs = [];
+  chronoBlades = [];
+  chronoZones = [];
+  divineWorldCutCharges = [];
+  divineWorldCuts = [];
+  arcadeBossShockwaves = [];
+  resetKeys();
+  restartPanel.classList.add('hidden');
+  gameStarted = true;
+  gameOver = false;
+  animate();
 }
 
 function startOldDaysGame() {
@@ -9819,16 +10733,27 @@ function selectCharacter(characterType, secretVariant = null) {
   if (secretVariant === 'superFireMaster' && !isSuperFireMasterUnlocked()) return;
 
   const selectedCharacterType = blindMode ? blindCharacterMix[characterType] || characterType : characterType;
-  const selectedSecretVariant = blindMode ? null : secretVariant;
+  const selectedSecretVariant = blindMode
+    ? null
+    : secretVariant || (selectedCharacterType === 'lightWarrior' && characterSecretModes.lightWarriorOmega ? 'omega' : null);
   if (selectedCharacterType === 'lightWarrior' && !isLightWarriorUnlocked()) return;
   if (selectedCharacterType === 'ghost' && !isGhostUnlocked()) return;
   if (selectedCharacterType === 'divineGeneral' && !isDivineGeneralUnlocked()) return;
   if (characterSelectionPlayer === 1) {
     player1.setCharacterType(selectedCharacterType, selectedSecretVariant);
     if (blindMode) applyBlindFighterLook(player1);
+    if (normalArcadeActive) {
+      player2.setCharacterType('normal');
+      openMapSelect();
+      return;
+    }
     characterSelectionPlayer = 2;
     characterSelectTitle.innerText = 'Personaje Jugador 2';
     characterScreen.classList.add('selecting-player2');
+    characterButtons.forEach(({ button }) => {
+      button.disabled = button.classList.contains('locked');
+      button.classList.toggle('arcade-disabled', false);
+    });
     return;
   }
 
@@ -9848,6 +10773,8 @@ function selectRandomCharacter() {
 function openMapSelect() {
   oldDaysScreen.classList.add('hidden');
   characterScreen.classList.add('hidden');
+  arcadeLevelsScreen.classList.add('hidden');
+  arcadeChaptersScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
   infoScreen.classList.add('hidden');
@@ -9864,6 +10791,7 @@ function closeMapSelect() {
 
 function selectMap(mapName) {
   selectedMap = mapName;
+  configureNormalArcadeLevel();
   mapScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
@@ -9874,10 +10802,16 @@ function openCharacterSelect() {
   characterSelectionPlayer = 1;
   characterSelectTitle.innerText = 'Personaje Jugador 1';
   characterScreen.classList.remove('selecting-player2');
+  characterButtons.forEach(({ button, characterType }) => {
+    const arcadeDisabled = normalArcadeActive && characterType !== 'normal';
+    button.disabled = arcadeDisabled || button.classList.contains('locked');
+    button.classList.toggle('arcade-disabled', arcadeDisabled);
+  });
   titleScreen.classList.add('hidden');
   oldDaysScreen.classList.add('hidden');
   mapScreen.classList.add('hidden');
   gameModesScreen.classList.add('hidden');
+  arcadeChaptersScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
@@ -9892,11 +10826,20 @@ function openCharacterSelect() {
 
 function closeCharacterSelect() {
   deactivateBlindMode();
+  if (normalArcadeActive) {
+    normalArcadeActive = false;
+    characterScreen.classList.add('hidden');
+    arcadeLevelsScreen.classList.remove('hidden');
+    syncNormalArcadeLevels();
+    return;
+  }
   characterSelectionPlayer = 1;
   characterScreen.classList.remove('selecting-player2');
   characterScreen.classList.add('hidden');
   mapScreen.classList.add('hidden');
   gameModesScreen.classList.add('hidden');
+  arcadeChaptersScreen.classList.add('hidden');
+  arcadeLevelsScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
@@ -9948,6 +10891,8 @@ function openGameModes() {
   mapScreen.classList.add('hidden');
   settingsScreen.classList.add('hidden');
   gameModesScreen.classList.add('hidden');
+  arcadeChaptersScreen.classList.add('hidden');
+  arcadeLevelsScreen.classList.add('hidden');
   guideScreen.classList.add('hidden');
   achievementsScreen.classList.add('hidden');
   statsScreen.classList.add('hidden');
@@ -9963,6 +10908,63 @@ function openGameModes() {
 function closeGameModes() {
   gameModesScreen.classList.add('hidden');
   titleScreen.classList.remove('hidden');
+}
+
+function openArcadeLevels() {
+  gameModesScreen.classList.add('hidden');
+  arcadeLevelsScreen.classList.add('hidden');
+  arcadeChaptersScreen.classList.remove('hidden');
+  normalArcadeActive = false;
+}
+
+function openArcadeChapter() {
+  arcadeChaptersScreen.classList.add('hidden');
+  arcadeLevelsScreen.classList.remove('hidden');
+  syncNormalArcadeLevels();
+}
+
+function closeArcadeChapters() {
+  arcadeChaptersScreen.classList.add('hidden');
+  gameModesScreen.classList.remove('hidden');
+}
+
+function closeArcadeLevels() {
+  arcadeLevelsScreen.classList.add('hidden');
+  arcadeChaptersScreen.classList.remove('hidden');
+}
+
+function getNormalArcadeHighestLevel() {
+  try {
+    const savedLevel = Number(localStorage.getItem(normalArcadeProgressStorageKey) || 1);
+    return Math.min(5, Math.max(1, Number.isFinite(savedLevel) ? savedLevel : 1));
+  } catch (error) {
+    return 1;
+  }
+}
+
+function syncNormalArcadeLevels() {
+  const highestLevel = getNormalArcadeHighestLevel();
+  normalArcadeLevelButtons.forEach((levelButton) => {
+    const level = Number(levelButton.dataset.arcadeLevel);
+    const unlocked = level <= highestLevel;
+    levelButton.disabled = !unlocked;
+    levelButton.classList.toggle('locked', !unlocked);
+    levelButton.classList.toggle('completed', level < highestLevel);
+    const status = levelButton.querySelector('.arcade-level-status');
+    if (status) status.textContent = unlocked ? (level < highestLevel ? 'SUPERADO' : 'DISPONIBLE') : 'BLOQUEADO';
+  });
+}
+
+function unlockNextNormalArcadeLevel(completedLevel) {
+  const nextLevel = Math.min(5, Number(completedLevel) + 1);
+  try {
+    if (nextLevel > getNormalArcadeHighestLevel()) {
+      localStorage.setItem(normalArcadeProgressStorageKey, String(nextLevel));
+    }
+  } catch (error) {
+    // Progress remains available for the current session if storage is blocked.
+  }
+  syncNormalArcadeLevels();
 }
 
 function openGuide() {
@@ -10249,6 +11251,9 @@ function syncDebugControls() {
   debugAffectedCharacterInputs.forEach((input) => {
     input.checked = debugAffectedCharacters[input.dataset.debugCharacter] !== false;
   });
+  if (debugRestoreAttackSpamInput) {
+    debugRestoreAttackSpamInput.checked = debugSettings.restoreAttackSpam;
+  }
   if (debugAffectAllInput) {
     debugAffectAllInput.checked = Array.from(debugAffectedCharacterInputs).every((input) => input.checked);
   }
@@ -10323,7 +11328,7 @@ function getCharacterMaxHealth(characterType, fighter = null) {
   if (characterType === 'fireMaster') return getFireMasterHealth(fighter);
   if (characterType === 'lightWarrior') return lightWarriorHealth;
   if (characterType === 'tank') return isTankIronWall(fighter) ? 260 : 200;
-  if (characterType === 'cowboy') return cowboyHealth;
+  if (characterType === 'cowboy') return getCowboyHealth(fighter);
   if (characterType === 'reflecter') return getReflecterHealth(fighter);
   if (characterType === 'switcher') return switcherHealth;
   if (characterType === 'sorcerer') return sorcererHealth;
@@ -10435,6 +11440,21 @@ characterBackButton.addEventListener('click', closeCharacterSelect);
 mapBackButton.addEventListener('click', closeMapSelect);
 settingsButton.addEventListener('click', openSettings);
 gameModesButton.addEventListener('click', openGameModes);
+arcadeModeButton.addEventListener('click', openArcadeLevels);
+normalArcadeChapterButton.addEventListener('click', openArcadeChapter);
+normalArcadeLevelButtons.forEach((levelButton) => {
+  levelButton.addEventListener('click', () => {
+    if (levelButton.disabled) return;
+    selectedNormalArcadeLevel = Number(levelButton.dataset.arcadeLevel);
+    normalArcadeActive = true;
+    player1.setCharacterType('normal');
+    player2.setCharacterType('normal');
+    selectedMap = 'normalArcade';
+    normalArcadeLevelButtons.forEach((button) => button.classList.remove('selected'));
+    levelButton.classList.add('selected');
+    startGame();
+  });
+});
 guideButton.addEventListener('click', openGuide);
 achievementsButton.addEventListener('click', openAchievements);
 statsButton.addEventListener('click', openStatistics);
@@ -10442,6 +11462,8 @@ infoButton.addEventListener('click', openInfo);
 opinionButton.addEventListener('click', openOpinion);
 backButton.addEventListener('click', closeSettings);
 gameModesBackButton.addEventListener('click', closeGameModes);
+arcadeChaptersBackButton.addEventListener('click', closeArcadeChapters);
+arcadeLevelsBackButton.addEventListener('click', closeArcadeLevels);
 guideBackButton.addEventListener('click', closeGuide);
 achievementsBackButton.addEventListener('click', closeAchievements);
 statsBackButton.addEventListener('click', closeStatistics);
@@ -10450,6 +11472,10 @@ infoBackButton.addEventListener('click', closeInfo);
 opinionBackButton.addEventListener('click', closeOpinion);
 debugBackButton.addEventListener('click', closeDebug);
 debugResetButton.addEventListener('click', resetDebugSettings);
+debugRestoreAttackSpamInput.addEventListener('change', () => {
+  debugSettings.restoreAttackSpam = debugRestoreAttackSpamInput.checked;
+  syncDebugControls();
+});
 secretGuideBackButton.addEventListener('click', closeSecretGuide);
 secretCharactersBackButton.addEventListener('click', closeSecretCharacters);
 eventGuideBackButton.addEventListener('click', closeEventGuide);

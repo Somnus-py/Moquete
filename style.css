@@ -470,6 +470,34 @@ body.menu-open .instructions {
   box-shadow: 0 2px 0 #111;
 }
 
+/* Keep readable contrast in the information screens. */
+.guide-section,
+.achievement-card,
+.stats-summary div,
+.stats-table,
+.setting-row,
+.difficulty-setting,
+.secret-code-panel,
+.info-panel,
+.opinion-panel {
+  color: #111;
+}
+
+.guide-section h3,
+.achievement-card strong,
+.achievement-card span,
+.stats-summary span,
+.stats-summary strong,
+.stats-table span,
+.stats-table strong,
+.setting-row strong,
+.difficulty-setting strong,
+.secret-code-panel strong,
+.info-panel strong,
+.opinion-panel strong {
+  color: #111;
+}
+
 .guide-section {
   border: 4px solid #111;
   background: #fff;
@@ -3223,6 +3251,931 @@ body.menu-open .instructions {
   .game-shell,
   .instructions {
     width: 100%;
-    min-width: 1024px;
+    min-width: 0;
+  }
+
+  #gameCanvas {
+    height: auto;
+    max-width: 100%;
+  }
+}
+
+/* Arcade presentation for the title and fighter roster. */
+.main-menu {
+  background:
+    linear-gradient(115deg, rgba(239, 83, 80, 0.18), transparent 34%),
+    linear-gradient(245deg, rgba(66, 165, 245, 0.2), transparent 36%),
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.08), transparent 42%),
+    #090b10;
+}
+
+.main-menu::before {
+  border-color: rgba(255, 255, 255, 0.28);
+  inset: 20px 26px;
+}
+
+.main-menu::after {
+  background:
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.78)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 3px, transparent 3px 34px);
+  height: 96px;
+}
+
+.menu-screen {
+  background:
+    linear-gradient(135deg, rgba(66, 165, 245, 0.1), transparent 34%),
+    linear-gradient(315deg, rgba(239, 83, 80, 0.1), transparent 38%),
+    rgba(15, 18, 24, 0.96);
+  border-color: #050608;
+  box-shadow:
+    0 12px 0 #050608,
+    inset 0 0 0 2px rgba(255, 255, 255, 0.08),
+    inset 0 -22px 34px rgba(0, 0, 0, 0.28),
+    0 26px 44px rgba(0, 0, 0, 0.66);
+  color: #f5f5f5;
+}
+
+.main-menu h1,
+.main-menu h2 {
+  color: #fff;
+  text-shadow:
+    0 5px 0 #050608,
+    4px 0 0 var(--player1),
+    -4px 0 0 var(--player2);
+}
+
+.main-menu h1 {
+  font-size: clamp(68px, 8vw, 96px);
+  letter-spacing: 3px;
+  animation: menu-title-in 0.55s ease both;
+}
+
+.main-menu h2 {
+  letter-spacing: 1px;
+}
+
+.title-menu {
+  background:
+    linear-gradient(135deg, rgba(239, 83, 80, 0.14), transparent 40%),
+    linear-gradient(315deg, rgba(66, 165, 245, 0.14), transparent 40%),
+    rgba(9, 11, 16, 0.94);
+  min-width: 620px;
+  padding-top: 48px;
+}
+
+.title-menu .menu-subtitle {
+  background: #050608;
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 5px 0 #050608, 0 0 24px rgba(66, 165, 245, 0.18);
+  color: #d9e7ff;
+  font-size: 14px;
+  letter-spacing: 3px;
+}
+
+.title-menu .secondary-actions {
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  padding-top: 18px;
+}
+
+.title-menu #playButton {
+  background: linear-gradient(180deg, #fff8bf 0 45%, #fdd835 45% 100%);
+  border-color: #050608;
+  box-shadow:
+    0 9px 0 #050608,
+    0 0 30px rgba(253, 216, 53, 0.25),
+    inset 0 -5px 0 rgba(0, 0, 0, 0.16);
+  letter-spacing: 2px;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.7);
+}
+
+.title-menu #playButton::before {
+  color: #111;
+  content: '>>';
+  font-family: 'Courier New', Consolas, monospace;
+  margin-right: 12px;
+}
+
+.title-menu .secondary-actions button {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 6px 0 #050608;
+  color: #f5f5f5;
+  font-size: 14px;
+}
+
+.title-menu .secondary-actions button:hover,
+.title-menu .secondary-actions button:focus-visible {
+  background: #fff;
+  color: #111;
+}
+
+.character-menu {
+  background:
+    linear-gradient(90deg, rgba(239, 83, 80, 0.12), transparent 22% 78%, rgba(66, 165, 245, 0.12)),
+    rgba(11, 14, 20, 0.98);
+  padding: 24px 26px 20px;
+  width: min(920px, calc(100% - 34px));
+}
+
+.character-menu h2 {
+  font-size: clamp(28px, 4vw, 42px);
+  margin-bottom: 2px;
+}
+
+.character-menu h2::after {
+  box-shadow: 0 0 14px rgba(253, 216, 53, 0.38);
+  height: 4px;
+  margin-top: 12px;
+}
+
+.character-grid {
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.character-option {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02) 58%),
+    linear-gradient(180deg, #202631 0 58%, #0c0f15 58% 100%);
+  border-color: #050608;
+  box-shadow:
+    0 7px 0 #050608,
+    inset 0 0 0 2px rgba(255, 255, 255, 0.08),
+    inset 0 -18px 28px rgba(0, 0, 0, 0.32);
+  height: 158px;
+}
+
+.character-option::before {
+  background:
+    radial-gradient(circle at 50% 34%, color-mix(in srgb, var(--accent) 38%, transparent) 0 24px, transparent 62px),
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 42%, transparent), transparent 48%);
+}
+
+.character-option::after {
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  bottom: 42px;
+  height: 3px;
+  opacity: 0.8;
+}
+
+.character-option > span:first-child {
+  background: linear-gradient(90deg, #050608 0 72%, var(--accent) 72% 100%);
+  border-top-color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  padding: 11px 6px;
+}
+
+.character-option:hover,
+.character-option:focus-visible {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--accent) 28%, #fff) 0 58%, var(--accent) 58% 100%);
+  box-shadow:
+    0 10px 0 #050608,
+    0 0 0 3px color-mix(in srgb, var(--accent) 60%, transparent),
+    0 0 24px color-mix(in srgb, var(--accent) 35%, transparent),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.character-option.locked {
+  filter: grayscale(0.82) brightness(0.7);
+}
+
+.character-option.locked::after {
+  background: #050608;
+  border-color: var(--accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 38%, transparent);
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.character-actions {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  padding-top: 14px;
+  width: 100%;
+}
+
+#randomCharacterButton,
+.character-actions > #characterBackButton {
+  border-color: #050608;
+  box-shadow: 0 6px 0 #050608;
+}
+
+.arcade-mode-option {
+  align-items: start;
+  background:
+    linear-gradient(135deg, rgba(253, 216, 53, 0.18), transparent 55%),
+    #f5f5f5;
+  border-color: #050608;
+  box-shadow: 0 7px 0 #050608, inset 0 0 0 2px rgba(253, 216, 53, 0.36);
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 16px 20px 19px;
+  text-align: left;
+  text-transform: none;
+  width: 100%;
+}
+
+.arcade-mode-option strong {
+  color: #111;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 24px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.arcade-mode-option span {
+  border-left: 5px solid #fdd835;
+  color: #111;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+  padding-left: 10px;
+}
+
+.arcade-mode-option:hover,
+.arcade-mode-option:focus-visible {
+  background:
+    linear-gradient(135deg, #fff8bf, #fdd835);
+  box-shadow:
+    0 10px 0 #050608,
+    0 0 0 3px rgba(253, 216, 53, 0.42),
+    0 0 24px rgba(253, 216, 53, 0.24);
+  color: #111;
+  transform: translateY(-3px);
+}
+
+.arcade-levels-menu {
+  gap: 16px;
+  width: min(760px, calc(100% - 34px));
+}
+
+.arcade-chapters-menu {
+  gap: 16px;
+  width: min(700px, calc(100% - 34px));
+}
+
+.arcade-chapters-menu h2 {
+  font-size: clamp(30px, 5vw, 46px);
+}
+
+.arcade-chapters-panel {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+
+.arcade-chapters-panel h3 {
+  color: #111;
+  margin-bottom: 2px;
+}
+
+.arcade-chapter-option {
+  align-items: center;
+  background:
+    linear-gradient(90deg, rgba(253, 216, 53, 0.2), transparent 38%),
+    #fff;
+  border: 3px solid #111;
+  box-shadow: 0 6px 0 #111;
+  color: #111;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto 1fr auto;
+  min-height: 96px;
+  padding: 14px 16px;
+  text-align: left;
+  width: 100%;
+}
+
+.arcade-chapter-option:has(.arcade-level-scene) {
+  grid-template-rows: auto auto;
+  min-height: 190px;
+}
+
+.arcade-chapter-option .arcade-chapter-number {
+  align-self: start;
+  grid-row: 1 / span 2;
+}
+
+.arcade-chapter-option .arcade-level-scene {
+  grid-column: 2;
+  grid-row: 1;
+  height: 94px;
+  margin: 0;
+  min-width: 0;
+  padding-top: 14px;
+}
+
+.arcade-chapter-option .arcade-chapter-copy {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.arcade-chapter-option .arcade-level-arrow {
+  align-self: end;
+  grid-column: 3;
+  grid-row: 2;
+  margin: 0;
+}
+
+.arcade-chapter-option:hover,
+.arcade-chapter-option:focus-visible {
+  background: linear-gradient(90deg, #fff8bf, #fdd835);
+  box-shadow: 0 9px 0 #111, 0 0 0 3px rgba(253, 216, 53, 0.38);
+  transform: translateY(-3px);
+}
+
+.arcade-chapter-number {
+  align-items: center;
+  background: #111;
+  color: #fdd835;
+  display: flex;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 22px;
+  font-weight: 900;
+  height: 52px;
+  justify-content: center;
+  width: 52px;
+}
+
+.arcade-chapter-copy {
+  display: grid;
+  gap: 5px;
+}
+
+.arcade-chapter-copy strong {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+.arcade-chapter-copy span {
+  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+@media (max-width: 560px) {
+  .arcade-chapter-option {
+    gap: 9px;
+    grid-template-columns: auto 1fr;
+  }
+
+  .arcade-chapter-option:has(.arcade-level-scene) {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .arcade-chapter-option .arcade-chapter-number {
+    grid-row: 1 / span 2;
+  }
+
+  .arcade-chapter-option .arcade-level-scene,
+  .arcade-chapter-option .arcade-chapter-copy {
+    grid-column: 2;
+  }
+
+  .arcade-chapter-option .arcade-level-arrow {
+    display: none;
+  }
+}
+
+.arcade-levels-menu h2 {
+  font-size: clamp(30px, 5vw, 46px);
+}
+
+.arcade-intro-menu {
+  gap: 18px;
+  max-width: 700px;
+  width: min(700px, calc(100% - 34px));
+}
+
+.arcade-intro-menu h2 {
+  font-size: clamp(30px, 5vw, 48px);
+}
+
+.arcade-intro-menu .arcade-story-panel {
+  margin: 0;
+}
+
+.arcade-intro-menu > button:not([data-i18n]) {
+  background: linear-gradient(180deg, #fff8bf 0 45%, #fdd835 45% 100%);
+  color: #111;
+  min-width: 250px;
+}
+
+.arcade-story-panel {
+  background:
+    linear-gradient(90deg, rgba(239, 83, 80, 0.12), transparent 34%),
+    #111820;
+  border: 4px solid #050608;
+  box-shadow: 0 6px 0 #050608, inset 0 0 0 2px rgba(255, 255, 255, 0.08);
+  color: #f5f5f5;
+  display: grid;
+  gap: 8px;
+  padding: 16px 20px;
+  width: 100%;
+}
+
+.arcade-story-kicker {
+  color: #fdd835;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.arcade-story-panel p {
+  color: #e7edf5;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.arcade-levels-panel {
+  background:
+    linear-gradient(135deg, rgba(66, 165, 245, 0.1), transparent 52%),
+    #f5f5f5;
+  width: 100%;
+}
+
+.arcade-levels-panel h3 {
+  color: #111;
+  margin-bottom: 12px;
+}
+
+.arcade-level-list {
+  display: grid;
+  gap: 12px;
+}
+
+.arcade-level-option {
+  align-items: center;
+  background:
+    linear-gradient(90deg, rgba(66, 165, 245, 0.14), transparent 28%),
+    #fff;
+  border: 4px solid #111;
+  box-shadow: 0 6px 0 #111;
+  color: #111;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto 1fr;
+  min-height: 108px;
+  padding: 14px 16px;
+  text-align: left;
+  width: 100%;
+}
+
+.arcade-level-number {
+  align-items: center;
+  background: #111;
+  color: #fdd835;
+  display: flex;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 24px;
+  font-weight: 900;
+  height: 58px;
+  justify-content: center;
+  width: 58px;
+}
+
+.arcade-level-scene {
+  align-items: end;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 42%),
+    repeating-linear-gradient(0deg, transparent 0 18px, rgba(255, 255, 255, 0.035) 18px 19px),
+    #303030;
+  border: 3px solid #111;
+  display: flex;
+  gap: 4%;
+  grid-column: 2;
+  height: 118px;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 16px 3% 0;
+  position: relative;
+}
+
+.arcade-level-scene::before {
+  border-top: 2px dashed rgba(253, 216, 53, 0.72);
+  content: '';
+  left: 12%;
+  position: absolute;
+  right: 12%;
+  top: 62%;
+}
+
+.arcade-level-scene::after {
+  background: #050505;
+  bottom: 0;
+  content: '';
+  height: 20px;
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.arcade-level-player,
+.arcade-level-boss,
+.arcade-level-enemies span {
+  border: 3px solid #111;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.arcade-level-player {
+  background: #09a7e8;
+  height: 76px;
+  width: 64px;
+}
+
+.arcade-level-player::before,
+.arcade-level-boss::before {
+  color: #fff;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 10px;
+  font-weight: 900;
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  text-shadow: 0 1px 0 #111;
+  top: -18px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.arcade-level-player::before {
+  content: 'NORMAL';
+}
+
+.arcade-level-enemies {
+  align-items: end;
+  display: flex;
+  flex: 1;
+  gap: 8%;
+  height: 70px;
+  justify-content: center;
+}
+
+.arcade-level-enemies span {
+  background: #666;
+  height: 58px;
+  width: 28px;
+}
+
+.arcade-level-enemies span:nth-child(2) {
+  height: 72px;
+}
+
+.arcade-level-enemies span:nth-child(3) {
+  height: 64px;
+}
+
+.arcade-level-enemies span:nth-child(4) {
+  height: 76px;
+}
+
+.arcade-level-enemies span:nth-child(2),
+.arcade-level-enemies span:nth-child(4) {
+  background: #777;
+}
+
+.arcade-level-boss {
+  background: #570000;
+  height: 84px;
+  width: 70px;
+}
+
+.arcade-level-boss::before {
+  content: 'BOSS';
+  color: #ff8a80;
+}
+
+.arcade-level-copy {
+  display: grid;
+  gap: 5px;
+  grid-column: 1 / -1;
+}
+
+.arcade-level-copy strong {
+  color: #111;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 22px;
+  text-transform: uppercase;
+}
+
+.arcade-level-copy span {
+  color: #333;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.arcade-level-arrow {
+  color: #1976d2;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 25px;
+  font-weight: 900;
+  grid-column: 2;
+  justify-self: end;
+  margin-top: -54px;
+  position: relative;
+  z-index: 2;
+}
+
+.arcade-level-option:hover,
+.arcade-level-option:focus-visible {
+  background:
+    linear-gradient(90deg, #fff8bf, #fdd835);
+  box-shadow: 0 9px 0 #111, 0 0 0 3px rgba(253, 216, 53, 0.38);
+  transform: translateY(-3px);
+}
+
+.arcade-level-option:hover .arcade-level-boss,
+.arcade-level-option:focus-visible .arcade-level-boss {
+  box-shadow: 0 0 18px rgba(239, 83, 80, 0.72);
+}
+
+.arcade-level-option.locked {
+  cursor: not-allowed;
+  filter: grayscale(0.9);
+  opacity: 0.58;
+}
+.character-option.arcade-disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.78);
+  opacity: 0.45;
+}
+.character-option.arcade-disabled::after {
+  background: #111;
+  color: #fdd835;
+  content: 'SOLO NORMAL';
+  font-size: 10px;
+  font-weight: 900;
+  left: 50%;
+  padding: 4px 7px;
+  position: absolute;
+  top: 8px;
+  transform: translateX(-50%);
+}
+
+.arcade-level-option.locked:hover {
+  background:
+    linear-gradient(90deg, rgba(66, 165, 245, 0.14), transparent 28%),
+    #fff;
+  box-shadow: 0 6px 0 #111;
+  transform: none;
+}
+
+.arcade-level-option.completed {
+  border-color: #4caf50;
+}
+
+.arcade-level-option.selected {
+  outline: 3px solid #fdd835;
+  outline-offset: 3px;
+}
+
+.arcade-level-status {
+  background: #111;
+  color: #fdd835;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 11px;
+  font-weight: 900;
+  grid-column: 2;
+  justify-self: end;
+  letter-spacing: 1px;
+  margin-top: -42px;
+  padding: 5px 7px;
+  position: relative;
+  z-index: 2;
+}
+
+.arcade-level-option.locked .arcade-level-status {
+  color: #e0e0e0;
+}
+
+.arcade-level-option.completed .arcade-level-status {
+  color: #8ff0a4;
+}
+
+@media (max-width: 520px) {
+  .arcade-level-option {
+    gap: 10px;
+    grid-template-columns: auto 1fr;
+  }
+
+  .arcade-level-arrow {
+    display: none;
+  }
+
+  .arcade-level-status {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 0;
+  }
+}
+
+@keyframes menu-title-in {
+  from { opacity: 0; transform: translateY(-14px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 720px) {
+  .title-menu {
+    min-width: 0;
+    padding-left: 22px;
+    padding-right: 22px;
+    width: calc(100% - 20px);
+  }
+
+  .main-menu h1 {
+    font-size: 56px;
+  }
+
+  .character-menu {
+    padding: 18px 14px 14px;
+    width: calc(100% - 20px);
+  }
+
+  .character-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .character-option {
+    height: 146px;
+  }
+}
+
+/* Clean campaign layout for Normal's level map. */
+.arcade-levels-menu {
+  align-items: stretch;
+  gap: 14px;
+  max-height: calc(100% - 28px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 20px;
+  scrollbar-color: #fdd835 #111820;
+  scrollbar-width: thin;
+  width: min(860px, calc(100% - 24px));
+}
+
+.arcade-levels-menu > h2 {
+  align-self: center;
+  font-size: clamp(30px, 4.5vw, 46px);
+}
+
+.arcade-story-panel {
+  border-left: 7px solid #fdd835;
+  gap: 6px;
+  padding: 13px 18px;
+}
+
+.arcade-story-panel p {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.arcade-levels-panel {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.arcade-levels-panel h3 {
+  border-bottom: 3px solid #d4af37;
+  font-size: 17px;
+  margin: 0;
+  padding-bottom: 9px;
+}
+
+.arcade-level-list {
+  gap: 10px;
+}
+
+.arcade-level-option {
+  align-items: center;
+  border-width: 3px;
+  box-shadow: 0 5px 0 #111;
+  column-gap: 14px;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  min-height: 82px;
+  padding: 11px 13px;
+}
+
+.arcade-level-number {
+  font-size: 20px;
+  height: 48px;
+  width: 48px;
+}
+
+.arcade-level-copy {
+  gap: 4px;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.arcade-level-copy strong {
+  font-size: 17px;
+}
+
+.arcade-level-copy span {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.arcade-level-scene {
+  grid-column: 2;
+  grid-row: 2;
+  height: 94px;
+  margin-top: 2px;
+  padding-top: 14px;
+}
+
+.arcade-level-option:has(.arcade-level-scene) {
+  min-height: 194px;
+}
+
+.arcade-level-option:has(.arcade-level-scene) .arcade-level-copy {
+  grid-row: 3;
+}
+
+.arcade-level-arrow,
+.arcade-level-status {
+  grid-column: 3;
+  grid-row: 1;
+  margin: 0;
+}
+
+.arcade-level-arrow {
+  align-self: center;
+}
+
+.arcade-level-status {
+  align-self: start;
+  justify-self: end;
+}
+
+.arcade-level-option:has(.arcade-level-scene) .arcade-level-arrow {
+  align-self: end;
+  grid-row: 3;
+}
+
+.arcade-level-option.locked {
+  min-height: 70px;
+}
+
+.arcade-level-option.locked .arcade-level-copy {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.arcade-level-option.completed {
+  background:
+    linear-gradient(90deg, rgba(76, 175, 80, 0.16), transparent 34%),
+    #fff;
+}
+
+@media (max-width: 560px) {
+  .arcade-levels-menu {
+    padding: 14px 10px;
+    width: calc(100% - 12px);
+  }
+
+  .arcade-story-panel {
+    padding: 11px 13px;
+  }
+
+  .arcade-level-option {
+    column-gap: 9px;
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .arcade-level-number {
+    font-size: 17px;
+    height: 40px;
+    width: 40px;
+  }
+
+  .arcade-level-arrow,
+  .arcade-level-status {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .arcade-level-status {
+    margin-top: 0;
+  }
+
+  .arcade-level-option:has(.arcade-level-scene) {
+    min-height: 190px;
+  }
+
+  .arcade-level-scene {
+    height: 84px;
   }
 }

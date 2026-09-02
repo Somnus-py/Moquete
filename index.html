@@ -66,7 +66,7 @@
           <button type="button" id="guideButton" data-i18n="guide">Guia</button>
           <button type="button" id="achievementsButton" data-i18n="achievements">Logros</button>
           <button type="button" id="statsButton" data-i18n="stats">Estadisticas</button>
-          <button type="button" id="infoButton" data-i18n="information">Informacion</button>
+          <button type="button" id="infoButton" data-i18n="information">Changelog</button>
           <button type="button" id="opinionButton" class="hidden" data-i18n="opinion">Opinion de Codex</button>
           <button type="button" id="settingsButton" data-i18n="settings">Ajustes</button>
         </div>
@@ -418,8 +418,10 @@
         <div class="guide-section">
           <h3>Disponibles</h3>
           <div class="character-guide">
-            <span><strong>Clasico local</strong> dos jugadores en la misma pantalla. Es el modo principal del juego.</span>
-            <span><strong>Contra bot</strong> activa el bot desde Ajustes y elegi dificultad facil, media o dificil.</span>
+            <button type="button" class="arcade-mode-option" id="arcadeModeButton" aria-describedby="arcadeModeDescription">
+              <strong>Arcade</strong>
+              <span id="arcadeModeDescription">Recorre una aventura de combates consecutivos con tu personaje, rivales especiales, finales y desbloqueos.</span>
+            </button>
           </div>
         </div>
         <div class="guide-section">
@@ -429,6 +431,70 @@
           </div>
         </div>
         <button type="button" id="gameModesBackButton" data-i18n="back">Volver</button>
+      </div>
+      <div class="menu-screen arcade-chapters-menu hidden" id="arcadeChaptersScreen">
+        <h2>Capitulos de Arcade</h2>
+        <div class="guide-section arcade-chapters-panel">
+          <h3>Selecciona un capitulo</h3>
+          <button type="button" class="arcade-chapter-option" id="normalArcadeChapterButton">
+            <span class="arcade-chapter-number">01</span>
+            <span class="arcade-level-scene" aria-hidden="true">
+              <span class="arcade-level-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss"></span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong>El desafio de Normal</strong>
+              <span>Capitulo 1. Supera los 5 niveles de la historia de Normal.</span>
+            </span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+          </button>
+        </div>
+        <button type="button" id="arcadeChaptersBackButton" data-i18n="back">Volver</button>
+      </div>
+      <div class="menu-screen arcade-levels-menu hidden" id="arcadeLevelsScreen">
+        <h2>Capitulo de Normal</h2>
+        <div class="arcade-story-panel">
+          <span class="arcade-story-kicker">El comienzo del caos</span>
+          <p>Normal se encontro con un grupo criminal que estaba aterrorizando los barrios de la ciudad. Intentaron secuestrarlo para obligarlo a trabajar para ellos, pero Normal se resistio y decidio acabar con la banda golpe a golpe.</p>
+          <p>Ahora debe atravesar su primer escondite y demostrar que una buena pelea puede ser el principio de una gran historia.</p>
+        </div>
+        <div class="guide-section arcade-levels-panel">
+          <h3>Selecciona un nivel</h3>
+          <div class="arcade-level-list">
+            <button type="button" class="arcade-level-option" id="normalArcadeLevelButton" data-arcade-level="1">
+              <span class="arcade-level-number">01</span>
+              <span class="arcade-level-copy">
+                <strong>Nivel 1</strong>
+                <span>El comienzo del caos. Enfrentate a Bruto Gris, un enemigo controlado por IA con menos vida y daño que Normal.</span>
+              </span>
+              <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+            </button>
+            <button type="button" class="arcade-level-option locked" data-arcade-level="2" disabled>
+              <span class="arcade-level-number">02</span>
+              <span class="arcade-level-copy"><strong>El escondite</strong><span>La banda cerro las salidas. Derrota a sus guardianes y abrete paso.</span></span>
+              <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+            <button type="button" class="arcade-level-option locked" data-arcade-level="3" disabled>
+              <span class="arcade-level-number">03</span>
+              <span class="arcade-level-copy"><strong>Zona de riesgo</strong><span>Los rivales mas duros protegen el centro de operaciones criminal.</span></span>
+              <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+            <button type="button" class="arcade-level-option locked" data-arcade-level="4" disabled>
+              <span class="arcade-level-number">04</span>
+              <span class="arcade-level-copy"><strong>La emboscada</strong><span>Normal quedo rodeado. Solo una victoria perfecta le permitira continuar.</span></span>
+              <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+            <button type="button" class="arcade-level-option locked" data-arcade-level="5" disabled>
+              <span class="arcade-level-number">05</span>
+              <span class="arcade-level-copy"><strong>Jefe de la banda</strong><span>El jefe rojo espera al final. Tiene 140 de vida y una onda de choque capaz de lanzar a Normal.</span></span>
+              <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+          </div>
+        </div>
+        <button type="button" id="arcadeLevelsBackButton" data-i18n="back">Volver</button>
       </div>
       <div class="menu-screen debug-menu hidden" id="debugScreen">
         <h2 data-i18n="debugTitle">Pantalla Debug</h2>
@@ -473,6 +539,10 @@
             <input type="range" id="debugKnockbackMultiplier" min="0" max="3" step="0.25" value="1" />
             <strong id="debugKnockbackValue">1x</strong>
           </label>
+          <label class="debug-control debug-toggle-control">
+            <span>Devolver spam de golpes</span>
+            <input type="checkbox" id="debugRestoreAttackSpam" />
+          </label>
         </div>
         <div class="debug-targets">
           <div class="debug-targets-heading">
@@ -483,7 +553,7 @@
             </label>
           </div>
           <div class="debug-target-grid">
-            <label><input type="checkbox" data-debug-character="normal" checked /> Normal</label>
+            <label><input type="checkbox" data-debug-character="normal" checked /> El desafio de "Normal"</label>
             <label><input type="checkbox" data-debug-character="lightWarrior" checked /> Light Warrior</label>
             <label><input type="checkbox" data-debug-character="fireMaster" checked /> Fire Master</label>
             <label><input type="checkbox" data-debug-character="tank" checked /> Tank</label>
@@ -687,6 +757,11 @@
             <strong>Super Fire Master</strong>
             <span>Win Mana Meltdown with Fire Master in under 45 seconds and with 80+ health.</span>
           </div>
+          <div class="achievement-card" data-achievement="normalArcadeCompleted">
+            <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
+            <strong>El desafio de Normal</strong>
+            <span>Completa el capitulo de Normal en el modo Arcade.</span>
+          </div>
         </div>
         <button type="button" id="achievementsBackButton" data-i18n="back">Volver</button>
       </div>
@@ -850,12 +925,31 @@
         </div>
       </div>
       <div class="menu-screen info-menu hidden" id="infoScreen">
-        <h2>Informacion</h2>
+        <h2 data-i18n="information">Changelog</h2>
         <div class="guide-section">
-          <h3>Sobre Moquete</h3>
+          <h3>Actualizacion 2.0</h3>
           <div class="character-guide">
-            <span>Moquete es un juego de peleas creado puramente por diversion,no busco fama ni reconocimiento, si es que encuentras algun error en el juego por favor dimelo. quiero aclarar que tambien use un "poquito" de IA xd pero espero que disfurtes el juego</span>
-            <span><strong>-Atentamente, el creador de este juego</strong></span>
+            <span><strong>Version previa a publicacion</strong> esta actualizacion reune los cambios mas importantes realizados antes de publicar el juego en GitHub y HTML.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Cambios recientes</h3>
+          <div class="character-guide">
+            <span><strong>Omega Light Warrior</strong> se incorporo como una forma poco documentada de Light Warrior. Se conocen algunos cambios en su aspecto y habilidades, pero todavia quedan detalles por descubrir.</span>
+            <span><strong>Modo Arcade</strong> ahora permite recorrer el primer capitulo de la historia de Normal a traves de combates consecutivos, con rivales, jefe, desbloqueos y progreso guardado.</span>
+            <span><strong>Buffs</strong> Deadeye Cowboy ahora tiene 110 de vida y un diseno ligeramente mas compacto. Gambler recupera mas rapido su segunda habilidad.</span>
+            <span><strong>Nerfeos</strong> Ghost tiene mas cooldown y hace contacto con dano cada 0,03 segundos. Reflecter 2.0 tiene menos dano, un escudo mas pequeno y menor duracion. Switcher tiene cooldown casi instantaneo al cambiar de modo y un dash mas lento.</span>
+            <span><strong>Apartado visual</strong> el menu recibio una presentacion arcade renovada, con nuevas tarjetas de personajes, previews visuales, paneles, colores, efectos, HUD y una identidad mas clara para cada pantalla.</span>
+            <span><strong>Preparacion de publicacion</strong> se mantienen los controles locales, los modos, los mapas, los eventos, los logros, los personajes secretos y la pantalla de debug.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Ideas para futuras actualizaciones</h3>
+          <div class="character-guide">
+            <span><strong>Mas capitulos de Arcade</strong> agregar nuevos rivales, rutas, jefes y finales para continuar la historia de Normal.</span>
+            <span><strong>Entrenamiento</strong> incluir un modo para probar habilidades, dano, cooldowns y combinaciones sin comenzar una partida completa.</span>
+            <span><strong>Mas contenido</strong> sumar personajes, mapas, eventos especiales, variantes secretas y nuevas animaciones.</span>
+            <span><strong>Mejoras de combate</strong> agregar estadisticas detalladas, indicadores de buffs y efectos mas claros para cada habilidad.</span>
           </div>
         </div>
         <button type="button" id="infoBackButton" data-i18n="back">Volver</button>
@@ -890,7 +984,7 @@
           <h3>Personajes</h3>
           <div class="character-guide">
             <span><strong>Normal</strong> 100 vida, golpes basicos. Con kaioken, F activa 12s de aura roja, velocidad, vida y dano; durante Kaioken, Q lanza un combo rapido.</span>
-            <span><strong>Light Warrior</strong> se desbloquea con Heroe de la luz. Tiene 160 vida y 10 dano base. Q dispara 5 tiros de luz de 25 dano cada uno. F le da velocidad temporal y cura vida. R/Enter usa Destello solar. F+R carga un puno blanco: cuanto mas carga, mas dano mete el proximo golpe cuerpo a cuerpo.</span>
+            <span><strong>Light Warrior</strong> se desbloquea con Heroe de la luz. Tiene 160 vida y 10 dano base. Q dispara 5 tiros de luz de 25 dano cada uno. F le da velocidad temporal y cura vida. R/Enter usa Destello solar. Q+F presionadas al mismo tiempo cargan un rayo de luz continuo de 8 dano por pulso, mas fuerte y rapido de preparar que el de Super Fire Master. F+R carga un puno blanco: cuanto mas carga, mas dano mete el proximo golpe cuerpo a cuerpo.</span>
             <span><strong>Fire Master</strong> 120 vida, bola de fuego y fire beam. Q+F dispara Inferno Split: tres bolas de fuego y un beam, con cooldown mas largo. Super Fire Master se desbloquea ganando Mana Meltdown con Fire Master en menos de 45 segundos y con 80+ vida; se elige con click derecho, tiene 160 vida, Q de 25 dano, F de 85 dano y Q+F carga 5 segundos un rayo naranja enorme que dura 5 segundos.</span>
             <span><strong>Living Tank</strong> 200 vida, lento, golpes pesados y canon. Con ironwall llega a 260 vida y pega mas fuerte.</span>
             <span><strong>Cowboy</strong> 80 vida, rafaga de 12 balas. Gana si mantiene distancia y corta habilidades antes de que arranquen.</span>
@@ -930,6 +1024,7 @@
           <h3>Counters</h3>
           <div class="character-guide">
             <span><strong>Normal</strong> sufre contra Living Tank por vida/alcance, Sorcerer por control y Divine General si la pelea se alarga. Le conviene presionar a Cowboy, Fire Master y Gambler antes de que usen distancia o recursos.</span>
+            <span><strong>Light Warrior</strong> counterea a Cowboy y Fire Master si conecta sus rafagas y mantiene la presion con velocidad. Sufre contra Living Tank por aguante, Reflecter si devuelve sus disparos y Chrono si interrumpe su carga.</span>
             <span><strong>Fire Master</strong> counterea a Living Tank porque castiga su lentitud desde lejos. Sufre contra Reflecter, Chrono y Divine General: uno copia, otro corta ventanas, y Divine se adapta al fuego.</span>
             <span><strong>Living Tank</strong> counterea a Normal, Cowboy y Ghost por aguante y golpes grandes. Sufre contra Fire Master, Sorcerer y Divine General porque lo obligan a caminar bajo castigo o le rompen el plan pesado.</span>
             <span><strong>Cowboy</strong> counterea a Fire Master, Switcher y Ghost si mantiene distancia con rafagas. Sufre contra Living Tank, Reflecter y Divine General cuando sus balas dejan de ser ventaja.</span>
@@ -960,6 +1055,7 @@
             <span>El juego ya tiene identidad: personajes distintos, mapas con reglas propias, codigos, eventos, logros y audio. Ahora el problema principal no es cantidad de contenido, es claridad.</span>
             <span>La prioridad deberia ser que el jugador entienda rapido que esta pasando: cooldowns, estado de buffs, terreno activo, evento especial y logro desbloqueado.</span>
             <span>El balance sigue dependiendo mucho de Sorcerer, Gambler y Switcher. Son los personajes con mas picos de poder; si uno domina, conviene tocar cooldowns antes que borrar mecanicas.</span>
+            <span><strong>Light Warrior</strong> es un personaje de presion media y buen aguante: combina 5 disparos de luz, velocidad temporal, curacion y un golpe cargado de alto dano. Su limite principal es que necesita administrar cooldowns y tiempo de carga para no quedar expuesto.</span>
           </div>
         </div>
         <div class="guide-section">
@@ -976,20 +1072,21 @@
             <span><strong>Mejor anti-proyectiles</strong> Reflecter por escudo/copia inmediata; Divine General escala mejor si tiene tiempo para adaptarse.</span>
             <span><strong>Mas tecnico</strong> Switcher, Chrono y Divine General: Switcher exige modos, Chrono timing, Divine elegir cuando adaptarse y cuando contraatacar.</span>
             <span><strong>Mejor factor sorpresa</strong> Ghost, porque fase e invulnerabilidad cambian el ritmo, pero su dano bajo exige jugar perfecto.</span>
+            <span><strong>Mejor presion sostenida</strong> Light Warrior, porque puede combinar rafagas, velocidad y curacion para mantener el ritmo mientras prepara su golpe cargado.</span>
             <span><strong>Mas facil de aprender</strong> Normal, porque no depende de recursos ni combos.</span>
           </div>
           <div class="character-guide hidden" id="categoryTopSimple">
-            <span><strong>Fuerza general</strong> 1 Divine General, 2 Sorcerer, 3 Chrono, 4 Gambler, 5 Switcher, 6 Living Tank, 7 Cowboy, 8 Reflecter, 9 Fire Master, 10 Ghost, 11 Normal.</span>
-            <span><strong>Vida/aguante</strong> 1 Living Tank, 2 Divine General, 3 Sorcerer, 4 Chrono, 5 Gambler, 6 Reflecter, 7 Fire Master, 8 Switcher, 9 Normal, 10 Cowboy, 11 Ghost.</span>
-            <span><strong>Distancia</strong> 1 Cowboy, 2 Sorcerer, 3 Chrono, 4 Fire Master, 5 Living Tank, 6 Reflecter, 7 Switcher, 8 Divine General, 9 Gambler, 10 Normal, 11 Ghost.</span>
-            <span><strong>Movilidad</strong> 1 Ghost, 2 Gambler, 3 Switcher, 4 Chrono, 5 Cowboy, 6 Normal, 7 Fire Master, 8 Divine General, 9 Sorcerer, 10 Reflecter, 11 Living Tank.</span>
-            <span><strong>Dificultad tecnica</strong> 1 Divine General, 2 Switcher, 3 Chrono, 4 Gambler, 5 Sorcerer, 6 Reflecter, 7 Ghost, 8 Fire Master, 9 Cowboy, 10 Living Tank, 11 Normal.</span>
-            <span><strong>Anti-proyectiles</strong> 1 Reflecter, 2 Divine General, 3 Chrono, 4 Sorcerer, 5 Switcher, 6 Living Tank, 7 Ghost, 8 Gambler, 9 Cowboy, 10 Fire Master, 11 Normal.</span>
-            <span><strong>Factor sorpresa</strong> 1 Gambler, 2 Ghost, 3 Divine General, 4 Chrono, 5 Switcher, 6 Sorcerer, 7 Reflecter, 8 Cowboy, 9 Fire Master, 10 Living Tank, 11 Normal.</span>
+            <span><strong>Fuerza general</strong> 1 Divine General, 2 Sorcerer, 3 Chrono, 4 Gambler, 5 Switcher, 6 Light Warrior, 7 Living Tank, 8 Cowboy, 9 Reflecter, 10 Fire Master, 11 Ghost, 12 Normal.</span>
+            <span><strong>Vida/aguante</strong> 1 Living Tank, 2 Divine General, 3 Sorcerer, 4 Light Warrior, 5 Chrono, 6 Gambler, 7 Reflecter, 8 Fire Master, 9 Switcher, 10 Normal, 11 Cowboy, 12 Ghost.</span>
+            <span><strong>Distancia</strong> 1 Cowboy, 2 Sorcerer, 3 Chrono, 4 Fire Master, 5 Light Warrior, 6 Living Tank, 7 Reflecter, 8 Switcher, 9 Divine General, 10 Gambler, 11 Normal, 12 Ghost.</span>
+            <span><strong>Movilidad</strong> 1 Ghost, 2 Gambler, 3 Switcher, 4 Light Warrior, 5 Chrono, 6 Cowboy, 7 Normal, 8 Fire Master, 9 Divine General, 10 Sorcerer, 11 Reflecter, 12 Living Tank.</span>
+            <span><strong>Dificultad tecnica</strong> 1 Divine General, 2 Switcher, 3 Chrono, 4 Gambler, 5 Sorcerer, 6 Reflecter, 7 Light Warrior, 8 Ghost, 9 Fire Master, 10 Cowboy, 11 Living Tank, 12 Normal.</span>
+            <span><strong>Anti-proyectiles</strong> 1 Reflecter, 2 Divine General, 3 Chrono, 4 Sorcerer, 5 Light Warrior, 6 Switcher, 7 Living Tank, 8 Ghost, 9 Gambler, 10 Cowboy, 11 Fire Master, 12 Normal.</span>
+            <span><strong>Factor sorpresa</strong> 1 Gambler, 2 Ghost, 3 Divine General, 4 Chrono, 5 Switcher, 6 Light Warrior, 7 Sorcerer, 8 Reflecter, 9 Cowboy, 10 Fire Master, 11 Living Tank, 12 Normal.</span>
           </div>
         </div>
         <div class="guide-section">
-          <h3>Top 10 enfrentamientos</h3>
+          <h3>Top 11 enfrentamientos</h3>
           <div class="character-guide">
             <span><strong>1. Divine General vs Sorcerer</strong> el duelo mas fuerte ahora: control arcano contra adaptacion. Si Divine aguanta y sella magia, Sorcerer pierde su plan principal.</span>
             <span><strong>2. Divine General vs Chrono</strong> lectura contra tiempo. Chrono quiere congelar ventanas; Divine quiere sobrevivir, adaptarse y convertir cada error en dano base permanente.</span>
@@ -1001,6 +1098,7 @@
             <span><strong>8. Fire Master vs Living Tank</strong> clasico de zoner contra tanque: Fire Master castiga desde lejos, pero si Tank entra una vez puede destruirlo.</span>
             <span><strong>9. Cowboy vs Reflecter</strong> tension pura: Cowboy quiere llenar la pantalla de balas, Reflecter espera el momento exacto para castigarlo.</span>
             <span><strong>10. Ghost vs Gambler</strong> caos real: Ghost necesita golpes precisos y evasivos; Gambler puede ganar por suerte, stun o jackpot si sobrevive.</span>
+            <span><strong>11. Light Warrior vs Chrono</strong> presion y carga contra control temporal: Light Warrior debe aprovechar velocidad y rafagas antes de que Chrono ralentice o congele su ventana ofensiva.</span>
           </div>
         </div>
         <div class="guide-section">
