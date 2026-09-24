@@ -125,12 +125,12 @@ const chronoBladeDamage = 20;
 const chronoBladeSpeed = playerMoveSpeed * 3.6;
 const chronoBladeCooldown = 300;
 const chronoBladeSlowDuration = 200;
-const chronoSlowCooldown = 780;
-const chronoSlowDuration = 180;
-const chronoSlowFactor = 0.9;
-const chronoSlowRadius = 350;
-const chronoSlowLockDuration = 45;
-const chronoSlowPull = 1.2;
+const chronoSlowCooldown = 540;
+const chronoSlowDuration = 300;
+const chronoSlowFactor = 0.65;
+const chronoSlowRadius = 390;
+const chronoSlowLockDuration = 90;
+const chronoSlowPull = 2.2;
 const chronoMarkDuration = 360;
 const chronoMarkDamage = 28;
 const chronoTimeStopDuration = 150;
@@ -140,7 +140,7 @@ const ghostHealth = 50;
 const ghostDamage = 1;
 const ghostPhaseDuration = 300;
 const ghostPhaseCooldown = 150;
-const ghostPhaseContactDamage = 2;
+const ghostPhaseContactDamage = 1;
 const ghostPhaseContactInterval = 2;
 const ghostPhaseSpeedMultiplier = 1.50;
 const lightWarriorHealth = 160;
@@ -249,12 +249,39 @@ const defaultDebugSettings = {
 };
 const debugSettings = { ...defaultDebugSettings };
 const achievementStorageKey = 'moqueteAchievements';
+const coinStorageKey = 'moqueteCoins';
 const normalArcadeProgressStorageKey = 'moqueteNormalArcadeProgress';
+const fireArcadeProgressStorageKey = 'moqueteFireArcadeProgress';
 const normalArcadeLevelButtons = document.querySelectorAll('[data-arcade-level]');
 const normalArcadeEnemyName = 'Bruto Gris';
 const normalArcadeEnemyHealth = 65;
 const normalArcadeEnemyDamageMultiplier = 0.65;
+const fireArcadeBruteName = 'Brutos Invernales';
+const fireArcadeBruteHealthByLevel = [0, 78, 108, 115];
+const fireArcadeBruteDamageMultiplierByLevel = [0, 0.78, 1.05, 1.08];
 const normalArcadeBossName = 'Jefe de la Banda';
+const fireArcadeBossName = 'Ice Master';
+const fireArcadeMiniBossName = 'Maton Helado';
+const fireArcadeMiniBossHealth = 115;
+const fireArcadeMiniBossDamageMultiplier = 1.1;
+const fireArcadeMiniBossDamageTakenMultiplier = 0.75;
+const icedThugFrostFieldCooldown = 600;
+const icedThugFrostFieldDuration = 270;
+const icedThugFrostFieldRadius = 150;
+const icedThugFrostSlowFactor = 0.7;
+const icedThugFrostVulnerability = 1.25;
+const icedThugFrostLingerDuration = 30;
+const icedThugBladeDamage = 12;
+const icedThugBladeSpeed = playerMoveSpeed * 3;
+const icedThugBladeCooldown = 360;
+const icedThugBladeSlowDuration = 110;
+const iceMasterHealth = 130;
+const iceMasterDamageMultiplier = 1.2;
+const iceMasterDamageTakenMultiplier = 0.85;
+const iceMasterAbilityDamageMultiplier = 0.6;
+const iceMasterMoveSpeed = playerMoveSpeed * 0.9;
+const iceMasterShardSlowDuration = 120;
+const iceMasterBeamSlowDuration = 200;
 const normalArcadeBossHealth = 140;
 const normalArcadeBossDamageMultiplier = 1.3;
 const normalArcadeBossSpeed = 3.1;
@@ -262,10 +289,12 @@ const normalArcadeBossShockwaveDamage = 20;
 const normalArcadeBossShockwaveCooldown = 420;
 let selectedNormalArcadeLevel = 1;
 let normalArcadeActive = false;
+let arcadeChapter = 'normal';
 let normalArcadeEnemiesRemaining = 0;
+let arcadeBossesUnlocked = false;
+const arcadeBossVariants = ['arcadeBoss', 'icedThug', 'iceMaster'];
 let normalArcadeEnemyIndex = 0;
 const statisticsStorageKey = 'moqueteStatistics';
-const supportedLanguages = ['es', 'en', 'pt'];
 const achievementIds = [
   'firstWin',
   'fastWin',
@@ -290,7 +319,34 @@ const achievementIds = [
   'divineGeneralUnlocked',
   'superFireMasterUnlocked',
   'normalArcadeCompleted',
+  'fireArcadeCompleted',
 ];
+const achievementCoinRewards = {
+  firstWin: 100,
+  fastWin: 250,
+  clutchWin: 300,
+  perfectDuel: 500,
+  jackpot: 750,
+  reflectedWin: 500,
+  darkRoom: 300,
+  oldDays: 300,
+  debug: 150,
+  codeBreaker: 400,
+  prismDriver: 600,
+  casinoRoyalty: 900,
+  meltdownMaster: 900,
+  tankCommander: 600,
+  flawlessWin: 350,
+  specialist: 300,
+  timeExecutioner: 1000,
+  absoluteDominance: 1200,
+  heroOfLight: 1500,
+  ghostUnlocked: 1000,
+  divineGeneralUnlocked: 2500,
+  superFireMasterUnlocked: 1800,
+  normalArcadeCompleted: 3000,
+  fireArcadeCompleted: 3500,
+};
 const divineGeneralTrialAchievements = [
   'perfectDuel',
   'reflectedWin',
@@ -346,94 +402,9 @@ const achievementDetailsByLanguage = {
       title: 'El desafio de Normal',
       description: 'Completa el capitulo de Normal en el modo Arcade.',
     },
-  },
-  en: {
-    firstWin: { title: 'First Moquete', description: 'Win your first fight.' },
-    fastWin: { title: 'No Time Wasted', description: 'Win a round in under 30 seconds.' },
-    clutchWin: { title: 'Last Breath', description: 'Win a fight with 10 health or less.' },
-    perfectDuel: { title: 'One Bullet Was Enough', description: 'Win with the single bullet from Desert Duel.' },
-    jackpot: { title: 'JACKPOT!!', description: 'Roll triple 7 with Gambler.' },
-    reflectedWin: { title: 'Reflected Victory', description: 'Win using an ability copied by Reflecter.' },
-    darkRoom: { title: 'Lights Out', description: 'Play a match in Dark Room.' },
-    oldDays: { title: 'Trip to the Past', description: 'Enter Alpha edition.' },
-    debug: { title: 'Debug Intruder', description: 'Open the Debug Screen.' },
-    codeBreaker: { title: 'Code Breaker', description: 'Activate any secret character code.' },
-    prismDriver: { title: 'Prism Driver', description: 'Activate Prism Overdrive.' },
-    casinoRoyalty: { title: 'Casino Royalty', description: 'Win during Casino Royale.' },
-    meltdownMaster: { title: 'Meltdown Master', description: 'Win during Mana Meltdown.' },
-    tankCommander: { title: 'Tank Commander', description: 'Win a Clash of Titans.' },
-    flawlessWin: { title: 'Untouchable', description: 'Win with full health.' },
-    specialist: { title: 'Specialist', description: 'Use 10 specials in one fight.' },
-    timeExecutioner: {
-      title: 'Time Executioner',
-      description: 'Win with Chrono after dealing damage during Time Stop.',
-    },
-    absoluteDominance: {
-      title: 'Absolute Dominance',
-      description: 'Win against a hard bot in under 25 seconds without taking damage.',
-    },
-    heroOfLight: {
-      title: 'Hero of Light',
-      description: 'Unlock Light Warrior: win with Normal against a hard bot in under 20 seconds without taking damage.',
-    },
-    ghostUnlocked: { title: 'Dark Room Wraith', description: 'Unlock Ghost after playing a match in Dark Room.' },
-    divineGeneralUnlocked: {
-      title: 'General Judgment',
-      description: 'Complete the 7 difficult seals to unlock Divine General.',
-    },
-    superFireMasterUnlocked: {
-      title: 'Super Fire Master',
-      description: 'Win Mana Meltdown with Fire Master in under 45 seconds and with 80+ health.',
-    },
-    normalArcadeCompleted: {
-      title: 'Normal\'s Challenge',
-      description: 'Complete Normal\'s chapter in Arcade mode.',
-    },
-  },
-  pt: {
-    firstWin: { title: 'Primeiro Moquete', description: 'Venca sua primeira luta.' },
-    fastWin: { title: 'Sem perder tempo', description: 'Venca uma rodada em menos de 30 segundos.' },
-    clutchWin: { title: 'Ultimo suspiro', description: 'Venca uma luta com 10 de vida ou menos.' },
-    perfectDuel: { title: 'Uma bala bastou', description: 'Venca com a bala unica do Duelo do Deserto.' },
-    jackpot: { title: 'JACKPOT!!', description: 'Tire triplo 7 com Gambler.' },
-    reflectedWin: { title: 'Vitoria refletida', description: 'Venca usando uma habilidade copiada por Reflecter.' },
-    darkRoom: { title: 'Luzes apagadas', description: 'Jogue uma partida no Dark Room.' },
-    oldDays: { title: 'Viagem ao passado', description: 'Entre na Alpha edition.' },
-    debug: { title: 'Intruso debug', description: 'Abra a Tela Debug.' },
-    codeBreaker: { title: 'Quebra-codigos', description: 'Ative qualquer codigo secreto de personagem.' },
-    prismDriver: { title: 'Piloto prisma', description: 'Ative Prism Overdrive.' },
-    casinoRoyalty: { title: 'Realeza casino', description: 'Venca durante Casino Royale.' },
-    meltdownMaster: { title: 'Mestre meltdown', description: 'Venca durante Mana Meltdown.' },
-    tankCommander: { title: 'Comandante tanque', description: 'Venca um Clash of Titans.' },
-    flawlessWin: { title: 'Intocavel', description: 'Venca com vida cheia.' },
-    specialist: { title: 'Especialista', description: 'Use 10 especiais em uma luta.' },
-    timeExecutioner: {
-      title: 'Executor temporal',
-      description: 'Venca com Chrono depois de causar dano durante Time Stop.',
-    },
-    absoluteDominance: {
-      title: 'Dominio absoluto',
-      description: 'Venca contra um bot dificil em menos de 25 segundos sem receber dano.',
-    },
-    heroOfLight: {
-      title: 'Heroi da luz',
-      description: 'Desbloqueie Light Warrior: venca com Normal contra um bot dificil em menos de 20 segundos sem receber dano.',
-    },
-    ghostUnlocked: {
-      title: 'Espectro do Dark Room',
-      description: 'Desbloqueie Ghost depois de jogar uma partida no Dark Room.',
-    },
-    divineGeneralUnlocked: {
-      title: 'Julgamento do general',
-      description: 'Complete os 7 selos dificeis para desbloquear Divine General.',
-    },
-    superFireMasterUnlocked: {
-      title: 'Super Fire Master',
-      description: 'Venca Mana Meltdown com Fire Master em menos de 45 segundos e com 80+ de vida.',
-    },
-    normalArcadeCompleted: {
-      title: 'Desafio do Normal',
-      description: 'Complete o capitulo do Normal no modo Arcade.',
+    fireArcadeCompleted: {
+      title: 'Deshielo total',
+      description: 'Completa el capitulo de Fire Master en el modo Arcade derrotando a Ice Master.',
     },
   },
 };
@@ -483,98 +454,6 @@ const uiTranslations = {
     lightWarriorLockedTitle: 'Logro Heroe de la luz: gana con Normal contra bot dificil en menos de 20s sin recibir dano',
     divineUnlockedTitle: 'Divine General desbloqueado',
     divineLockedTitle: 'Completa los 7 sellos dificiles para usar Divine General',
-  },
-  en: {
-    achievementToastLabel: 'Achievement unlocked',
-    menuSubtitle: 'Local fighting game',
-    play: 'Play',
-    gameModes: 'Game modes',
-    guide: 'Guide',
-    achievements: 'Achievements',
-    stats: 'Stats',
-    information: 'Changelog',
-    opinion: 'Codex Opinion',
-    settings: 'Settings',
-    settingsTitle: 'Settings',
-    back: 'Back',
-    backCurrent: 'Back to current version',
-    fightBot: 'Fight bot',
-    botDifficulty: 'Bot difficulty',
-    easy: 'Easy',
-    medium: 'Medium',
-    hard: 'Hard',
-    language: 'Language',
-    masterVolume: 'Master volume',
-    music: 'Music',
-    effects: 'Effects',
-    player1Color: 'Player 1 color',
-    player2Color: 'Player 2 color',
-    debugTitle: 'Debug Screen',
-    debugDamage: 'Damage multiplier',
-    debugHealth: 'Health multiplier',
-    debugMove: 'Player speed',
-    debugCooldown: 'Cooldown multiplier',
-    debugGravity: 'Gravity multiplier',
-    debugProjectile: 'Projectile speed',
-    debugDuration: 'Effect duration',
-    debugKnockback: 'Hit knockback',
-    debugTargets: 'Affected characters',
-    all: 'All',
-    resetAll: 'Reset all',
-    pending: 'Pending',
-    unlocked: 'Unlocked',
-    ghostUnlockedTitle: 'Ghost unlocked',
-    ghostLockedTitle: 'Play a match in Dark Room to use Ghost',
-    lightWarriorUnlockedTitle: 'Light Warrior unlocked',
-    lightWarriorLockedTitle: 'Hero of Light achievement: win with Normal against a hard bot in under 20s without taking damage',
-    divineUnlockedTitle: 'Divine General unlocked',
-    divineLockedTitle: 'Complete the 7 difficult seals to use Divine General',
-  },
-  pt: {
-    achievementToastLabel: 'Conquista obtida',
-    menuSubtitle: 'Jogo de luta local',
-    play: 'Jogar',
-    gameModes: 'Modos de jogo',
-    guide: 'Guia',
-    achievements: 'Conquistas',
-    stats: 'Estatisticas',
-    information: 'Changelog',
-    opinion: 'Opiniao do Codex',
-    settings: 'Ajustes',
-    settingsTitle: 'Ajustes',
-    back: 'Voltar',
-    backCurrent: 'Voltar para a versao atual',
-    fightBot: 'Lutar contra bot',
-    botDifficulty: 'Dificuldade do bot',
-    easy: 'Facil',
-    medium: 'Media',
-    hard: 'Dificil',
-    language: 'Idioma',
-    masterVolume: 'Volume geral',
-    music: 'Musica',
-    effects: 'Efeitos',
-    player1Color: 'Cor Jogador 1',
-    player2Color: 'Cor Jogador 2',
-    debugTitle: 'Tela Debug',
-    debugDamage: 'Multiplicador de dano',
-    debugHealth: 'Multiplicador de vida',
-    debugMove: 'Velocidade jogadores',
-    debugCooldown: 'Multiplicador cooldowns',
-    debugGravity: 'Multiplicador gravidade',
-    debugProjectile: 'Velocidade projeteis',
-    debugDuration: 'Duracao efeitos',
-    debugKnockback: 'Empurrao golpes',
-    debugTargets: 'Personagens afetados',
-    all: 'Todos',
-    resetAll: 'Restaurar tudo',
-    pending: 'Pendente',
-    unlocked: 'Obtido',
-    ghostUnlockedTitle: 'Ghost desbloqueado',
-    ghostLockedTitle: 'Jogue uma partida no Dark Room para usar Ghost',
-    lightWarriorUnlockedTitle: 'Light Warrior desbloqueado',
-    lightWarriorLockedTitle: 'Conquista Heroi da luz: venca com Normal contra bot dificil em menos de 20s sem receber dano',
-    divineUnlockedTitle: 'Divine General desbloqueado',
-    divineLockedTitle: 'Complete os 7 selos dificeis para usar Divine General',
   },
 };
 let menuSecretBuffer = '';
@@ -665,7 +544,6 @@ let gameStarted = false;
 let botEnabled = false;
 let botAttackCooldown = 0;
 let botDifficulty = 'medium';
-let currentLanguage = 'es';
 let animationId = null;
 let fireballs = [];
 let fireBeams = [];
@@ -681,6 +559,8 @@ let sorcererGravityOrbs = [];
 let sorcererSecretOrbs = [];
 let chronoBlades = [];
 let chronoZones = [];
+let icedThugBlades = [];
+let icedThugFrostFields = [];
 let divineWorldCutCharges = [];
 let divineWorldCuts = [];
 let characterSelectionPlayer = 1;
@@ -698,6 +578,11 @@ const characterScreen = document.getElementById('characterScreen');
 const characterSelectTitle = document.getElementById('characterSelectTitle');
 const mapScreen = document.getElementById('mapScreen');
 const darkRoomMapButton = document.getElementById('darkRoomMapButton');
+const gangBossCharacterButton = document.getElementById('gangBossCharacterButton');
+const icedThugCharacterButton = document.getElementById('icedThugCharacterButton');
+const iceMasterCharacterButton = document.getElementById('iceMasterCharacterButton');
+const arcadeBossCharacterButtons = [gangBossCharacterButton, icedThugCharacterButton, iceMasterCharacterButton];
+const arcadeMapButtons = document.querySelectorAll('.arcade-map-option');
 const settingsScreen = document.getElementById('settingsScreen');
 const gameModesScreen = document.getElementById('gameModesScreen');
 const guideScreen = document.getElementById('guideScreen');
@@ -740,8 +625,13 @@ const gameModesBackButton = document.getElementById('gameModesBackButton');
 const arcadeModeButton = document.getElementById('arcadeModeButton');
 const arcadeChaptersScreen = document.getElementById('arcadeChaptersScreen');
 const normalArcadeChapterButton = document.getElementById('normalArcadeChapterButton');
+const fireArcadeChapterButton = document.getElementById('fireArcadeChapterButton');
 const arcadeChaptersBackButton = document.getElementById('arcadeChaptersBackButton');
 const arcadeLevelsScreen = document.getElementById('arcadeLevelsScreen');
+const arcadeLevelsTitle = document.getElementById('arcadeLevelsTitle');
+const arcadeStoryKicker = document.getElementById('arcadeStoryKicker');
+const arcadeStoryParagraphOne = document.getElementById('arcadeStoryParagraphOne');
+const arcadeStoryParagraphTwo = document.getElementById('arcadeStoryParagraphTwo');
 const arcadeLevelsBackButton = document.getElementById('arcadeLevelsBackButton');
 const guideBackButton = document.getElementById('guideBackButton');
 const achievementsBackButton = document.getElementById('achievementsBackButton');
@@ -787,6 +677,9 @@ const statsTotalDraws = document.getElementById('statsTotalDraws');
 const statsWinRate = document.getElementById('statsWinRate');
 const statsBotFights = document.getElementById('statsBotFights');
 const statsCharacterRows = document.getElementById('statsCharacterRows');
+const menuCoinBalance = document.getElementById('menuCoinBalance');
+const statsCoinBalance = document.getElementById('statsCoinBalance');
+const secretTrashButton = document.getElementById('secretTrashButton');
 const player1ColorInputs = document.querySelectorAll('input[name="player1Color"]');
 const player2ColorInputs = document.querySelectorAll('input[name="player2Color"]');
 const botDifficultyInputs = document.querySelectorAll('input[name="botDifficulty"]');
@@ -1063,6 +956,7 @@ const fightStats = createEmptyFightStats();
 const fightAchievementFlags = createEmptyFightAchievementFlags();
 const persistentStatistics = loadStatistics();
 const unlockedAchievements = loadAchievements();
+const coinWallet = loadCoinWallet();
 let achievementToastTimer = null;
 
 function createEmptyFightStats() {
@@ -1097,13 +991,11 @@ function createEmptyFightAchievementFlags() {
 }
 
 function t(key) {
-  const languagePack = uiTranslations[currentLanguage] || uiTranslations.es;
-  return languagePack[key] || uiTranslations.es[key] || key;
+  return uiTranslations.es[key] || key;
 }
 
 function getAchievementDetails(achievementId) {
-  const languagePack = achievementDetailsByLanguage[currentLanguage] || achievementDetailsByLanguage.es;
-  return languagePack[achievementId] || achievementDetailsByLanguage.es[achievementId] || {
+  return achievementDetailsByLanguage.es[achievementId] || {
     title: achievementId,
     description: '',
   };
@@ -1123,8 +1015,7 @@ function syncAchievementText() {
 }
 
 function applyLanguage() {
-  if (!supportedLanguages.includes(currentLanguage)) currentLanguage = 'es';
-  document.documentElement.lang = currentLanguage;
+  document.documentElement.lang = 'es';
 
   document.querySelectorAll('[data-i18n]').forEach((element) => {
     element.innerText = t(element.dataset.i18n);
@@ -1167,6 +1058,76 @@ function saveAchievements() {
   } catch (error) {
     // localStorage can be blocked in some browser modes; achievements still work for the session.
   }
+}
+
+function createEmptyCoinWallet() {
+  return {
+    balance: 0,
+    achievements: {},
+    arcadeLevels: {},
+    arcadeChapters: {},
+  };
+}
+
+function normalizeCoinWallet(savedWallet) {
+  const wallet = createEmptyCoinWallet();
+  if (!savedWallet || typeof savedWallet !== 'object') return wallet;
+
+  wallet.balance = Math.max(0, Math.floor(Number(savedWallet.balance) || 0));
+  ['achievements', 'arcadeLevels', 'arcadeChapters'].forEach((rewardGroup) => {
+    if (!savedWallet[rewardGroup] || typeof savedWallet[rewardGroup] !== 'object') return;
+    Object.keys(savedWallet[rewardGroup]).forEach((rewardKey) => {
+      if (savedWallet[rewardGroup][rewardKey]) wallet[rewardGroup][rewardKey] = true;
+    });
+  });
+
+  return wallet;
+}
+
+function loadCoinWallet() {
+  try {
+    return normalizeCoinWallet(JSON.parse(localStorage.getItem(coinStorageKey) || 'null'));
+  } catch (error) {
+    return createEmptyCoinWallet();
+  }
+}
+
+function saveCoinWallet() {
+  try {
+    localStorage.setItem(coinStorageKey, JSON.stringify(coinWallet));
+  } catch (error) {
+    // Coins still work for the current session if storage is blocked.
+  }
+}
+
+function syncCoinWalletUI() {
+  if (menuCoinBalance) menuCoinBalance.innerText = coinWallet.balance.toLocaleString('es-ES');
+  if (statsCoinBalance) statsCoinBalance.innerText = coinWallet.balance.toLocaleString('es-ES');
+}
+
+function awardCoins(amount) {
+  const reward = Math.max(0, Math.floor(Number(amount) || 0));
+  if (reward <= 0) return;
+
+  coinWallet.balance += reward;
+  saveCoinWallet();
+  syncCoinWalletUI();
+}
+
+function awardAchievementCoins(achievementId) {
+  if (coinWallet.achievements[achievementId]) return;
+
+  coinWallet.achievements[achievementId] = true;
+  awardCoins(achievementCoinRewards[achievementId] || 0);
+  saveCoinWallet();
+}
+
+function awardArcadeReward(rewardGroup, rewardKey, amount) {
+  if (coinWallet[rewardGroup][rewardKey]) return;
+
+  coinWallet[rewardGroup][rewardKey] = true;
+  awardCoins(amount);
+  saveCoinWallet();
 }
 
 function syncAchievementsUI() {
@@ -1261,6 +1222,7 @@ function unlockAchievement(achievementId) {
 
   unlockedAchievements[achievementId] = true;
   saveAchievements();
+  awardAchievementCoins(achievementId);
   syncAchievementsUI();
   playSound('achievement');
   showAchievementToast(achievementId);
@@ -1956,6 +1918,10 @@ class Fighter {
     this.chronoBladeCooldown = 0;
     this.chronoSlowCooldown = 0;
     this.chronoSlowTimer = 0;
+    this.icedThugBladeCooldown = 0;
+    this.icedThugFrostFieldCooldown = 0;
+    this.icedSlowTimer = 0;
+    this.icedVulnerableTimer = 0;
     this.chronoMarkTimer = 0;
     this.chronoMarkedBy = null;
     this.chronoTimeStopCooldown = 0;
@@ -2127,6 +2093,10 @@ class Fighter {
       this.drawReflecterShield();
     }
 
+    if (this.icedSlowTimer > 0 || this.icedVulnerableTimer > 0) {
+      this.drawFrostbiteOverlay();
+    }
+
     if (this.isAttacking) {
       const attack = this.attackArea;
       ctx.fillStyle = this.lightWarriorRadiantPunchAttackActive ? 'rgba(255, 255, 255, 0.9)' : this.attackColor;
@@ -2173,6 +2143,16 @@ class Fighter {
       return;
     }
 
+    if (this.secretVariant === 'iceBrute') {
+      this.drawIceBruteDetails();
+      return;
+    }
+
+    if (this.secretVariant === 'icedThug') {
+      this.drawIcedThugDetails();
+      return;
+    }
+
     ctx.fillStyle = kaiokenActive ? '#1a1a1a' : '#111';
     ctx.fillRect(x + 8, y + 22, this.width - 16, 10);
     ctx.fillStyle = kaiokenActive ? '#0d47a1' : '#fdd835';
@@ -2209,6 +2189,139 @@ class Fighter {
     ctx.lineTo(x + 16, y + 28);
     ctx.moveTo(x + this.width - 2, y + 42);
     ctx.lineTo(x + this.width - 16, y + 28);
+    ctx.stroke();
+  }
+
+  drawIceBruteDetails() {
+    const x = this.position.x;
+    const y = this.position.y;
+
+    ctx.strokeStyle = '#050505';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(x + 3, y + 6, this.width - 6, this.height - 6);
+
+    ctx.fillStyle = '#8a5738';
+    ctx.fillRect(x + 6, y + 46, this.width - 12, 42);
+    ctx.fillStyle = '#6f432c';
+    ctx.fillRect(x + 9, y + 86, 18, 34);
+    ctx.fillRect(x + this.width - 27, y + 86, 18, 34);
+    ctx.fillStyle = '#2b1912';
+    ctx.fillRect(x + 7, y + 112, 22, 8);
+    ctx.fillRect(x + this.width - 29, y + 112, 22, 8);
+
+    ctx.fillStyle = '#f2fbff';
+    ctx.fillRect(x + 7, y + 12, this.width - 14, 43);
+    ctx.strokeStyle = '#050505';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x + 7, y + 12, this.width - 14, 43);
+
+    ctx.fillStyle = '#293fc2';
+    ctx.fillRect(x + 15, y + 24, this.width - 30, 30);
+    ctx.fillStyle = '#1b2f98';
+    ctx.fillRect(x + 18, y + 30, this.width - 36, 24);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x + 9, y + 49, this.width - 18, 8);
+    ctx.fillRect(x + 11, y + 39, 7, 11);
+    ctx.fillRect(x + this.width - 18, y + 39, 7, 11);
+
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(x + 20, y + 31, 7, 5);
+    ctx.fillRect(x + this.width - 27, y + 31, 7, 5);
+    ctx.fillRect(x + 25, y + 44, this.width - 50, 4);
+
+    ctx.fillStyle = '#5a3322';
+    ctx.fillRect(x + 1, y + 56, 12, 30);
+    ctx.fillRect(x + this.width - 13, y + 56, 12, 30);
+    ctx.fillRect(x + 18, y + 64, 9, 24);
+    ctx.fillRect(x + this.width - 27, y + 64, 9, 24);
+    ctx.fillStyle = '#26140e';
+    ctx.fillRect(x + 21, y + 68, 4, 17);
+    ctx.fillRect(x + this.width - 25, y + 68, 4, 17);
+  }
+
+  drawFrostbiteOverlay() {
+    const x = this.position.x;
+    const y = this.position.y;
+    ctx.fillStyle = this.icedVulnerableTimer > 0 ? 'rgba(160, 236, 255, 0.28)' : 'rgba(160, 236, 255, 0.16)';
+    ctx.fillRect(x, y, this.width, this.height);
+    ctx.strokeStyle = 'rgba(224, 252, 255, 0.9)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x - 4, y - 4, this.width + 8, this.height + 8);
+    ctx.fillStyle = '#e0fcff';
+    [[0.2, 0.18], [0.72, 0.34], [0.35, 0.62], [0.8, 0.82]].forEach(([offsetX, offsetY]) => {
+      const crystalX = x + this.width * offsetX;
+      const crystalY = y + this.height * offsetY;
+      ctx.beginPath();
+      ctx.moveTo(crystalX, crystalY - 6);
+      ctx.lineTo(crystalX + 4, crystalY);
+      ctx.lineTo(crystalX, crystalY + 6);
+      ctx.lineTo(crystalX - 4, crystalY);
+      ctx.closePath();
+      ctx.fill();
+    });
+    if (this.icedVulnerableTimer > 0) {
+      ctx.fillStyle = '#e0fcff';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('+25%', x + this.width / 2, y - 10);
+    }
+  }
+
+  drawIcedThugDetails() {
+    const x = this.position.x;
+    const y = this.position.y;
+
+    ctx.fillStyle = '#77dcf2';
+    ctx.fillRect(x + 4, y + 4, this.width - 8, this.height - 8);
+    ctx.strokeStyle = '#050505';
+    ctx.lineWidth = 5;
+    ctx.strokeRect(x + 4, y + 4, this.width - 8, this.height - 8);
+
+    ctx.fillStyle = 'rgba(189, 247, 255, 0.74)';
+    ctx.fillRect(x + 12, y + 10, this.width - 24, 20);
+    ctx.fillStyle = 'rgba(50, 168, 195, 0.24)';
+    ctx.fillRect(x + 18, y + 48, 10, 8);
+    ctx.fillRect(x + 34, y + 64, 14, 10);
+    ctx.fillRect(x + 20, y + 90, 18, 11);
+    ctx.fillRect(x + 44, y + 36, 9, 9);
+
+    ctx.fillStyle = 'rgba(224, 252, 255, 0.78)';
+    ctx.beginPath();
+    ctx.ellipse(x + this.width * 0.58, y + this.height * 0.42, 17, 25, -0.35, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(134, 224, 244, 0.86)';
+    ctx.beginPath();
+    ctx.ellipse(x + this.width * 0.55, y + this.height * 0.43, 9, 17, -0.25, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#050505';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y + 26);
+    ctx.lineTo(x + 15, y + 34);
+    ctx.lineTo(x + 25, y + 24);
+    ctx.lineTo(x + 34, y + 28);
+    ctx.lineTo(x + 43, y + 16);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x + 6, y + 72);
+    ctx.lineTo(x + 18, y + 84);
+    ctx.lineTo(x + 24, y + 104);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x + this.width - 5, y + 66);
+    ctx.lineTo(x + this.width - 18, y + 66);
+    ctx.lineTo(x + this.width - 24, y + 78);
+    ctx.lineTo(x + this.width - 12, y + 84);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x + 10, y + this.height - 30);
+    ctx.lineTo(x + 8, y + this.height - 12);
+    ctx.lineTo(x + 18, y + this.height - 24);
     ctx.stroke();
   }
 
@@ -2393,6 +2506,10 @@ class Fighter {
       this.drawSuperFireMasterDetails();
       return;
     }
+    if (isIceMaster(this)) {
+      this.drawIceMasterDetails();
+      return;
+    }
 
     ctx.fillStyle = '#ffb300';
     ctx.fillRect(this.position.x, this.position.y + 78, this.width, 12);
@@ -2429,6 +2546,59 @@ class Fighter {
       ctx.lineWidth = 3;
       ctx.stroke();
     }
+  }
+
+  drawIceMasterDetails() {
+    const x = this.position.x;
+    const y = this.position.y;
+    const centerX = x + this.width / 2;
+    const beltY = y + this.height * 0.58;
+    const beltHeight = this.height * 0.14;
+    const pulse = (Math.sin(performance.now() / 260) + 1) / 2;
+
+    ctx.fillStyle = '#111';
+    ctx.fillRect(x, beltY - 5, this.width, beltHeight + 10);
+    ctx.fillStyle = '#3f3fc8';
+    ctx.fillRect(x + 4, beltY, this.width - 8, beltHeight);
+    ctx.fillStyle = '#9ff4ff';
+    ctx.beginPath();
+    ctx.ellipse(centerX, beltY + beltHeight / 2, 8, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#b3f5ff';
+    [[-20, -4], [-14, 5], [14, -5], [20, 4], [-5, -7], [6, 7]].forEach(([offsetX, offsetY]) => {
+      ctx.fillRect(centerX + offsetX - 1.5, beltY + beltHeight / 2 + offsetY - 1.5, 3, 3);
+    });
+
+    const flameY = y + this.height * 0.28;
+    ctx.fillStyle = `rgba(160, 236, 255, ${0.25 + pulse * 0.2})`;
+    ctx.beginPath();
+    ctx.ellipse(centerX, flameY, 20, 26, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#9ff4ff';
+    ctx.strokeStyle = '#e0fcff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(centerX - 4, flameY - 24);
+    ctx.lineTo(centerX + 6, flameY - 14);
+    ctx.lineTo(centerX + 14, flameY - 20);
+    ctx.lineTo(centerX + 12, flameY - 4);
+    ctx.lineTo(centerX + 16, flameY + 8);
+    ctx.lineTo(centerX + 6, flameY + 20);
+    ctx.lineTo(centerX - 8, flameY + 18);
+    ctx.lineTo(centerX - 16, flameY + 6);
+    ctx.lineTo(centerX - 12, flameY - 6);
+    ctx.lineTo(centerX - 16, flameY - 16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.beginPath();
+    ctx.ellipse(centerX, flameY + 2, 6, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 5;
+    ctx.strokeRect(x + 2.5, y + 2.5, this.width - 5, this.height - 5);
   }
 
   drawSuperFireMasterDetails() {
@@ -3240,6 +3410,22 @@ class Fighter {
       this.chronoSlowTimer -= 1;
     }
 
+    if (this.icedSlowTimer > 0) {
+      this.icedSlowTimer -= 1;
+    }
+
+    if (this.icedVulnerableTimer > 0) {
+      this.icedVulnerableTimer -= 1;
+    }
+
+    if (this.icedThugBladeCooldown > 0) {
+      this.icedThugBladeCooldown -= 1;
+    }
+
+    if (this.icedThugFrostFieldCooldown > 0) {
+      this.icedThugFrostFieldCooldown -= 1;
+    }
+
     if (this.chronoMarkTimer > 0) {
       this.chronoMarkTimer -= 1;
       if (this.chronoMarkTimer <= 0) this.chronoMarkedBy = null;
@@ -3635,6 +3821,7 @@ class Fighter {
 
   setColor(color) {
     this.baseColor = color;
+    if (isArcadeBossFighter(this)) return;
     if (
       this.characterType === 'fireMaster' ||
       this.characterType === 'tank' ||
@@ -3656,6 +3843,12 @@ class Fighter {
   }
 
   setCharacterType(characterType, secretVariant = null) {
+    if (arcadeBossVariants.includes(secretVariant)) {
+      this.setCharacterType(characterType);
+      this.secretVariant = secretVariant;
+      this.applyArcadeBossVariantStats();
+      return;
+    }
     this.characterType = characterType;
     this.secretVariant = secretVariant;
     this.arcadeBossVariant = false;
@@ -3875,6 +4068,50 @@ class Fighter {
     this.attackColor = hexToRgba(this.baseColor, 0.65);
   }
 
+  applyArcadeBossVariantStats() {
+    if (this.secretVariant === 'arcadeBoss') {
+      this.width = 72;
+      this.height = 144;
+      this.moveSpeed = normalArcadeBossSpeed;
+      this.damageMultiplier = normalArcadeBossDamageMultiplier;
+      this.attackDuration = 12;
+      this.attackBox = {
+        offset: { x: this.attacksToTheRight ? this.width : -64, y: 18 },
+        width: 64,
+        height: 30,
+      };
+      this.arcadeBossVariant = true;
+      this.color = '#980018';
+      this.attackColor = hexToRgba(this.color, 0.65);
+    } else if (this.secretVariant === 'icedThug') {
+      this.width = 72;
+      this.height = 132;
+      this.moveSpeed = playerMoveSpeed * 0.92;
+      this.damageMultiplier = fireArcadeMiniBossDamageMultiplier;
+      this.attackDuration = 14;
+      this.attackBox = {
+        offset: { x: this.attacksToTheRight ? this.width : -76, y: 28 },
+        width: 76,
+        height: 34,
+      };
+      this.color = '#77dcf2';
+      this.attackColor = hexToRgba(this.color, 0.65);
+    } else if (this.secretVariant === 'iceMaster') {
+      this.width = 64;
+      this.height = 128;
+      this.moveSpeed = iceMasterMoveSpeed;
+      this.damageMultiplier = iceMasterDamageMultiplier;
+      this.attackBox = {
+        offset: { x: this.attacksToTheRight ? this.width : -70, y: 22 },
+        width: 70,
+        height: 30,
+      };
+      this.color = '#03a9f4';
+      this.attackColor = 'rgba(160, 236, 255, 0.7)';
+    }
+    this.setMaxHealth(getArcadeBossVariantHealth(this));
+  }
+
   setMaxHealth(maxHealth) {
     this.baseMaxHealth = maxHealth;
     this.maxHealth = getDebugMaxHealth(maxHealth, this);
@@ -3915,6 +4152,10 @@ class Fighter {
     this.chronoBladeCooldown = 0;
     this.chronoSlowCooldown = 0;
     this.chronoSlowTimer = 0;
+    this.icedThugBladeCooldown = 0;
+    this.icedThugFrostFieldCooldown = 0;
+    this.icedSlowTimer = 0;
+    this.icedVulnerableTimer = 0;
     this.chronoMarkTimer = 0;
     this.chronoMarkedBy = null;
     this.chronoTimeStopCooldown = 0;
@@ -3991,12 +4232,44 @@ class Fireball {
   }
 
   draw() {
+    if (isIceMaster(this.attacker)) {
+      this.drawIceShard();
+      return;
+    }
     ctx.fillStyle = '#ffb300';
     ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
     ctx.fillStyle = '#ef5350';
     ctx.fillRect(this.position.x + 6, this.position.y + 5, this.width - 12, this.height - 10);
     ctx.fillStyle = '#ffd54f';
     ctx.fillRect(this.position.x + this.width - 10, this.position.y + 7, 8, 8);
+  }
+
+  drawIceShard() {
+    const pointsRight = this.velocity.x > 0;
+    const centerX = this.position.x + this.width / 2;
+    const centerY = this.position.y + this.height / 2;
+    const tipX = pointsRight ? this.position.x + this.width + 6 : this.position.x - 6;
+    const tailX = pointsRight ? this.position.x - 14 : this.position.x + this.width + 14;
+    ctx.fillStyle = 'rgba(160, 236, 255, 0.35)';
+    ctx.beginPath();
+    ctx.moveTo(centerX, this.position.y + 2);
+    ctx.lineTo(tailX, centerY);
+    ctx.lineTo(centerX, this.position.y + this.height - 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#29b6f6';
+    ctx.beginPath();
+    ctx.moveTo(tipX, centerY);
+    ctx.lineTo(centerX, this.position.y - 2);
+    ctx.lineTo(pointsRight ? this.position.x : this.position.x + this.width, centerY);
+    ctx.lineTo(centerX, this.position.y + this.height + 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#0b3d91';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#e0fcff';
+    ctx.fillRect(centerX - 5, centerY - 4, 10, 8);
   }
 
   update() {
@@ -4030,6 +4303,20 @@ class FireBeam {
   }
 
   draw() {
+    if (isIceMaster(this.attacker)) {
+      ctx.fillStyle = 'rgba(224, 252, 255, 0.95)';
+      ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+      ctx.fillStyle = '#29b6f6';
+      ctx.fillRect(this.position.x, this.position.y + 4, this.width, this.height - 8);
+      ctx.fillStyle = '#3f3fc8';
+      ctx.fillRect(this.position.x + (this.velocity.x > 0 ? this.width - 12 : 0), this.position.y + 2, 12, this.height - 4);
+      ctx.fillStyle = '#ffffff';
+      for (let sparkleX = this.position.x + 10; sparkleX < this.position.x + this.width - 10; sparkleX += 22) {
+        ctx.fillRect(sparkleX, this.position.y - 4, 4, 4);
+        ctx.fillRect(sparkleX + 11, this.position.y + this.height, 4, 4);
+      }
+      return;
+    }
     ctx.fillStyle = '#fff3e0';
     ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
     ctx.fillStyle = '#ff6d00';
@@ -4950,6 +5237,109 @@ const player2 = new Fighter({ x: 820, y: 0, color: '#ef5350', attacksToTheRight:
 player1.target = player2;
 player2.target = player1;
 
+class IcedThugBlade extends ChronoBlade {
+  constructor({ x, y, target, attacker }) {
+    super({ x, y, target, attacker });
+    const speed = getDebugProjectileSpeed(icedThugBladeSpeed, attacker);
+    const currentSpeed = Math.max(1, Math.hypot(this.velocity.x, this.velocity.y));
+    this.velocity = {
+      x: (this.velocity.x / currentSpeed) * speed,
+      y: (this.velocity.y / currentSpeed) * speed,
+    };
+    this.width = 38;
+    this.height = 16;
+  }
+
+  draw() {
+    const pointsRight = this.velocity.x > 0;
+    const tipX = pointsRight ? this.position.x + this.width : this.position.x;
+    const baseX = pointsRight ? this.position.x : this.position.x + this.width;
+    const centerY = this.position.y + this.height / 2;
+    ctx.fillStyle = 'rgba(189, 247, 255, 0.35)';
+    ctx.fillRect(this.position.x - 4, this.position.y - 2, this.width + 8, this.height + 4);
+    ctx.fillStyle = '#e0fcff';
+    ctx.beginPath();
+    ctx.moveTo(tipX, centerY);
+    ctx.lineTo(baseX, this.position.y);
+    ctx.lineTo(baseX + (pointsRight ? 8 : -8), centerY);
+    ctx.lineTo(baseX, this.position.y + this.height);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#3aa9c9';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.beginPath();
+    ctx.moveTo(baseX + (pointsRight ? 8 : -8), centerY);
+    ctx.lineTo(tipX + (pointsRight ? -6 : 6), centerY);
+    ctx.stroke();
+  }
+}
+
+class IcedThugFrostField {
+  constructor({ attacker, target }) {
+    this.attacker = attacker;
+    this.target = target;
+    this.centerX = target.position.x + target.width / 2;
+    this.radius = icedThugFrostFieldRadius;
+    this.timer = getDebugDuration(icedThugFrostFieldDuration, attacker);
+    this.maxTimer = this.timer;
+    this.active = true;
+  }
+
+  get top() {
+    return ground - this.radius * 1.1;
+  }
+
+  draw() {
+    const progress = this.timer / this.maxTimer;
+    const left = this.centerX - this.radius;
+    const top = this.top;
+    const elapsed = this.maxTimer - this.timer;
+    const fieldGradient = ctx.createLinearGradient(0, top, 0, ground);
+    fieldGradient.addColorStop(0, 'rgba(160, 236, 255, 0)');
+    fieldGradient.addColorStop(1, `rgba(160, 236, 255, ${0.18 + progress * 0.2})`);
+    ctx.fillStyle = fieldGradient;
+    ctx.fillRect(left, top, this.radius * 2, ground - top);
+    ctx.fillStyle = `rgba(224, 252, 255, ${0.55 + progress * 0.35})`;
+    ctx.fillRect(left, ground - 8, this.radius * 2, 8);
+    ctx.strokeStyle = 'rgba(58, 169, 201, 0.85)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let spikeX = left + 12; spikeX < left + this.radius * 2 - 10; spikeX += 28) {
+      const spikeHeight = 14 + (Math.abs(Math.round(spikeX * 7)) % 18);
+      ctx.moveTo(spikeX - 7, ground - 6);
+      ctx.lineTo(spikeX, ground - 6 - spikeHeight * Math.min(1, elapsed / 12));
+      ctx.lineTo(spikeX + 7, ground - 6);
+    }
+    ctx.stroke();
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.5 * progress + 0.2})`;
+    for (let flake = 0; flake < 8; flake += 1) {
+      const flakeX = left + ((flake * 53 + elapsed * 1.4) % (this.radius * 2));
+      const flakeY = top + ((flake * 37 + elapsed * 2) % (ground - top));
+      ctx.fillRect(flakeX, flakeY, 3, 3);
+    }
+  }
+
+  isTargetInside() {
+    if (!this.target || this.target.health <= 0) return false;
+    const targetLeft = this.target.position.x;
+    const targetRight = this.target.position.x + this.target.width;
+    const targetBottom = this.target.position.y + this.target.height;
+    return targetRight >= this.centerX - this.radius && targetLeft <= this.centerX + this.radius && targetBottom >= this.top;
+  }
+
+  update() {
+    this.timer -= 1;
+    if (this.isTargetInside()) {
+      this.target.icedSlowTimer = Math.max(this.target.icedSlowTimer, icedThugFrostLingerDuration);
+      this.target.icedVulnerableTimer = Math.max(this.target.icedVulnerableTimer, icedThugFrostLingerDuration);
+    }
+    this.draw();
+    if (this.timer <= 0) this.active = false;
+  }
+}
+
 function rectangularCollision({ rectangle1, rectangle2 }) {
   const rectangle2X = rectangle2.position ? rectangle2.position.x : rectangle2.x;
   const rectangle2Y = rectangle2.position ? rectangle2.position.y : rectangle2.y;
@@ -4986,6 +5376,7 @@ function hasSecretVariant(fighter, variant, globalFlag = false) {
 }
 
 function isFireMasterOverheat(fighter) {
+  if (isIceMaster(fighter)) return false;
   return hasSecretVariant(fighter, 'fireMasterOverheat', characterSecretModes.fireMasterOverheat);
 }
 
@@ -5241,8 +5632,8 @@ function drawLightWarriorOmegaTransformation() {
   ctx.strokeStyle = '#111';
   ctx.lineWidth = 6;
   const phrase = timer < lightWarriorOmegaAnnouncementTimer ? 'CON SUS PODERES COMBINADOS SOY...' : 'OMEGA LIGHT WARRIOR!!';
-  ctx.strokeText(phrase, canvas.width / 2, 100);
-  ctx.fillText(phrase, canvas.width / 2, 100);
+  ctx.strokeText(phrase, canvas.width / 2, 190);
+  ctx.fillText(phrase, canvas.width / 2, 190);
 
   if (timer >= lightWarriorOmegaAnnouncementTimer && timer <= lightWarriorOmegaAnnouncementTimer + lightWarriorOmegaActivationDelay) {
     const flashProgress = (timer - lightWarriorOmegaAnnouncementTimer) / lightWarriorOmegaActivationDelay;
@@ -5395,9 +5786,10 @@ function getDebugMaxHealth(baseMaxHealth, fighter = null) {
 function getDebugMoveSpeed(fighter) {
   const kaiokenMultiplier = isNormalKaioken(fighter) && fighter.characterType === 'normal' && fighter.kaiokenTimer > 0 ? kaiokenSecretSpeedMultiplier : 1;
   const chronoMultiplier = fighter.chronoSlowTimer > 0 ? chronoSlowFactor : 1;
+  const icedMultiplier = fighter.icedSlowTimer > 0 ? icedThugFrostSlowFactor : 1;
   const ghostMultiplier = fighter.characterType === 'ghost' && fighter.ghostPhaseTimer > 0 ? ghostPhaseSpeedMultiplier : 1;
   const lightWarriorMultiplier = fighter.characterType === 'lightWarrior' && fighter.lightWarriorSpeedTimer > 0 ? lightWarriorSpeedMultiplier : 1;
-  return fighter.moveSpeed * getDebugMultiplier('moveMultiplier', fighter) * (1 + fighter.gamblerSpeedBoost) * kaiokenMultiplier * chronoMultiplier * ghostMultiplier * lightWarriorMultiplier;
+  return fighter.moveSpeed * getDebugMultiplier('moveMultiplier', fighter) * (1 + fighter.gamblerSpeedBoost) * kaiokenMultiplier * chronoMultiplier * icedMultiplier * ghostMultiplier * lightWarriorMultiplier;
 }
 
 function getDebugJumpSpeed(jumpSpeed, fighter = null) {
@@ -5434,6 +5826,7 @@ function getGamblerLuckWaveProgress(timer, fighter = null) {
 }
 
 function getFireMasterSecretDamage(attacker, damage) {
+  if (isIceMaster(attacker)) return damage * iceMasterAbilityDamageMultiplier;
   if (isSuperFireMaster(attacker)) {
     if (damage === fireballDamage) return superFireballDamage;
     if (damage === fireBeamDamage) return superFireBeamDamage;
@@ -5530,10 +5923,13 @@ function clearActiveCodes() {
   });
   deactivateBlindMode();
   lockDarkRoomMap();
+  lockArcadeBosses();
   syncSecretBodyModes();
 
   [player1, player2].forEach((fighter) => {
+    const wasArcadeBoss = isArcadeBossFighter(fighter);
     fighter.secretVariant = null;
+    if (wasArcadeBoss) fighter.setCharacterType(fighter.characterType);
     fighter.lightWarriorOmegaTransformed = false;
     fighter.lightWarriorOmegaStateTimer = 0;
     if (fighter.characterType === 'normal') {
@@ -5809,7 +6205,14 @@ function applyDamage(attacker, target, damage, { isSpecial = false, ignoreDebug 
     return 0;
   }
 
-  const adaptedDamage = getDivineAdaptedDamage(target, damage, resolvedDamageType);
+  const icedThugArmorMultiplier = target.secretVariant === 'icedThug'
+    ? fireArcadeMiniBossDamageTakenMultiplier
+    : isIceMaster(target)
+      ? iceMasterDamageTakenMultiplier
+      : 1;
+  const frostVulnerabilityMultiplier = target.icedVulnerableTimer > 0 ? icedThugFrostVulnerability : 1;
+  const targetDamageMultiplier = icedThugArmorMultiplier * frostVulnerabilityMultiplier;
+  const adaptedDamage = getDivineAdaptedDamage(target, damage * targetDamageMultiplier, resolvedDamageType);
   const previousHealth = Math.max(0, target.health);
   target.health = Math.max(0, target.health - (ignoreDebug ? adaptedDamage : getDebugDamage(adaptedDamage, attacker)));
   const actualDamage = previousHealth - target.health;
@@ -6322,16 +6725,16 @@ function drawDesertCowboyDuelAlert() {
 
   ctx.save();
   ctx.fillStyle = 'rgba(17, 17, 17, 0.82)';
-  ctx.fillRect(210, 70, 604, 96);
+  ctx.fillRect(210, 184, 604, 96);
   ctx.strokeStyle = '#fdd835';
   ctx.lineWidth = 5;
-  ctx.strokeRect(210, 70, 604, 96);
+  ctx.strokeRect(210, 184, 604, 96);
   ctx.fillStyle = '#fff';
   ctx.font = '900 22px Courier New, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(message.title, canvas.width / 2, 108);
+  ctx.fillText(message.title, canvas.width / 2, 222);
   ctx.font = '900 24px Courier New, monospace';
-  ctx.fillText(message.subtitle, canvas.width / 2, 140);
+  ctx.fillText(message.subtitle, canvas.width / 2, 254);
   ctx.restore();
 }
 
@@ -6340,16 +6743,16 @@ function drawTankClashAlert() {
 
   ctx.save();
   ctx.fillStyle = 'rgba(20, 24, 18, 0.86)';
-  ctx.fillRect(252, 74, 520, 90);
+  ctx.fillRect(252, 184, 520, 90);
   ctx.strokeStyle = '#ffeb3b';
   ctx.lineWidth = 5;
-  ctx.strokeRect(252, 74, 520, 90);
+  ctx.strokeRect(252, 184, 520, 90);
   ctx.fillStyle = '#fff';
   ctx.font = '900 26px Courier New, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('CHOQUE DE TITANES', canvas.width / 2, 110);
+  ctx.fillText('CHOQUE DE TITANES', canvas.width / 2, 220);
   ctx.font = '900 16px Courier New, monospace';
-  ctx.fillText('El proximo canon de cada Tank queda sobrecargado.', canvas.width / 2, 140);
+  ctx.fillText('El proximo canon de cada Tank queda sobrecargado.', canvas.width / 2, 250);
   ctx.restore();
 }
 
@@ -6358,16 +6761,16 @@ function drawArcaneRiftAlert() {
 
   ctx.save();
   ctx.fillStyle = 'rgba(12, 8, 28, 0.88)';
-  ctx.fillRect(234, 74, 556, 90);
+  ctx.fillRect(234, 184, 556, 90);
   ctx.strokeStyle = '#ce93d8';
   ctx.lineWidth = 5;
-  ctx.strokeRect(234, 74, 556, 90);
+  ctx.strokeRect(234, 184, 556, 90);
   ctx.fillStyle = '#fff';
   ctx.font = '900 26px Courier New, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('RUPTURA ARCANA', canvas.width / 2, 110);
+  ctx.fillText('RUPTURA ARCANA', canvas.width / 2, 220);
   ctx.font = '900 16px Courier New, monospace';
-  ctx.fillText('La magia reflejada potencia las esferas rojas.', canvas.width / 2, 140);
+  ctx.fillText('La magia reflejada potencia las esferas rojas.', canvas.width / 2, 250);
   ctx.restore();
 }
 
@@ -6376,19 +6779,19 @@ function drawMirrorCollapseAlert() {
 
   ctx.save();
   ctx.fillStyle = 'rgba(7, 13, 32, 0.9)';
-  ctx.fillRect(224, 174, 576, 86);
+  ctx.fillRect(224, 294, 576, 86);
   ctx.strokeStyle = '#42a5f5';
   ctx.lineWidth = 5;
-  ctx.strokeRect(224, 174, 576, 86);
+  ctx.strokeRect(224, 294, 576, 86);
   ctx.strokeStyle = '#fdd835';
   ctx.lineWidth = 2;
-  ctx.strokeRect(236, 186, 552, 62);
+  ctx.strokeRect(236, 306, 552, 62);
   ctx.fillStyle = '#fff';
   ctx.font = '900 24px Courier New, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('COLAPSO ESPEJO', canvas.width / 2, 208);
+  ctx.fillText('COLAPSO ESPEJO', canvas.width / 2, 328);
   ctx.font = '900 15px Courier New, monospace';
-  ctx.fillText('La esfera secreta reflejada vuelve inestable el duelo.', canvas.width / 2, 236);
+  ctx.fillText('La esfera secreta reflejada vuelve inestable el duelo.', canvas.width / 2, 356);
   ctx.restore();
 }
 
@@ -6397,16 +6800,16 @@ function drawCasinoRoyaleAlert() {
 
   ctx.save();
   ctx.fillStyle = 'rgba(4, 20, 12, 0.88)';
-  ctx.fillRect(242, 74, 540, 90);
+  ctx.fillRect(242, 184, 540, 90);
   ctx.strokeStyle = '#66ff80';
   ctx.lineWidth = 5;
-  ctx.strokeRect(242, 74, 540, 90);
+  ctx.strokeRect(242, 184, 540, 90);
   ctx.fillStyle = '#fff';
   ctx.font = '900 26px Courier New, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('CASINO ROYALE', canvas.width / 2, 110);
+  ctx.fillText('CASINO ROYALE', canvas.width / 2, 220);
   ctx.font = '900 16px Courier New, monospace';
-  ctx.fillText('Ambos Gambler ganan suerte y ruleta lista.', canvas.width / 2, 140);
+  ctx.fillText('Ambos Gambler ganan suerte y ruleta lista.', canvas.width / 2, 250);
   ctx.restore();
 }
 
@@ -6415,16 +6818,16 @@ function drawManaMeltdownAlert() {
 
   ctx.save();
   ctx.fillStyle = 'rgba(36, 12, 8, 0.88)';
-  ctx.fillRect(232, 74, 560, 90);
+  ctx.fillRect(232, 184, 560, 90);
   ctx.strokeStyle = '#ff8f00';
   ctx.lineWidth = 5;
-  ctx.strokeRect(232, 74, 560, 90);
+  ctx.strokeRect(232, 184, 560, 90);
   ctx.fillStyle = '#fff';
   ctx.font = '900 26px Courier New, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('MANA MELTDOWN', canvas.width / 2, 110);
+  ctx.fillText('MANA MELTDOWN', canvas.width / 2, 220);
   ctx.font = '900 16px Courier New, monospace';
-  ctx.fillText('Fuego y magia hacen mas dano temporalmente.', canvas.width / 2, 140);
+  ctx.fillText('Fuego y magia hacen mas dano temporalmente.', canvas.width / 2, 250);
   ctx.restore();
 }
 
@@ -6433,19 +6836,19 @@ function drawPrismOverdriveAlert() {
 
   ctx.save();
   ctx.fillStyle = 'rgba(8, 14, 28, 0.88)';
-  ctx.fillRect(232, 74, 560, 90);
+  ctx.fillRect(232, 184, 560, 90);
   ctx.strokeStyle = '#42a5f5';
   ctx.lineWidth = 5;
-  ctx.strokeRect(232, 74, 560, 90);
+  ctx.strokeRect(232, 184, 560, 90);
   ctx.strokeStyle = '#fdd835';
   ctx.lineWidth = 2;
-  ctx.strokeRect(244, 86, 536, 66);
+  ctx.strokeRect(244, 196, 536, 66);
   ctx.fillStyle = '#fff';
   ctx.font = '900 26px Courier New, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('PRISM OVERDRIVE', canvas.width / 2, 110);
+  ctx.fillText('PRISM OVERDRIVE', canvas.width / 2, 220);
   ctx.font = '900 16px Courier New, monospace';
-  ctx.fillText('Switcher acelera sus cambios y habilidades.', canvas.width / 2, 140);
+  ctx.fillText('Switcher acelera sus cambios y habilidades.', canvas.width / 2, 250);
   ctx.restore();
 }
 
@@ -6454,19 +6857,19 @@ function drawAbsoluteAdaptationAlert() {
 
   ctx.save();
   ctx.fillStyle = 'rgba(5, 7, 12, 0.9)';
-  ctx.fillRect(216, 174, 592, 92);
+  ctx.fillRect(216, 294, 592, 92);
   ctx.strokeStyle = '#e0f7fa';
   ctx.lineWidth = 5;
-  ctx.strokeRect(216, 174, 592, 92);
+  ctx.strokeRect(216, 294, 592, 92);
   ctx.strokeStyle = '#ce93d8';
   ctx.lineWidth = 2;
-  ctx.strokeRect(230, 188, 564, 64);
+  ctx.strokeRect(230, 308, 564, 64);
   ctx.fillStyle = '#fff';
   ctx.font = '900 25px Courier New, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('ABSOLUTE ADAPTATION', canvas.width / 2, 210);
+  ctx.fillText('ABSOLUTE ADAPTATION', canvas.width / 2, 330);
   ctx.font = '900 15px Courier New, monospace';
-  ctx.fillText('Divine entiende el tiempo; Chrono recupera sus herramientas.', canvas.width / 2, 238);
+  ctx.fillText('Divine entiende el tiempo; Chrono recupera sus herramientas.', canvas.width / 2, 358);
   ctx.restore();
 }
 
@@ -6480,6 +6883,16 @@ function formatFightDuration(milliseconds) {
 function getVictoryPhrase(fighter, opponent) {
   if (fighter.characterType === 'lightWarrior' && Math.random() < 0.01) {
     return 'Jarona!';
+  }
+
+  if (isIceMaster(fighter)) {
+    const icePhrases = ['Tu fuego se apago antes de llegar a la cima.', 'El invierno siempre gana.', 'Quedate quieto, el hielo hara el resto.'];
+    return icePhrases[Math.floor(Math.random() * icePhrases.length)];
+  }
+
+  if (isIceMaster(opponent) && fighter.characterType === 'fireMaster') {
+    const meltPhrases = ['Ningun hielo resiste una llama de verdad.', 'La montaña ya no es tuya, Ice Master.'];
+    return meltPhrases[Math.floor(Math.random() * meltPhrases.length)];
   }
 
   const phraseSet = victoryPhrases[fighter.characterType] || victoryPhrases.normal;
@@ -6560,6 +6973,20 @@ function drawVictoryCharacter(fighter, x, y, scale = 1) {
       ctx.stroke();
       ctx.fillStyle = '#8d5d1d';
       ctx.fillRect(x - width * 0.2, y + height * 0.04, width * 1.4, height * 0.06);
+    } else if (isIceMaster(fighter)) {
+      ctx.fillStyle = '#3f3fc8';
+      ctx.fillRect(x, y + height * 0.58, width, height * 0.14);
+      ctx.fillStyle = '#9ff4ff';
+      ctx.beginPath();
+      ctx.moveTo(x + width * 0.2, y);
+      ctx.lineTo(x + width * 0.32, y - height * 0.16);
+      ctx.lineTo(x + width * 0.44, y);
+      ctx.lineTo(x + width * 0.56, y - height * 0.2);
+      ctx.lineTo(x + width * 0.68, y);
+      ctx.lineTo(x + width * 0.8, y - height * 0.14);
+      ctx.lineTo(x + width * 0.86, y);
+      ctx.closePath();
+      ctx.fill();
     } else {
       ctx.fillStyle = '#ffeb3b';
       ctx.fillRect(x + width * 0.25, y - height * 0.16, width * 0.5, height * 0.16);
@@ -6679,6 +7106,11 @@ function drawStage() {
     return;
   }
 
+  if (selectedMap === 'fireArcade') {
+    drawFireArcadeStage();
+    return;
+  }
+
   if (selectedMap === 'normalArcade') {
     drawNormalArcadeStage();
     return;
@@ -6722,6 +7154,120 @@ function drawNormalArcadeStage() {
   }
   ctx.fillStyle = '#e14b61';
   ctx.fillRect(390, ground - 34, 244, 7);
+}
+
+function drawFireArcadeStage() {
+  const skyGradient = ctx.createLinearGradient(0, 0, 0, ground);
+  skyGradient.addColorStop(0, '#082033');
+  skyGradient.addColorStop(0.48, '#4d7f9f');
+  skyGradient.addColorStop(1, '#d9f5ff');
+  ctx.fillStyle = skyGradient;
+  ctx.fillRect(0, 0, canvas.width, ground);
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+  ctx.beginPath();
+  ctx.arc(824, 96, 42, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255, 238, 170, 0.32)';
+  ctx.beginPath();
+  ctx.arc(824, 96, 72, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#17324a';
+  ctx.beginPath();
+  ctx.moveTo(-90, ground - 18);
+  ctx.lineTo(130, 170);
+  ctx.lineTo(348, ground - 18);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#274e68';
+  ctx.beginPath();
+  ctx.moveTo(190, ground - 18);
+  ctx.lineTo(498, 104);
+  ctx.lineTo(778, ground - 18);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#1a3b57';
+  ctx.beginPath();
+  ctx.moveTo(620, ground - 18);
+  ctx.lineTo(858, 150);
+  ctx.lineTo(canvas.width + 92, ground - 18);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#f4fbff';
+  ctx.beginPath();
+  ctx.moveTo(76, 240);
+  ctx.lineTo(130, 170);
+  ctx.lineTo(184, 240);
+  ctx.lineTo(146, 224);
+  ctx.lineTo(118, 250);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(402, 192);
+  ctx.lineTo(498, 104);
+  ctx.lineTo(594, 194);
+  ctx.lineTo(534, 174);
+  ctx.lineTo(486, 220);
+  ctx.lineTo(450, 176);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(784, 222);
+  ctx.lineTo(858, 150);
+  ctx.lineTo(934, 224);
+  ctx.lineTo(888, 208);
+  ctx.lineTo(850, 238);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(225, 246, 255, 0.78)';
+  ctx.beginPath();
+  ctx.moveTo(0, ground - 18);
+  ctx.bezierCurveTo(152, ground - 82, 286, ground - 54, 414, ground - 88);
+  ctx.bezierCurveTo(572, ground - 130, 704, ground - 32, canvas.width, ground - 96);
+  ctx.lineTo(canvas.width, ground);
+  ctx.lineTo(0, ground);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(121, 158, 178, 0.34)';
+  for (let x = 28; x < canvas.width; x += 128) {
+    ctx.beginPath();
+    ctx.moveTo(x, ground - 58);
+    ctx.lineTo(x + 38, ground - 90);
+    ctx.lineTo(x + 92, ground - 62);
+    ctx.lineTo(x + 58, ground - 70);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#233544';
+  ctx.fillRect(0, ground, canvas.width, canvas.height - ground);
+  ctx.fillStyle = '#dff7ff';
+  ctx.fillRect(0, ground - 14, canvas.width, 14);
+  ctx.fillStyle = '#9fd5e8';
+  ctx.fillRect(0, ground - 6, canvas.width, 6);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.fillRect(0, ground + 18, canvas.width, 12);
+  ctx.strokeStyle = 'rgba(12, 32, 48, 0.34)';
+  ctx.lineWidth = 3;
+  for (let x = -50; x < canvas.width; x += 90) {
+    ctx.beginPath();
+    ctx.moveTo(x, ground - 12);
+    ctx.lineTo(x + 118, canvas.height);
+    ctx.stroke();
+  }
+
+  const snowDrift = Math.floor(performance.now() / 38) % 80;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.76)';
+  for (let x = -80; x < canvas.width + 80; x += 80) {
+    const yOffset = (x * 17) % 190;
+    ctx.beginPath();
+    ctx.arc(x + snowDrift, 64 + yOffset, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 function drawAlphaStage() {
@@ -7311,6 +7857,7 @@ function updateVictoryStats() {
 
 function updateFightAchievements(winnerPlayer, fightTime) {
   if (!winnerPlayer) return;
+  if (isArcadeBossFighter(winnerPlayer)) return;
 
   unlockAchievement('firstWin');
 
@@ -7403,6 +7950,7 @@ function finishFight() {
   resetLightWarriorOmegaState(player2);
   stopOmegaBattleTrack();
   if (normalArcadeActive && player1.health > 0 && player2.health <= 0 && normalArcadeEnemiesRemaining > 0) {
+    awardCoins(100);
     startNextNormalArcadeEnemy();
     return;
   }
@@ -7426,9 +7974,13 @@ function finishFight() {
   updateVictoryStats();
   recordPersistentFightStatistics(winnerPlayer, fightTime);
   updateFightAchievements(winnerPlayer, fightTime);
+  if (winnerPlayer) awardCoins(100);
   if (normalArcadeActive && winnerPlayer === player1) {
+    awardArcadeReward('arcadeLevels', `${arcadeChapter}-${selectedNormalArcadeLevel}`, selectedNormalArcadeLevel * 250);
     if (selectedNormalArcadeLevel === 5) {
-      unlockAchievement('normalArcadeCompleted');
+      awardArcadeReward('arcadeChapters', `${arcadeChapter}-01`, 3000);
+      if (arcadeChapter === 'normal') unlockAchievement('normalArcadeCompleted');
+      if (arcadeChapter === 'fireMaster') unlockAchievement('fireArcadeCompleted');
     }
     unlockNextNormalArcadeLevel(selectedNormalArcadeLevel);
   }
@@ -7463,6 +8015,8 @@ function resetFight() {
   sorcererSecretOrbs = [];
   chronoBlades = [];
   chronoZones = [];
+  icedThugBlades = [];
+  icedThugFrostFields = [];
   divineWorldCutCharges = [];
   divineWorldCuts = [];
   clearQfPendingSpecial(1);
@@ -7477,6 +8031,7 @@ function resetFight() {
   applyBotDifficulty();
   player1.reset({ x: 120, y: 0 });
   player2.reset({ x: 820, y: 0 });
+  if (normalArcadeActive) configureNormalArcadeLevel();
   updateHealthBars();
   if (!animationId) {
     animate();
@@ -7510,6 +8065,8 @@ function returnToMenu() {
   sorcererSecretOrbs = [];
   chronoBlades = [];
   chronoZones = [];
+  icedThugBlades = [];
+  icedThugFrostFields = [];
   divineWorldCutCharges = [];
   divineWorldCuts = [];
   clearQfPendingSpecial(1);
@@ -7598,6 +8155,8 @@ function animate() {
   updateSorcererSecretOrbs();
   updateChronoBlades();
   updateChronoZones();
+  updateIcedThugFrostFields();
+  updateIcedThugBlades();
   updateDivineWorldCutCharges();
   updateDivineWorldCuts();
 
@@ -7726,6 +8285,9 @@ function updateHealthBars() {
 function getCharacterDisplayName(fighter) {
   if (fighter.characterType === 'lightWarrior' && fighter.lightWarriorOmegaTransformed) return 'OMEGA LIGHT WARRIOR!!';
   const baseName = characterDisplayNames[fighter.characterType] || 'Normal';
+  if (fighter.secretVariant === 'arcadeBoss') return normalArcadeBossName;
+  if (fighter.secretVariant === 'icedThug') return fireArcadeMiniBossName;
+  if (isIceMaster(fighter)) return fireArcadeBossName;
   if (fighter.characterType === 'normal' && isNormalKaioken(fighter) && fighter.kaiokenTimer > 0) return 'Kaioken';
   if (fighter.characterType === 'fireMaster' && isSuperFireMaster(fighter)) return 'Super Fire Master';
   if (fighter.characterType === 'fireMaster' && isFireMasterOverheat(fighter)) return 'Fire Master+';
@@ -7744,11 +8306,17 @@ function updateCombatHudIdentity() {
   p1Portrait.dataset.variant = player1.secretVariant || '';
   p2Portrait.dataset.variant = player2.secretVariant || '';
   p1CharacterName.innerText = getCharacterDisplayName(player1);
-  p2CharacterName.innerText = normalArcadeActive && selectedNormalArcadeLevel === 5
-    ? normalArcadeBossName
-    : normalArcadeActive && selectedNormalArcadeLevel >= 1 && selectedNormalArcadeLevel <= 4
-      ? normalArcadeEnemyName
-      : getCharacterDisplayName(player2);
+  let p2Name = getCharacterDisplayName(player2);
+  if (normalArcadeActive && selectedNormalArcadeLevel === 5) {
+    p2Name = arcadeChapter === 'fireMaster' ? fireArcadeBossName : normalArcadeBossName;
+  } else if (normalArcadeActive && isFireArcadeMiniBoss()) {
+    p2Name = fireArcadeMiniBossName;
+  } else if (normalArcadeActive && arcadeChapter === 'fireMaster' && selectedNormalArcadeLevel >= 1 && selectedNormalArcadeLevel <= 3) {
+    p2Name = fireArcadeBruteName;
+  } else if (normalArcadeActive && selectedNormalArcadeLevel >= 1 && selectedNormalArcadeLevel <= 4) {
+    p2Name = normalArcadeEnemyName;
+  }
+  p2CharacterName.innerText = p2Name;
   p1HudTag.innerText = 'P1';
   p2HudTag.innerText = botEnabled ? `Bot ${botDifficultyDisplayNames[botDifficulty] || 'media'}` : 'P2';
 }
@@ -7796,6 +8364,18 @@ function updateCooldownChip(element, cooldown) {
 }
 
 function getPlayerAbilityCooldowns(player) {
+  if (player.secretVariant === 'arcadeBoss') {
+    return {
+      q: { active: true, name: 'Onda de choque', remaining: player.arcadeBossShockwaveCooldown, max: getDebugCooldown(normalArcadeBossShockwaveCooldown, player) },
+      f: { active: false },
+    };
+  }
+  if (isIcedThug(player)) {
+    return {
+      q: { active: true, name: 'Campo gelido', remaining: player.icedThugFrostFieldCooldown, max: getDebugCooldown(icedThugFrostFieldCooldown, player) },
+      f: { active: true, name: 'Cuchilla de hielo', remaining: player.icedThugBladeCooldown, max: getDebugCooldown(icedThugBladeCooldown, player) },
+    };
+  }
   switch (player.characterType) {
     case 'normal':
       return {
@@ -7811,7 +8391,7 @@ function getPlayerAbilityCooldowns(player) {
       return {
         q: {
           active: true,
-          name: 'Bola de fuego',
+          name: isIceMaster(player) ? 'Bola de hielo' : 'Bola de fuego',
           remaining: player.specialCooldown,
           max: Math.max(
             getDebugCooldown(getFireMasterSecretCooldown(player, fireballCooldown), player),
@@ -7820,7 +8400,7 @@ function getPlayerAbilityCooldowns(player) {
         },
         f: {
           active: true,
-          name: 'Fire beam',
+          name: isIceMaster(player) ? 'Rayo helado' : 'Fire beam',
           remaining: player.fireBeamCooldown,
           max: Math.max(
             getDebugCooldown(getFireMasterSecretCooldown(player, fireBeamCooldown), player),
@@ -7981,6 +8561,7 @@ function updateFireballs() {
         getElementalEventDamage(fireball.attacker, getFireMasterSecretDamage(fireball.attacker, fireballDamage) * fireball.damageMultiplier),
         { isSpecial: true, damageType: 'fireProjectile' }
       );
+      applyIceMasterSlow(fireball.attacker, fireball.target, iceMasterShardSlowDuration);
       fireball.target.velocity.x = getDebugKnockback(fireball.velocity.x > 0 ? 10 : -10, fireball.target);
       fireball.target.velocity.y = getDebugKnockback(-7, fireball.target);
       fireball.active = false;
@@ -8010,6 +8591,7 @@ function updateFireBeams() {
         getElementalEventDamage(fireBeam.attacker, getFireMasterSecretDamage(fireBeam.attacker, fireBeamDamage) * fireBeam.damageMultiplier),
         { isSpecial: true, damageType: 'fireBeam' }
       );
+      applyIceMasterSlow(fireBeam.attacker, fireBeam.target, iceMasterBeamSlowDuration);
       fireBeam.target.velocity.x = getDebugKnockback(fireBeam.velocity.x > 0 ? 18 : -18, fireBeam.target);
       fireBeam.target.velocity.y = getDebugKnockback(-10, fireBeam.target);
       fireBeam.active = false;
@@ -8251,6 +8833,44 @@ function getChronoBladeCollisionArea(chronoBlade) {
     width: maxX - minX,
     height: maxY - minY,
   };
+}
+
+function updateIcedThugBlades() {
+  icedThugBlades.forEach((iceBlade) => {
+    if (!updateProjectileIfNotTimeStopped(iceBlade)) return;
+    const bladeCollisionArea = getChronoBladeCollisionArea(iceBlade);
+
+    if (
+      iceBlade.active &&
+      (rectangularCopycatShieldCollision(iceBlade.target, bladeCollisionArea) ||
+        rectangularCollision({ rectangle1: bladeCollisionArea, rectangle2: iceBlade.target }))
+    ) {
+      if (handleCopycatShieldHit(iceBlade.target, iceBlade.attacker)) {
+        iceBlade.active = false;
+        return;
+      }
+
+      applyDamage(iceBlade.attacker, iceBlade.target, icedThugBladeDamage, { isSpecial: true, damageType: 'iceBlade' });
+      iceBlade.target.icedSlowTimer = Math.max(iceBlade.target.icedSlowTimer, getDebugDuration(icedThugBladeSlowDuration, iceBlade.target));
+      iceBlade.target.velocity.x = getDebugKnockback(iceBlade.velocity.x > 0 ? 6 : -6, iceBlade.target);
+      iceBlade.target.velocity.y = getDebugKnockback(-3, iceBlade.target);
+      iceBlade.active = false;
+    }
+  });
+
+  icedThugBlades = icedThugBlades.filter((iceBlade) => iceBlade.active);
+}
+
+function updateIcedThugFrostFields() {
+  icedThugFrostFields.forEach((frostField) => {
+    if (isTimeStoppedByChrono(frostField.attacker)) {
+      frostField.draw();
+      return;
+    }
+    frostField.update();
+  });
+
+  icedThugFrostFields = icedThugFrostFields.filter((frostField) => frostField.active);
 }
 
 function updateChronoZones() {
@@ -8520,6 +9140,10 @@ function handleMenuSecretInput(event) {
       }
     });
     unlockAchievement('codeBreaker');
+  } else if (normalizedSecretBuffer.endsWith('bossrush')) {
+    menuSecretBuffer = '';
+    unlockArcadeBosses();
+    unlockAchievement('codeBreaker');
   } else if (normalizedSecretBuffer.endsWith('lightsout')) {
     menuSecretBuffer = '';
     unlockDarkRoomMap();
@@ -8576,6 +9200,8 @@ window.addEventListener('keydown', (event) => {
       activateGamblerRoll(player1);
       launchChronoBlade(player1, player2);
       activateGhostPhase(player1);
+      launchArcadeBossShockwave(player1, player2);
+      activateIcedThugFrostField(player1, player2);
       break;
     case 'f':
     case 'F':
@@ -8599,6 +9225,7 @@ window.addEventListener('keydown', (event) => {
       activateLightWarriorSpeed(player1);
       activateKaioken(player1);
       activateChronoSlow(player1, player2);
+      launchIcedThugBlade(player1, player2);
       break;
     case 'r':
     case 'R':
@@ -8652,6 +9279,8 @@ window.addEventListener('keydown', (event) => {
         activateGamblerRoll(player2);
         launchChronoBlade(player2, player1);
         activateGhostPhase(player2);
+        launchArcadeBossShockwave(player2, player1);
+        activateIcedThugFrostField(player2, player1);
       }
       break;
     case '.':
@@ -8676,6 +9305,7 @@ window.addEventListener('keydown', (event) => {
         activateLightWarriorSpeed(player2);
         activateKaioken(player2);
         activateChronoSlow(player2, player1);
+        launchIcedThugBlade(player2, player1);
       }
       break;
     case 'Enter':
@@ -9042,6 +9672,7 @@ function launchTankShell(attacker, target) {
 }
 
 function launchArcadeBossShockwave(attacker, target) {
+  if (!canFighterAct(attacker)) return false;
   if (!attacker.arcadeBossVariant || attacker.arcadeBossShockwaveCooldown > 0 || gameOver) return false;
 
   arcadeBossShockwaves.push(new ArcadeBossShockwave({ target, attacker }));
@@ -9095,6 +9726,74 @@ function launchSorcererGravityOrb(attacker, target) {
   playSound('gravityOrb');
   recordSpecialUsed(attacker);
   attacker.sorcererGravityCooldown = getDebugCooldown(sorcererGravityCooldown, attacker);
+}
+
+function isIcedThug(fighter) {
+  return hasSecretVariant(fighter, 'icedThug');
+}
+
+function isArcadeBossFighter(fighter) {
+  return Boolean(fighter && arcadeBossVariants.includes(fighter.secretVariant));
+}
+
+function getArcadeBossVariantHealth(fighter) {
+  if (!fighter) return 100;
+  if (fighter.secretVariant === 'arcadeBoss') return normalArcadeBossHealth;
+  if (fighter.secretVariant === 'icedThug') return fireArcadeMiniBossHealth;
+  if (fighter.secretVariant === 'iceMaster') return iceMasterHealth;
+  return 100;
+}
+
+function unlockArcadeBosses() {
+  arcadeBossesUnlocked = true;
+  arcadeBossCharacterButtons.forEach((button) => button.classList.remove('hidden'));
+  arcadeMapButtons.forEach((button) => button.classList.remove('hidden'));
+}
+
+function lockArcadeBosses() {
+  arcadeBossesUnlocked = false;
+  arcadeBossCharacterButtons.forEach((button) => button.classList.add('hidden'));
+  arcadeMapButtons.forEach((button) => button.classList.add('hidden'));
+  if (!normalArcadeActive && (selectedMap === 'normalArcade' || selectedMap === 'fireArcade')) {
+    selectedMap = 'foundry';
+  }
+}
+
+function isIceMaster(fighter) {
+  return Boolean(fighter && fighter.characterType === 'fireMaster' && fighter.secretVariant === 'iceMaster');
+}
+
+function applyIceMasterSlow(attacker, target, duration) {
+  if (!isIceMaster(attacker) || !target) return;
+  target.icedSlowTimer = Math.max(target.icedSlowTimer, getDebugDuration(duration, target));
+}
+
+function launchIcedThugBlade(attacker, target) {
+  if (!canFighterAct(attacker)) return false;
+  if (!isIcedThug(attacker) || attacker.icedThugBladeCooldown > 0 || gameOver) return false;
+
+  const attackerCenterX = attacker.position.x + attacker.width / 2;
+  const targetCenterX = target.position.x + target.width / 2;
+  const direction = targetCenterX >= attackerCenterX ? 1 : -1;
+  const startX = direction > 0 ? attacker.position.x + attacker.width : attacker.position.x - 38;
+  const startY = attacker.position.y + attacker.height / 2 - 8;
+
+  icedThugBlades.push(new IcedThugBlade({ x: startX, y: startY, target, attacker }));
+  playSound('sorcererOrb');
+  recordSpecialUsed(attacker);
+  attacker.icedThugBladeCooldown = getDebugCooldown(icedThugBladeCooldown, attacker);
+  return true;
+}
+
+function activateIcedThugFrostField(attacker, target) {
+  if (!canFighterAct(attacker)) return false;
+  if (!isIcedThug(attacker) || attacker.icedThugFrostFieldCooldown > 0 || gameOver) return false;
+
+  icedThugFrostFields.push(new IcedThugFrostField({ attacker, target }));
+  playSound('gravityOrb');
+  recordSpecialUsed(attacker);
+  attacker.icedThugFrostFieldCooldown = getDebugCooldown(icedThugFrostFieldCooldown, attacker);
+  return true;
 }
 
 function launchChronoBlade(attacker, target) {
@@ -10283,6 +10982,25 @@ function updateBotSpecials(profile, absDistance, threat) {
     return true;
   }
 
+  if (isIcedThug(player2)) {
+    if (
+      player2.icedThugFrostFieldCooldown === 0 &&
+      absDistance < 420 &&
+      shouldBotUseSpecial(profile, closePressure ? 1.1 : 0.7)
+    ) {
+      return activateIcedThugFrostField(player2, player1);
+    }
+    if (
+      player2.icedThugBladeCooldown === 0 &&
+      absDistance > 140 &&
+      absDistance < 760 &&
+      shouldBotUseSpecial(profile, 0.8)
+    ) {
+      return launchIcedThugBlade(player2, player1);
+    }
+    return false;
+  }
+
   if (
     player2.characterType === 'reflecter' &&
     player2.copycatShieldCooldown === 0 &&
@@ -10617,33 +11335,35 @@ function configureNormalArcadeLevel() {
   if (selectedNormalArcadeLevel === 5) {
     normalArcadeEnemiesRemaining = 0;
     normalArcadeEnemyIndex = 0;
-    player1.setCharacterType('normal');
-    player2.setCharacterType('normal');
+    player1.setCharacterType(arcadeChapter === 'fireMaster' ? 'fireMaster' : 'normal');
+    player2.setCharacterType(arcadeChapter === 'fireMaster' ? 'fireMaster' : 'normal');
     configureNormalArcadeBoss();
     return;
   }
-  player1.setCharacterType('normal');
-  player2.setCharacterType('normal');
+  player1.setCharacterType(arcadeChapter === 'fireMaster' ? 'fireMaster' : 'normal');
+  player2.setCharacterType(arcadeChapter === 'fireMaster' ? getFireArcadeEnemyType() : 'normal');
   normalArcadeEnemiesRemaining = selectedNormalArcadeLevel >= 3 ? selectedNormalArcadeLevel === 3 ? 1 : 4 : 0;
+  if (isFireArcadeMiniBoss()) normalArcadeEnemiesRemaining = 0;
   normalArcadeEnemyIndex = 1;
   botEnabled = true;
   configureNormalArcadeEnemy();
 }
 
+function configureFireArcadeBoss() {
+  player2.setCharacterType('fireMaster', 'iceMaster');
+  player2.health = player2.maxHealth;
+  botEnabled = true;
+  botDifficulty = 'hard';
+  updateHealthBars();
+  updateCombatHudIdentity();
+}
+
 function configureNormalArcadeBoss() {
-  player2.arcadeBossVariant = true;
-  player2.width = 72;
-  player2.height = 144;
-  player2.moveSpeed = normalArcadeBossSpeed;
-  player2.damageMultiplier = normalArcadeBossDamageMultiplier;
-  player2.attackDuration = 12;
-  player2.attackBox = {
-    offset: { x: player2.attacksToTheRight ? player2.width : -64, y: 18 },
-    width: 64,
-    height: 30,
-  };
-  player2.setColor('#980018');
-  player2.setMaxHealth(normalArcadeBossHealth);
+  if (arcadeChapter === 'fireMaster') {
+    configureFireArcadeBoss();
+    return;
+  }
+  player2.setCharacterType('normal', 'arcadeBoss');
   player2.health = player2.maxHealth;
   player2.arcadeBossShockwaveCooldown = 0;
   botEnabled = true;
@@ -10660,15 +11380,39 @@ function getNormalArcadeEnemyDifficulty() {
   return 'hard';
 }
 
+function getFireArcadeEnemyType() {
+  return 'normal';
+}
+
+function isFireArcadeMiniBoss() {
+  return arcadeChapter === 'fireMaster' && selectedNormalArcadeLevel === 4;
+}
+
+function getFireArcadeBruteHealth() {
+  return fireArcadeBruteHealthByLevel[selectedNormalArcadeLevel] || fireArcadeBruteHealthByLevel[1];
+}
+
+function getFireArcadeBruteDamageMultiplier() {
+  return fireArcadeBruteDamageMultiplierByLevel[selectedNormalArcadeLevel] || fireArcadeBruteDamageMultiplierByLevel[1];
+}
+
 function configureNormalArcadeEnemy() {
   player2.arcadeBossVariant = false;
-  botDifficulty = getNormalArcadeEnemyDifficulty();
-  player2.setColor('#606060');
+  const fireArcadeBrute = arcadeChapter === 'fireMaster' && selectedNormalArcadeLevel <= 3;
+  const fireArcadeMiniBoss = isFireArcadeMiniBoss();
+  if (arcadeChapter === 'fireMaster') player2.setCharacterType(getFireArcadeEnemyType());
+  botDifficulty = fireArcadeMiniBoss ? 'hard' : getNormalArcadeEnemyDifficulty();
+  player2.secretVariant = fireArcadeMiniBoss ? 'icedThug' : fireArcadeBrute ? 'iceBrute' : null;
+  player2.setColor(fireArcadeMiniBoss ? '#77dcf2' : fireArcadeBrute ? '#123761' : arcadeChapter === 'fireMaster' ? '#8bdbea' : '#606060');
   applyBotDifficulty();
   player2.health = player2.maxHealth;
-  if (selectedNormalArcadeLevel === 1) {
-    player2.setMaxHealth(normalArcadeEnemyHealth);
-    player2.damageMultiplier = normalArcadeEnemyDamageMultiplier;
+  if (fireArcadeMiniBoss) {
+    player2.setCharacterType('normal', 'icedThug');
+    player2.health = player2.maxHealth;
+  } else if (fireArcadeBrute || selectedNormalArcadeLevel === 1) {
+    player2.setMaxHealth(fireArcadeBrute ? getFireArcadeBruteHealth() : normalArcadeEnemyHealth);
+    player2.health = player2.maxHealth;
+    player2.damageMultiplier = fireArcadeBrute ? getFireArcadeBruteDamageMultiplier() : normalArcadeEnemyDamageMultiplier;
   }
   updateHealthBars();
   updateCombatHudIdentity();
@@ -10693,6 +11437,8 @@ function startNextNormalArcadeEnemy() {
   sorcererSecretOrbs = [];
   chronoBlades = [];
   chronoZones = [];
+  icedThugBlades = [];
+  icedThugFrostFields = [];
   divineWorldCutCharges = [];
   divineWorldCuts = [];
   arcadeBossShockwaves = [];
@@ -10731,6 +11477,7 @@ function getVisibleStatisticsCharacterTypes() {
 
 function selectCharacter(characterType, secretVariant = null) {
   if (secretVariant === 'superFireMaster' && !isSuperFireMasterUnlocked()) return;
+  if (arcadeBossVariants.includes(secretVariant) && !arcadeBossesUnlocked) return;
 
   const selectedCharacterType = blindMode ? blindCharacterMix[characterType] || characterType : characterType;
   const selectedSecretVariant = blindMode
@@ -10743,7 +11490,7 @@ function selectCharacter(characterType, secretVariant = null) {
     player1.setCharacterType(selectedCharacterType, selectedSecretVariant);
     if (blindMode) applyBlindFighterLook(player1);
     if (normalArcadeActive) {
-      player2.setCharacterType('normal');
+      player2.setCharacterType(arcadeChapter === 'fireMaster' ? 'normal' : 'normal');
       openMapSelect();
       return;
     }
@@ -10806,6 +11553,10 @@ function openCharacterSelect() {
     const arcadeDisabled = normalArcadeActive && characterType !== 'normal';
     button.disabled = arcadeDisabled || button.classList.contains('locked');
     button.classList.toggle('arcade-disabled', arcadeDisabled);
+  });
+  arcadeBossCharacterButtons.forEach((button) => {
+    button.disabled = normalArcadeActive;
+    button.classList.toggle('arcade-disabled', normalArcadeActive);
   });
   titleScreen.classList.add('hidden');
   oldDaysScreen.classList.add('hidden');
@@ -10917,9 +11668,47 @@ function openArcadeLevels() {
   normalArcadeActive = false;
 }
 
-function openArcadeChapter() {
+function syncArcadeChapterUI() {
+  const fireChapter = arcadeChapter === 'fireMaster';
+  const levelTitles = fireChapter
+    ? ['La primera chispa', 'Guardianes congelados', 'Calor bajo cero', 'El glaciar que camina', 'El invierno eterno']
+    : ['Nivel 1', 'El escondite', 'Zona de riesgo', 'La emboscada', 'Jefe de la banda'];
+  const levelDescriptions = fireChapter
+    ? [
+        'Enfrentate a un Bruto Invernal debilitado y recupera tu primera chispa.',
+        'Los Brutos Invernales bloquearon el paso. Derrotalos y abre la fortaleza.',
+        'La fortaleza roba energia de fuego. Supera a otra banda de Brutos Invernales antes de que te rodeen.',
+        'Mitad guardia, mitad montaña. Los golpes le rebotan y el suelo se congela bajo tus pies. Quedarse quieto es morir.',
+        'Ice Master robo tu fuego y lo volvio hielo. Solo uno de los dos va a bajar de esta montaña.',
+      ]
+    : [
+        'El comienzo del caos. Enfrentate a Bruto Gris, un enemigo controlado por IA con menos vida y daño que Normal.',
+        'La banda cerro las salidas. Derrota a sus guardianes y abrete paso.',
+        'Los rivales mas duros protegen el centro de operaciones criminal.',
+        'Normal quedo rodeado. Solo una victoria perfecta le permitira continuar.',
+        'El jefe rojo espera al final. Tiene 140 de vida y una onda de choque capaz de lanzar a Normal.',
+      ];
+  normalArcadeLevelButtons.forEach((levelButton, index) => {
+    const title = levelButton.querySelector('.arcade-level-copy strong');
+    const description = levelButton.querySelector('.arcade-level-copy span');
+    if (title) title.innerText = levelTitles[index];
+    if (description) description.innerText = levelDescriptions[index];
+  });
+  arcadeLevelsTitle.innerText = fireChapter ? 'Capitulo de Fire Master' : 'Capitulo de Normal';
+  arcadeStoryKicker.innerText = fireChapter ? 'El despertar del fuego' : 'El comienzo del caos';
+  arcadeStoryParagraphOne.innerText = fireChapter
+    ? 'Fire Master descubrio que una fortaleza helada estaba drenando la energia de los barrios. Para recuperar su poder, debe abrirse paso entre guardianes de hielo y fuego robado.'
+    : 'Normal se encontro con un grupo criminal que estaba aterrorizando los barrios de la ciudad. Intentaron secuestrarlo para obligarlo a trabajar para ellos, pero Normal se resistio y decidio acabar con la banda golpe a golpe.';
+  arcadeStoryParagraphTwo.innerText = fireChapter
+    ? 'Al final de la fortaleza espera Ice Master, un rival capaz de apagar cualquier llama. Solo el fuego de Fire Master puede romper el invierno.'
+    : 'Ahora debe atravesar su primer escondite y demostrar que una buena pelea puede ser el principio de una gran historia.';
+}
+
+function openArcadeChapter(chapter = 'normal') {
+  arcadeChapter = chapter;
   arcadeChaptersScreen.classList.add('hidden');
   arcadeLevelsScreen.classList.remove('hidden');
+  syncArcadeChapterUI();
   syncNormalArcadeLevels();
 }
 
@@ -10935,7 +11724,8 @@ function closeArcadeLevels() {
 
 function getNormalArcadeHighestLevel() {
   try {
-    const savedLevel = Number(localStorage.getItem(normalArcadeProgressStorageKey) || 1);
+    const storageKey = arcadeChapter === 'fireMaster' ? fireArcadeProgressStorageKey : normalArcadeProgressStorageKey;
+    const savedLevel = Number(localStorage.getItem(storageKey) || 1);
     return Math.min(5, Math.max(1, Number.isFinite(savedLevel) ? savedLevel : 1));
   } catch (error) {
     return 1;
@@ -10959,7 +11749,8 @@ function unlockNextNormalArcadeLevel(completedLevel) {
   const nextLevel = Math.min(5, Number(completedLevel) + 1);
   try {
     if (nextLevel > getNormalArcadeHighestLevel()) {
-      localStorage.setItem(normalArcadeProgressStorageKey, String(nextLevel));
+      const storageKey = arcadeChapter === 'fireMaster' ? fireArcadeProgressStorageKey : normalArcadeProgressStorageKey;
+      localStorage.setItem(storageKey, String(nextLevel));
     }
   } catch (error) {
     // Progress remains available for the current session if storage is blocked.
@@ -11305,6 +12096,7 @@ function applyBotDifficulty() {
   const difficultySettings = botDifficultySettings[botDifficulty];
   if (botEnabled) {
     player2.setMaxHealth(
+      isArcadeBossFighter(player2) ||
       player2.characterType === 'tank' ||
       player2.characterType === 'cowboy' ||
       player2.characterType === 'lightWarrior' ||
@@ -11325,6 +12117,7 @@ function applyBotDifficulty() {
 }
 
 function getCharacterMaxHealth(characterType, fighter = null) {
+  if (isArcadeBossFighter(fighter)) return getArcadeBossVariantHealth(fighter);
   if (characterType === 'fireMaster') return getFireMasterHealth(fighter);
   if (characterType === 'lightWarrior') return lightWarriorHealth;
   if (characterType === 'tank') return isTankIronWall(fighter) ? 260 : 200;
@@ -11435,21 +12228,25 @@ gamblerCharacterButton.addEventListener('click', () => selectCharacter('gambler'
 chronoCharacterButton.addEventListener('click', () => selectCharacter('chrono'));
 ghostCharacterButton.addEventListener('click', () => selectCharacter('ghost'));
 divineGeneralCharacterButton.addEventListener('click', () => selectCharacter('divineGeneral'));
+gangBossCharacterButton.addEventListener('click', () => selectCharacter('normal', 'arcadeBoss'));
+icedThugCharacterButton.addEventListener('click', () => selectCharacter('normal', 'icedThug'));
+iceMasterCharacterButton.addEventListener('click', () => selectCharacter('fireMaster', 'iceMaster'));
 randomCharacterButton.addEventListener('click', selectRandomCharacter);
 characterBackButton.addEventListener('click', closeCharacterSelect);
 mapBackButton.addEventListener('click', closeMapSelect);
 settingsButton.addEventListener('click', openSettings);
 gameModesButton.addEventListener('click', openGameModes);
 arcadeModeButton.addEventListener('click', openArcadeLevels);
-normalArcadeChapterButton.addEventListener('click', openArcadeChapter);
+normalArcadeChapterButton.addEventListener('click', () => openArcadeChapter('normal'));
+fireArcadeChapterButton.addEventListener('click', () => openArcadeChapter('fireMaster'));
 normalArcadeLevelButtons.forEach((levelButton) => {
   levelButton.addEventListener('click', () => {
     if (levelButton.disabled) return;
     selectedNormalArcadeLevel = Number(levelButton.dataset.arcadeLevel);
     normalArcadeActive = true;
-    player1.setCharacterType('normal');
+    player1.setCharacterType(arcadeChapter === 'fireMaster' ? 'fireMaster' : 'normal');
     player2.setCharacterType('normal');
-    selectedMap = 'normalArcade';
+    selectedMap = arcadeChapter === 'fireMaster' ? 'fireArcade' : 'normalArcade';
     normalArcadeLevelButtons.forEach((button) => button.classList.remove('selected'));
     levelButton.classList.add('selected');
     startGame();
@@ -11467,6 +12264,17 @@ arcadeLevelsBackButton.addEventListener('click', closeArcadeLevels);
 guideBackButton.addEventListener('click', closeGuide);
 achievementsBackButton.addEventListener('click', closeAchievements);
 statsBackButton.addEventListener('click', closeStatistics);
+secretTrashButton.addEventListener('click', () => {
+  const wins = persistentStatistics.wins;
+  const remainingWins = Math.max(0, 101 - wins);
+  const requirements = [
+    `Ganar mas de 100 batallas (${wins > 100 ? 'LISTO' : `faltan ${remainingWins}`})`,
+    'Tener un winrate mayor a 101%',
+    'Derrotar a un Gambler durante un Jackpot',
+    `Pasarse el primer capitulo de Arcade (${unlockedAchievements.normalArcadeCompleted ? 'LISTO' : 'pendiente'})`,
+  ];
+  window.alert(`Este contenedor esta bloqueado. Requisitos:\n\n- ${requirements.join('\n- ')}`);
+});
 statsResetButton.addEventListener('click', resetPersistentStatistics);
 infoBackButton.addEventListener('click', closeInfo);
 opinionBackButton.addEventListener('click', closeOpinion);
@@ -11492,5 +12300,6 @@ syncCodexOpinionUI();
 migrateUnlocksFromExistingAchievements();
 syncAchievementsUI();
 syncStatisticsUI();
+syncCoinWalletUI();
 updateHealthBars();
 animate();

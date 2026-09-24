@@ -56,6 +56,11 @@
     </div>
     <div class="main-menu" id="mainMenu">
       <div class="menu-screen title-menu" id="titleScreen">
+        <div class="menu-wallet" aria-label="Monedas">
+          <span class="coin-symbol" aria-hidden="true"></span>
+          <strong id="menuCoinBalance">0</strong>
+        </div>
+        <button type="button" class="secret-trash-button" id="secretTrashButton" aria-label="Contenedor de basura"></button>
         <h1>Moquete</h1>
         <span class="menu-subtitle" data-i18n="menuSubtitle">Juego de pelea local</span>
         <div class="menu-actions">
@@ -191,6 +196,30 @@
               <span class="preview-divine-arm right"></span>
             </span>
           </button>
+          <button type="button" class="character-option arcade-boss-option gang-boss-option hidden" id="gangBossCharacterButton">
+            <span>Jefe de la Banda</span>
+            <span class="character-preview gang-boss-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-gang-mark"></span>
+              <span class="preview-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option arcade-boss-option iced-thug-option hidden" id="icedThugCharacterButton">
+            <span>Maton Helado</span>
+            <span class="character-preview iced-thug-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option arcade-boss-option ice-master-option hidden" id="iceMasterCharacterButton">
+            <span>Ice Master</span>
+            <span class="character-preview fire-master-preview ice-master-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-flame"></span>
+              <span class="preview-belt"></span>
+              <span class="preview-arm"></span>
+            </span>
+          </button>
         </div>
         <div class="character-actions">
           <button type="button" id="randomCharacterButton" aria-label="Elegir personaje aleatorio">?</button>
@@ -250,6 +279,22 @@
           </button>
           <button type="button" class="map-option dark-room-map hidden" data-map="darkRoom" id="darkRoomMapButton">
             <span>Dark Room</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option arcade-map-option normal-arcade-map hidden" data-map="normalArcade">
+            <span>Guarida de la Banda</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option arcade-map-option fire-arcade-map hidden" data-map="fireArcade">
+            <span>Montaña Nevada</span>
             <span class="map-preview" aria-hidden="true">
               <span class="map-sky"></span>
               <span class="map-platform"></span>
@@ -451,15 +496,30 @@
             </span>
             <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
           </button>
+          <button type="button" class="arcade-chapter-option fireArcade-chapter-option" id="fireArcadeChapterButton">
+            <span class="arcade-chapter-number">02</span>
+            <span class="arcade-level-scene fireArcade-level-scene" aria-hidden="true">
+              <span class="arcade-level-player fireArcade-level-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss fireArcade-level-boss"></span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong>El despertar de Fire Master</strong>
+              <span>Capitulo 2. Atraviesa la montaña nevada y enfrenta a enemigos "gelidos".</span>
+            </span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+          </button>
         </div>
         <button type="button" id="arcadeChaptersBackButton" data-i18n="back">Volver</button>
       </div>
       <div class="menu-screen arcade-levels-menu hidden" id="arcadeLevelsScreen">
-        <h2>Capitulo de Normal</h2>
+        <h2 id="arcadeLevelsTitle">Capitulo de Normal</h2>
         <div class="arcade-story-panel">
-          <span class="arcade-story-kicker">El comienzo del caos</span>
-          <p>Normal se encontro con un grupo criminal que estaba aterrorizando los barrios de la ciudad. Intentaron secuestrarlo para obligarlo a trabajar para ellos, pero Normal se resistio y decidio acabar con la banda golpe a golpe.</p>
-          <p>Ahora debe atravesar su primer escondite y demostrar que una buena pelea puede ser el principio de una gran historia.</p>
+          <span class="arcade-story-kicker" id="arcadeStoryKicker">El comienzo del caos</span>
+          <p id="arcadeStoryParagraphOne">Normal se encontro con un grupo criminal que estaba aterrorizando los barrios de la ciudad. Intentaron secuestrarlo para obligarlo a trabajar para ellos, pero Normal se resistio y decidio acabar con la banda golpe a golpe.</p>
+          <p id="arcadeStoryParagraphTwo">Ahora debe atravesar su primer escondite y demostrar que una buena pelea puede ser el principio de una gran historia.</p>
         </div>
         <div class="guide-section arcade-levels-panel">
           <h3>Selecciona un nivel</h3>
@@ -595,6 +655,7 @@
             <span><strong>prism</strong> mejora a Switcher con diseno prism, cooldown mas bajo y habilidades de modo mas rapidas/potentes.</span>
             <span><strong>fulladapt</strong> requiere Divine General desbloqueado: le da 250 de vida y lo inicia con 6 a 10 adaptaciones en los tipos principales.</span>
             <span><strong>lightsout</strong> desbloquea el mapa secreto Dark Room por una partida.</span>
+            <span><strong>bossrush</strong> habilita los mapas del modo Arcade y permite jugar con Jefe de la Banda, Maton Helado e Ice Master.</span>
             <span><strong>secretguide1</strong> abre esta lista de codigos.</span>
             <span><strong>secretguide2</strong> abre la lista de eventos especiales.</span>
             <span><strong>clear</strong> desactiva los codigos activos y restaura personajes/mapas secretos.</span>
@@ -762,6 +823,11 @@
             <strong>El desafio de Normal</strong>
             <span>Completa el capitulo de Normal en el modo Arcade.</span>
           </div>
+          <div class="achievement-card" data-achievement="fireArcadeCompleted">
+            <span class="achievement-icon achievement-icon-thaw" aria-hidden="true"></span>
+            <strong>Deshielo total</strong>
+            <span>Completa el capitulo de Fire Master en el modo Arcade derrotando a Ice Master.</span>
+          </div>
         </div>
         <button type="button" id="achievementsBackButton" data-i18n="back">Volver</button>
       </div>
@@ -795,6 +861,10 @@
           <div>
             <span>Contra bot</span>
             <strong id="statsBotFights">0</strong>
+          </div>
+          <div class="stats-coins">
+            <span>Monedas</span>
+            <strong id="statsCoinBalance">0</strong>
           </div>
         </div>
         <div class="stats-table">

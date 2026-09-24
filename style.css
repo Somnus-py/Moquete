@@ -230,6 +230,99 @@ body.menu-open .instructions {
   padding: 42px 46px 38px;
 }
 
+.secret-trash-button {
+  appearance: none;
+  background: transparent !important;
+  border: 0 !important;
+  bottom: 8px !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  display: block;
+  height: 32px;
+  min-width: 28px !important;
+  opacity: 0.55;
+  overflow: visible;
+  padding: 0 !important;
+  position: absolute;
+  right: 8px !important;
+  width: 28px;
+  z-index: 3;
+}
+
+.secret-trash-button::before {
+  background: #555;
+  border: 2px solid #111;
+  bottom: 2px;
+  content: '';
+  height: 21px;
+  left: 5px;
+  position: absolute;
+  transform: skew(-4deg);
+  width: 17px;
+}
+
+.secret-trash-button::after {
+  background: #555;
+  border: 2px solid #111;
+  border-bottom: 0;
+  content: '';
+  height: 4px;
+  left: 2px;
+  position: absolute;
+  top: 3px;
+  width: 23px;
+}
+
+.secret-trash-button:hover,
+.secret-trash-button:focus-visible {
+  opacity: 1;
+  outline: 2px solid #555;
+  outline-offset: 3px;
+}
+
+.secret-trash-button:focus-visible {
+  opacity: 1;
+}
+
+.menu-wallet {
+  align-items: center;
+  background: #111;
+  border: 3px solid #fdd835;
+  box-shadow: 0 4px 0 #111;
+  color: #fdd835;
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
+
+.coin-symbol {
+  background: #fdd835;
+  border: 2px solid #fff3a6;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px #c49000;
+  display: block;
+  height: 22px;
+  position: relative;
+  width: 22px;
+}
+
+.coin-symbol::after {
+  border: 1px solid #c49000;
+  border-radius: 50%;
+  content: '';
+  inset: 3px;
+  position: absolute;
+}
+
+.menu-wallet strong {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
 .title-menu::before {
   background:
     linear-gradient(90deg, var(--player1), #fdd835, var(--player2));
@@ -468,6 +561,48 @@ body.menu-open .instructions {
 .main-menu button:active {
   transform: translateY(4px);
   box-shadow: 0 2px 0 #111;
+}
+
+.title-menu .secret-trash-button {
+  background: transparent !important;
+  border: 0 !important;
+  bottom: 8px !important;
+  box-shadow: none !important;
+  height: 32px !important;
+  min-width: 28px !important;
+  opacity: 0.55;
+  overflow: visible;
+  padding: 0 !important;
+  position: absolute !important;
+  right: 8px !important;
+  width: 28px !important;
+  z-index: 3;
+}
+
+.title-menu .secret-trash-button::before {
+  background: #777;
+  border: 2px solid #111;
+  bottom: 2px;
+  content: '';
+  height: 21px;
+  left: 5px;
+  position: absolute;
+  transform: skew(-4deg);
+  width: 17px;
+}
+
+.title-menu .secret-trash-button::after {
+  background: #777;
+  border: 2px solid #111;
+  border-bottom: 0;
+  bottom: auto;
+  content: '';
+  height: 4px;
+  left: 2px;
+  position: absolute;
+  right: auto;
+  top: 3px;
+  width: 23px;
 }
 
 /* Keep readable contrast in the information screens. */
@@ -1038,6 +1173,32 @@ body.menu-open .instructions {
   width: 38px;
 }
 
+.achievement-icon-thaw {
+  background: linear-gradient(180deg, #b3f5ff 0 55%, #03a9f4 55%);
+}
+
+.achievement-icon-thaw::before {
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-bottom: 26px solid #ff6d00;
+  background: transparent;
+  height: 0;
+  left: 12px;
+  top: 6px;
+  width: 0;
+  filter: drop-shadow(0 0 3px #ffeb3b);
+}
+
+.achievement-icon-thaw::after {
+  background: #3f3fc8;
+  border-top: 3px solid #111;
+  border-bottom: 3px solid #111;
+  height: 6px;
+  left: 0;
+  top: 34px;
+  width: 46px;
+}
+
 .achievement-icon-tank {
   background: #d9dfc7;
 }
@@ -1353,6 +1514,54 @@ body.menu-open .instructions {
 
 .foundry-map {
   --map-accent: #ff6d00;
+}
+
+.normal-arcade-map {
+  --map-accent: #c62828;
+}
+
+.fire-arcade-map {
+  --map-accent: #4fc3f7;
+}
+
+.normal-arcade-map .map-sky {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 22px, rgba(0, 0, 0, 0.25) 22px 24px),
+    repeating-linear-gradient(0deg, transparent 0 10px, rgba(0, 0, 0, 0.25) 10px 12px),
+    linear-gradient(180deg, #2b1d1d, #4e342e 60%, #5d4037);
+}
+
+.normal-arcade-map .map-platform {
+  background: #3e2723;
+  border-top: 6px solid #c62828;
+}
+
+.normal-arcade-map .map-detail {
+  background:
+    radial-gradient(circle at 22% 30%, #ffd54f 0 5px, transparent 6px),
+    linear-gradient(90deg, transparent 0 58%, #263238 58% 76%, transparent 76%);
+  bottom: 24px;
+  height: 48px;
+}
+
+.fire-arcade-map .map-sky {
+  background: linear-gradient(180deg, #082033, #4d7f9f 55%, #d9f5ff);
+}
+
+.fire-arcade-map .map-platform {
+  background: #dff6ff;
+  border-top: 6px solid #4fc3f7;
+}
+
+.fire-arcade-map .map-detail {
+  background:
+    linear-gradient(140deg, transparent 0 48%, #274e68 49%),
+    linear-gradient(220deg, transparent 0 48%, #1a3b57 49%);
+  background-position: 0 0, 100% 0;
+  background-repeat: no-repeat;
+  background-size: 60% 100%, 60% 100%;
+  bottom: 24px;
+  height: 52px;
 }
 
 .desert-map {
@@ -1714,6 +1923,67 @@ body.menu-open .instructions {
 .fire-master-preview .preview-body,
 .fire-master-preview .preview-arm {
   background: #fb8c00;
+}
+
+.gang-boss-preview .preview-body,
+.gang-boss-preview .preview-arm,
+.selecting-player2 .gang-boss-preview .preview-body,
+.selecting-player2 .gang-boss-preview .preview-arm {
+  background: #980018;
+  box-shadow: none;
+}
+
+.gang-boss-preview .preview-body {
+  height: 80px;
+  left: 12px;
+  width: 44px;
+}
+
+.preview-gang-mark {
+  background: #f48fb1;
+  border: 3px solid #111;
+  display: block;
+  height: 10px;
+  left: 20px;
+  position: absolute;
+  top: 18px;
+  width: 28px;
+}
+
+.iced-thug-preview .preview-body,
+.iced-thug-preview .preview-arm,
+.selecting-player2 .iced-thug-preview .preview-body,
+.selecting-player2 .iced-thug-preview .preview-arm {
+  background:
+    linear-gradient(35deg, transparent 0 46%, #111 47% 51%, transparent 52%),
+    linear-gradient(150deg, transparent 0 62%, #111 63% 67%, transparent 68%),
+    linear-gradient(180deg, #bdf7ff 0 22%, #77dcf2 22%);
+  box-shadow: none;
+}
+
+.iced-thug-preview .preview-body {
+  height: 76px;
+  left: 12px;
+  width: 44px;
+}
+
+.selecting-player2 .ice-master-preview .preview-body,
+.selecting-player2 .ice-master-preview .preview-arm,
+.ice-master-preview .preview-body,
+.ice-master-preview .preview-arm {
+  background: #03a9f4;
+}
+
+.ice-master-preview .preview-belt {
+  background: #3f3fc8;
+}
+
+.ice-master-preview .preview-flame {
+  background: #9ff4ff;
+}
+
+.ice-master-preview .preview-flame::after {
+  background: #ffffff;
 }
 
 .preview-belt {
@@ -2824,6 +3094,40 @@ body.menu-open .instructions {
   width: 28px;
 }
 
+.fighter-portrait[data-character='normal'][data-variant='arcadeBoss'] {
+  --portrait-main: #980018;
+  --portrait-accent: #f48fb1;
+}
+
+.fighter-portrait[data-character='normal'][data-variant='icedThug'] {
+  --portrait-main: #77dcf2;
+  --portrait-accent: #e0fcff;
+}
+
+.fighter-portrait[data-character='fireMaster'][data-variant='iceMaster'] {
+  --portrait-main: #03a9f4;
+  --portrait-accent: #9ff4ff;
+}
+
+.fighter-portrait[data-character='fireMaster'][data-variant='iceMaster']::before {
+  border: 0;
+  background: radial-gradient(ellipse at center, #ffffff 0 28%, #9ff4ff 30% 62%, transparent 64%);
+  height: 18px;
+  left: 12px;
+  top: 4px;
+  width: 18px;
+}
+
+.fighter-portrait[data-character='fireMaster'][data-variant='iceMaster']::after {
+  background:
+    radial-gradient(circle at center, #9ff4ff 0 3px, transparent 4px),
+    #3f3fc8;
+  bottom: 8px;
+  height: 8px;
+  left: 3px;
+  width: 36px;
+}
+
 .fighter-portrait[data-character='tank'] {
   --portrait-main: #56613f;
   --portrait-accent: #c9b458;
@@ -3258,6 +3562,11 @@ body.menu-open .instructions {
     height: auto;
     max-width: 100%;
   }
+
+  .menu-wallet {
+    right: 14px;
+    top: 14px;
+  }
 }
 
 /* Arcade presentation for the title and fighter roster. */
@@ -3615,6 +3924,55 @@ body.menu-open .instructions {
   font-size: 13px;
   font-weight: 700;
   line-height: 1.3;
+}
+
+.fireArcade-chapter-option {
+  background:
+    linear-gradient(90deg, rgba(3, 169, 244, 0.24), transparent 38%),
+    #e9fbff;
+}
+
+.fireArcade-chapter-option:hover,
+.fireArcade-chapter-option:focus-visible {
+  background: linear-gradient(90deg, #b9f0ff, #e9fbff);
+}
+
+.fireArcade-level-scene {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), transparent 42%),
+    repeating-linear-gradient(0deg, transparent 0 18px, rgba(0, 188, 212, 0.1) 18px 19px),
+    #b9eff8;
+}
+
+.fireArcade-level-scene::before {
+  border-color: rgba(3, 169, 244, 0.72);
+}
+
+.fireArcade-level-player {
+  background: #ff7628;
+}
+
+.fireArcade-level-player::before {
+  color: #ff6d00;
+  content: 'FIRE MASTER';
+}
+
+.fireArcade-level-enemies span {
+  background: #8a5b43;
+}
+
+.fireArcade-level-enemies span:nth-child(2),
+.fireArcade-level-enemies span:nth-child(4) {
+  background: #6e91a6;
+}
+
+.fireArcade-level-boss {
+  background: #41c5e8;
+}
+
+.fireArcade-level-boss::before {
+  color: #2447c7;
+  content: 'ICE MASTER';
 }
 
 @media (max-width: 560px) {
@@ -4178,4 +4536,170 @@ body.menu-open .instructions {
   .arcade-level-scene {
     height: 84px;
   }
+}
+
+/* Fire Master chapter illustration. */
+.fireArcade-chapter-option .fireArcade-level-scene {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.48), transparent 46%),
+    linear-gradient(155deg, transparent 0 54%, rgba(67, 122, 190, 0.22) 54% 67%, transparent 67%),
+    linear-gradient(205deg, transparent 0 56%, rgba(67, 122, 190, 0.18) 56% 70%, transparent 70%),
+    repeating-linear-gradient(0deg, transparent 0 20px, rgba(0, 120, 170, 0.1) 20px 21px),
+    #bfeff8;
+  border-color: #17334f;
+}
+
+.fireArcade-chapter-option .fireArcade-level-scene::before {
+  border-color: #03a9f4;
+  border-top-style: solid;
+  top: 62%;
+}
+
+.fireArcade-chapter-option .fireArcade-level-player {
+  background:
+    linear-gradient(90deg, transparent 0 15%, #ffb300 15% 85%, transparent 85%),
+    linear-gradient(180deg, #fb8c00 0 62%, #f4511e 62% 100%);
+  border-color: #111;
+  border-radius: 6px 6px 2px 2px;
+  box-shadow: inset 0 -15px 0 #ff9800, inset 0 0 0 4px rgba(255, 235, 59, 0.22);
+  height: 76px;
+  width: 64px;
+}
+
+.fireArcade-chapter-option .fireArcade-level-player::before {
+  color: #ff6d00;
+  content: 'FIRE MASTER';
+  top: -18px;
+}
+
+.fireArcade-chapter-option .fireArcade-level-player::after {
+  background:
+    radial-gradient(circle at 50% 56%, #d50000 0 22%, transparent 24%),
+    #ffeb3b;
+  border: 3px solid #f4511e;
+  border-radius: 55% 45% 60% 40%;
+  clip-path: polygon(50% 0, 100% 62%, 72% 100%, 28% 100%, 0 62%);
+  content: '';
+  height: 28px;
+  left: 17px;
+  position: absolute;
+  top: 20px;
+  transform: rotate(-8deg);
+  width: 30px;
+}
+
+.fireArcade-chapter-option .fireArcade-level-player {
+  overflow: visible;
+}
+
+.fireArcade-chapter-option .fireArcade-level-player::before {
+  text-shadow: 0 1px 0 #fff;
+}
+
+#fireArcadeChapterButton .arcade-level-enemies span {
+  background:
+    linear-gradient(90deg, #3152b8 0 16%, #7b503b 16% 84%, #3152b8 84%),
+    linear-gradient(180deg, #5076e0 0 24%, #6d4635 24% 100%) !important;
+  border-color: #17334f;
+  border-radius: 5px 5px 2px 2px;
+  box-shadow: inset 0 0 0 3px rgba(120, 174, 255, 0.28), inset 0 -12px 0 rgba(48, 31, 25, 0.42), 0 3px 0 rgba(23, 51, 79, 0.3);
+  height: 58px;
+  position: relative;
+  width: 28px;
+}
+
+#fireArcadeChapterButton .arcade-level-enemies span::before {
+  background:
+    linear-gradient(180deg, #eafcff 0 18%, transparent 19%),
+    #3152b8;
+  border: 3px solid #111;
+  border-bottom: 0;
+  border-radius: 9px 9px 2px 2px;
+  content: '';
+  height: 22px;
+  left: -3px;
+  position: absolute;
+  top: -13px;
+  width: 28px;
+}
+
+#fireArcadeChapterButton .arcade-level-enemies span::after {
+  background: #b9865d;
+  border: 2px solid #111;
+  content: '';
+  height: 4px;
+  left: 5px;
+  position: absolute;
+  top: 29px;
+  width: 5px;
+  box-shadow: 12px 0 0 #b9865d;
+}
+
+#fireArcadeChapterButton .arcade-level-enemies span:nth-child(2),
+#fireArcadeChapterButton .arcade-level-enemies span:nth-child(4) {
+  background:
+    linear-gradient(90deg, #29449f 0 16%, #684332 16% 84%, #29449f 84%),
+    #684332 !important;
+}
+
+#fireArcadeChapterButton .arcade-level-enemies span:nth-child(4) {
+  background:
+    linear-gradient(90deg, #3b61d0 0 14%, #936047 14% 86%, #3b61d0 86%),
+    #936047 !important;
+  border-radius: 6px 6px 2px 2px;
+  box-shadow: inset 0 0 0 3px rgba(185, 245, 251, 0.42), inset 0 -15px 0 rgba(48, 31, 25, 0.35), 0 3px 0 rgba(23, 51, 79, 0.3);
+  height: 76px;
+  width: 34px;
+}
+
+#fireArcadeChapterButton .arcade-level-enemies span:nth-child(4)::before {
+  background:
+    linear-gradient(180deg, #ffffff 0 18%, transparent 19%),
+    #3b61d0;
+  border-color: #111;
+  border-radius: 8px 8px 0 0;
+  height: 35px;
+  left: -3px;
+  top: -4px;
+  width: 34px;
+}
+
+#fireArcadeChapterButton .arcade-level-enemies span:nth-child(4)::after {
+  background: #c99b72;
+  border-color: #111;
+  height: 5px;
+  left: 6px;
+  top: 45px;
+  width: 8px;
+  box-shadow: 14px 0 0 #c99b72;
+}
+
+.fireArcade-chapter-option .fireArcade-level-boss {
+  background:
+    linear-gradient(180deg, #43c7e9 0 64%, #3f51b5 64% 78%, #29a9d0 78% 100%);
+  border-color: #111;
+  border-radius: 6px 6px 2px 2px;
+  box-shadow: inset 0 -15px 0 #3f51b5, inset 0 0 0 4px rgba(224, 247, 250, 0.3);
+  height: 84px;
+  width: 70px;
+}
+
+.fireArcade-chapter-option .fireArcade-level-boss::before {
+  color: #304dcc;
+  content: 'ICE MASTER';
+  top: -18px;
+}
+
+.fireArcade-chapter-option .fireArcade-level-boss::after {
+  background:
+    linear-gradient(90deg, transparent 0 38%, #b2ebf2 38% 62%, transparent 62%),
+    rgba(224, 247, 250, 0.86);
+  border: 3px solid #304dcc;
+  border-radius: 50% 50% 42% 42%;
+  content: '';
+  height: 32px;
+  left: 17px;
+  position: absolute;
+  top: 18px;
+  width: 32px;
 }
