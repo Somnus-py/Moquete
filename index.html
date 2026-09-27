@@ -61,6 +61,7 @@
           <strong id="menuCoinBalance">0</strong>
         </div>
         <button type="button" class="secret-trash-button" id="secretTrashButton" aria-label="Contenedor de basura"></button>
+        <span class="menu-shop-badges" id="menuShopBadges" aria-hidden="true"></span>
         <h1>Moquete</h1>
         <span class="menu-subtitle" data-i18n="menuSubtitle">Juego de pelea local</span>
         <div class="menu-actions">
@@ -72,7 +73,7 @@
           <button type="button" id="achievementsButton" data-i18n="achievements">Logros</button>
           <button type="button" id="statsButton" data-i18n="stats">Estadisticas</button>
           <button type="button" id="infoButton" data-i18n="information">Changelog</button>
-          <button type="button" id="opinionButton" class="hidden" data-i18n="opinion">Opinion de Codex</button>
+          <button type="button" id="opinionButton" class="hidden">Opinion de <s class="old-author">Codex</s> Claude</button>
           <button type="button" id="settingsButton" data-i18n="settings">Ajustes</button>
         </div>
       </div>
@@ -196,6 +197,26 @@
               <span class="preview-divine-arm right"></span>
             </span>
           </button>
+          <button type="button" class="character-option monkey-option locked" id="monkeyCharacterButton">
+            <span>Monkei</span>
+            <span class="character-preview monkey-preview" aria-hidden="true">
+              <span class="preview-monkey-tail"></span>
+              <span class="preview-monkey-ear left"></span>
+              <span class="preview-monkey-ear right"></span>
+              <span class="preview-body"></span>
+              <span class="preview-monkey-face"></span>
+              <span class="preview-monkey-banana"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option scammer-option hidden" id="scammerCharacterButton" disabled>
+            <span>Scammer</span>
+            <span class="character-preview scammer-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-scammer-jacket"></span>
+              <span class="preview-scammer-hair"></span>
+              <span class="preview-scammer-glasses"></span>
+            </span>
+          </button>
           <button type="button" class="character-option arcade-boss-option gang-boss-option hidden" id="gangBossCharacterButton">
             <span>Jefe de la Banda</span>
             <span class="character-preview gang-boss-preview" aria-hidden="true">
@@ -218,6 +239,15 @@
               <span class="preview-flame"></span>
               <span class="preview-belt"></span>
               <span class="preview-arm"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option arcade-boss-option shadow-jester-option hidden" id="shadowJesterCharacterButton">
+            <span>Shadow Jester</span>
+            <span class="character-preview shadow-jester-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-jester-collar"></span>
+              <span class="preview-jester-face"></span>
+              <span class="preview-jester-hat"></span>
             </span>
           </button>
         </div>
@@ -277,6 +307,38 @@
               <span class="map-detail"></span>
             </span>
           </button>
+          <button type="button" class="map-option arcane-library-map" data-map="arcaneLibrary">
+            <span>Biblioteca Arcana</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option clock-tower-map" data-map="clockTower">
+            <span>Torre del Reloj</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option ancient-ruins-map" data-map="ancientRuins">
+            <span>Ruinas Devastadas</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option jungle-map" data-map="jungle">
+            <span>Jungla Banana</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
           <button type="button" class="map-option dark-room-map hidden" data-map="darkRoom" id="darkRoomMapButton">
             <span>Dark Room</span>
             <span class="map-preview" aria-hidden="true">
@@ -295,6 +357,30 @@
           </button>
           <button type="button" class="map-option arcade-map-option fire-arcade-map hidden" data-map="fireArcade">
             <span>Montaña Nevada</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option arcade-map-option cobalt-city-map hidden" data-map="gamblerArcade">
+            <span>Ciudad Cobalto</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option arcade-map-option gambler-alley-map hidden" data-map="gamblerAlley">
+            <span>Callejon</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option arcade-map-option jester-rift-map hidden" data-map="jesterRift">
+            <span>Escenario del Bufon</span>
             <span class="map-preview" aria-hidden="true">
               <span class="map-sky"></span>
               <span class="map-platform"></span>
@@ -478,9 +564,11 @@
         <button type="button" id="gameModesBackButton" data-i18n="back">Volver</button>
       </div>
       <div class="menu-screen arcade-chapters-menu hidden" id="arcadeChaptersScreen">
-        <h2>Capitulos de Arcade</h2>
+        <div class="arcade-chapters-header">
+          <h2>Capitulos de Arcade</h2>
+          <span>Elegi una historia. Cada capitulo tiene su propio protagonista, mapa y jefes.</span>
+        </div>
         <div class="guide-section arcade-chapters-panel">
-          <h3>Selecciona un capitulo</h3>
           <button type="button" class="arcade-chapter-option" id="normalArcadeChapterButton">
             <span class="arcade-chapter-number">01</span>
             <span class="arcade-level-scene" aria-hidden="true">
@@ -493,6 +581,11 @@
             <span class="arcade-chapter-copy">
               <strong>El desafio de Normal</strong>
               <span>Capitulo 1. Supera los 5 niveles de la historia de Normal.</span>
+            </span>
+            <span class="arcade-chapter-badge" data-chapter-badge="normal">NUEVO</span>
+            <span class="arcade-chapter-progress">
+              <span class="arcade-chapter-progress-bar"><span data-chapter-fill="normal"></span></span>
+              <span class="arcade-chapter-progress-text" data-chapter-progress="normal">0 niveles</span>
             </span>
             <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
           </button>
@@ -508,6 +601,51 @@
             <span class="arcade-chapter-copy">
               <strong>El despertar de Fire Master</strong>
               <span>Capitulo 2. Atraviesa la montaña nevada y enfrenta a enemigos "gelidos".</span>
+            </span>
+            <span class="arcade-chapter-badge" data-chapter-badge="fireMaster">NUEVO</span>
+            <span class="arcade-chapter-progress">
+              <span class="arcade-chapter-progress-bar"><span data-chapter-fill="fireMaster"></span></span>
+              <span class="arcade-chapter-progress-text" data-chapter-progress="fireMaster">0 niveles</span>
+            </span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+          </button>
+          <button type="button" class="arcade-chapter-option gamblerArcade-chapter-option" id="gamblerArcadeChapterButton">
+            <span class="arcade-chapter-number">03</span>
+            <span class="arcade-level-scene gamblerArcade-level-scene" aria-hidden="true">
+              <span class="arcade-level-player gamblerArcade-level-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss gamblerArcade-level-boss"></span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong>La racha de Gambler</strong>
+              <span>Capitulo 3. Recorre la ciudad azul, enfrenta mezclas imposibles, a un estafador... y a quien reparte las cartas.</span>
+            </span>
+            <span class="arcade-chapter-badge" data-chapter-badge="gambler">NUEVO</span>
+            <span class="arcade-chapter-progress">
+              <span class="arcade-chapter-progress-bar"><span data-chapter-fill="gambler"></span></span>
+              <span class="arcade-chapter-progress-text" data-chapter-progress="gambler">0 niveles</span>
+            </span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+          </button>
+          <button type="button" class="arcade-chapter-option reflecterArcade-chapter-option" id="reflecterArcadeChapterButton">
+            <span class="arcade-chapter-number">04</span>
+            <span class="arcade-level-scene reflecterArcade-level-scene" aria-hidden="true">
+              <span class="arcade-level-player reflecterArcade-level-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss reflecterArcade-level-boss"></span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong>La mision de Reflecter</strong>
+              <span>Capitulo 4. Infiltrate en la fabrica abandonada de la competencia y destrui sus robots defectuosos.</span>
+            </span>
+            <span class="arcade-chapter-badge" data-chapter-badge="reflecter">NUEVO</span>
+            <span class="arcade-chapter-progress">
+              <span class="arcade-chapter-progress-bar"><span data-chapter-fill="reflecter"></span></span>
+              <span class="arcade-chapter-progress-text" data-chapter-progress="reflecter">0 niveles</span>
             </span>
             <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
           </button>
@@ -550,6 +688,11 @@
             <button type="button" class="arcade-level-option locked" data-arcade-level="5" disabled>
               <span class="arcade-level-number">05</span>
               <span class="arcade-level-copy"><strong>Jefe de la banda</strong><span>El jefe rojo espera al final. Tiene 140 de vida y una onda de choque capaz de lanzar a Normal.</span></span>
+              <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+            <button type="button" class="arcade-level-option locked hidden" data-arcade-level="6" disabled>
+              <span class="arcade-level-number">06</span>
+              <span class="arcade-level-copy"><strong>???</strong><span>Proximamente.</span></span>
               <span class="arcade-level-status">BLOQUEADO</span>
             </button>
           </div>
@@ -677,6 +820,8 @@
             <span><strong>Switcher Prism</strong> codigo prism: Switcher gana diseno prism reforzado, cooldown menor, dash mas fuerte, mas curacion y mejor armadura amarilla.</span>
             <span><strong>Light Warrior</strong> logro Heroe de la luz: gana con Normal contra bot dificil en menos de 20 segundos sin recibir dano.</span>
             <span><strong>Divine General Full Adapt</strong> codigo fulladapt: requiere haber desbloqueado a Divine General; sube a 250 vida y empieza con 6 a 10 adaptaciones contra los tipos principales de golpes, proyectiles y estados.</span>
+            <span><strong>Scammer</strong> logro [[BIG SHOT]]: derrotalo en el nivel 5 del capitulo 3 de Arcade. 185 vida, 7 dano. Q oferta irresistible, F mercancia trucha desde cualquier lado, R tragamonedas del cielo. Cada estafa perjudica distinto segun el rival: a Gambler le roba suerte, a Normal le baja los stats, a Fire Master le recarga el fuego, a Tank le deja el blindaje de carton, a Chrono le atrasa el reloj, y asi con todos.</span>
+            <span><strong>Monkei</strong> aparece solo mientras algun personaje tenga exactamente 67% de winrate en Estadisticas. Si ese porcentaje cambia, vuelve a bloquearse. 167 vida, 6.7 dano, Q pistola banana, F cascara de banana que hace resbalar, R lluvia de cocos.</span>
             <span><strong>Divine General</strong> desafio de los 7 sellos: gana Perfect Duel, Reflectado, Casino Royale, Mana Meltdown, Choque de Titanes, Ejecutor temporal y Dominio absoluto.</span>
           </div>
         </div>
@@ -822,6 +967,16 @@
             <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
             <strong>El desafio de Normal</strong>
             <span>Completa el capitulo de Normal en el modo Arcade.</span>
+          </div>
+          <div class="achievement-card" data-achievement="gamblerArcadeCompleted">
+            <span class="achievement-icon achievement-icon-jester" aria-hidden="true"></span>
+            <strong>EL MUNDO GIRA Y GIRA!</strong>
+            <span>Derrota a Shadow Jester y completa el capitulo de Gambler en el modo Arcade. El show termino... por ahora.</span>
+          </div>
+          <div class="achievement-card" data-achievement="scammerDefeated">
+            <span class="achievement-icon achievement-icon-bigshot" aria-hidden="true"></span>
+            <strong>[[BIG SHOT]]</strong>
+            <span>Derrota a Scammer en el capitulo 3 de Arcade. Ahora es TU oportunidad de jugar con el.</span>
           </div>
           <div class="achievement-card" data-achievement="fireArcadeCompleted">
             <span class="achievement-icon achievement-icon-thaw" aria-hidden="true"></span>
@@ -994,16 +1149,112 @@
           <button type="button" id="statsBackButton">Volver</button>
         </div>
       </div>
+      <div class="menu-screen scammer-intro-menu hidden" id="scammerIntroScreen">
+        <div class="offcam-alley" aria-hidden="true">
+          <span class="offcam-dumpster"><span class="offcam-lid"></span></span>
+        </div>
+        <button type="button" class="offcam-dialog" id="scammerIntroDialog">
+          <span class="offcam-speaker" id="scammerIntroSpeaker">???</span>
+          <span class="offcam-text" id="scammerIntroText"></span>
+          <em class="offcam-hint">ENTER / CLICK</em>
+        </button>
+      </div>
+      <div class="menu-screen scammer-shop-menu hidden" id="scammerShopScreen">
+        <div class="shop-awning" aria-hidden="true"></div>
+        <div class="shop-sign">
+          <span class="shop-seal" aria-hidden="true">100%<br>ORIGINAL</span>
+          <div class="shop-sign-text">
+            <h2>Tienda Oficial Certificada S.A.</h2>
+            <span class="shop-tagline">Distribuidor autorizado &bull; Productos 100% originales &bull; Desde 1997 &bull; Garantia real*</span>
+          </div>
+          <div class="menu-wallet shop-wallet" aria-label="Monedas">
+            <span class="coin-symbol" aria-hidden="true"></span>
+            <strong id="shopCoinBalance">0</strong>
+          </div>
+        </div>
+        <div class="shop-counter">
+          <div class="shop-scammer" id="shopScammer" role="button" tabindex="0" title="Hablar con Scammer">
+            <span class="character-preview scammer-preview">
+              <span class="preview-body"></span>
+              <span class="preview-scammer-jacket"></span>
+              <span class="preview-scammer-hair"></span>
+              <span class="preview-scammer-glasses"></span>
+            </span>
+          </div>
+          <div class="shop-bubble">
+            <span class="shop-bubble-name">SCAMMER</span>
+            <span class="shop-vendor-line" id="shopVendorLine"></span>
+            <div class="shop-questions hidden" id="shopQuestions"></div>
+            <span class="shop-talk-hint">(click en Scammer para hablar)</span>
+          </div>
+        </div>
+        <div class="shop-items" id="shopItems"></div>
+        <div class="shop-footer">
+          <span class="shop-footnote">*La garantia no es real. Las fotos son ilustrativas. No se aceptan devoluciones, reclamos ni preguntas.</span>
+          <button type="button" id="scammerShopBackButton">Volver</button>
+        </div>
+      </div>
       <div class="menu-screen info-menu hidden" id="infoScreen">
         <h2 data-i18n="information">Changelog</h2>
         <div class="guide-section">
-          <h3>Actualizacion 2.0</h3>
+          <h3>Actualizacion 2.5</h3>
           <div class="character-guide">
-            <span><strong>Version previa a publicacion</strong> esta actualizacion reune los cambios mas importantes realizados antes de publicar el juego en GitHub y HTML.</span>
+            <span><strong>La actualizacion mas grande hasta ahora.</strong> Dos capitulos nuevos de Arcade, un personaje secreto, mapas nuevos, jefes con cinematicas, musica y muchos cambios por dentro.</span>
+            <span><em>"Que paso con las 2.1, 2.2, 2.3 y 2.4, senor creador de Moquete?" Nunca lo sabras, amigo. Nunca lo sabras.</em></span>
           </div>
         </div>
         <div class="guide-section">
-          <h3>Cambios recientes</h3>
+          <h3>Arcade: capitulo 2 de Fire Master</h3>
+          <div class="character-guide">
+            <span><strong>Nivel 4: Maton Helado</strong> un mini jefe de 115 de vida que recibe menos dano. Congela el suelo con un campo de escarcha que te ralentiza y te vuelve vulnerable, y lanza cuchillas de hielo.</span>
+            <span><strong>Nivel 5: Ice Master</strong> el jefe del capitulo: usa las habilidades de Fire Master convertidas en hielo, con menos dano pero ralentizando cada golpe.</span>
+            <span><strong>Nuevos titulos y descripciones</strong> para los niveles 4 y 5, y un logro por completar el capitulo.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Arcade: capitulo 3 de Gambler</h3>
+          <div class="character-guide">
+            <span><strong>Ciudad Cobalto</strong> una ciudad azul donde las calles se mezclan como cartas barajadas. Con cada nivel se deforma y oscurece un poco mas.</span>
+            <span><strong>Enemigos hibridos</strong> luchadores fusionados: el Vaquero Blindado, el Mago Ardiente, el Espejo Temporal y la Quimera, que combinan habilidades de varios personajes.</span>
+            <span><strong>La suerte crece</strong> Gambler empieza cada nivel con mas LUCK que el anterior.</span>
+            <span><strong>Nivel 5: Scammer</strong> un estafador sale de un contenedor de basura en un callejon con su propia cinematica y musica. Vende "ofertas", tira productos truchos que roban suerte y deja caer una tragamonedas que puede ayudarlo o arruinarlo. Sus estafas cambian segun contra quien pelea.</span>
+            <span><strong>Nivel 6: ???</strong> alguien estuvo jugando con todos desde el principio. Un jefe final con escenario propio, dos canciones, ataques secretos que aparecen a medida que pierde vida, cinematicas de victoria y de derrota... y muy poca paciencia si lo dejas esperando.</span>
+            <span><strong>Nuevos logros</strong> por derrotar a Scammer y por completar el capitulo.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Personajes</h3>
+          <div class="character-guide">
+            <span><strong>Monkei</strong> un personaje secreto con 167 de vida y 6.7 de dano: cascaras de banana, bananas y lluvia de cocos. Para jugarlo hace falta que algun personaje tenga un winrate muy particular... y si cambia, Monkei se vuelve a esconder.</span>
+            <span><strong>Scammer jugable</strong> despues de derrotarlo en el Arcade aparece en la seleccion de personajes, con estafas distintas para cada rival.</span>
+            <span><strong>Buff a Ghost</strong> ahora tiene 60 de vida y su Fase hace un 25% mas de dano al atravesar al rival.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Mapas nuevos</h3>
+          <div class="character-guide">
+            <span><strong>Biblioteca Arcana</strong> inspirada en Sorcerer: estanterias llenas de libros y una runa magica que cambia de lugar. Pararse sobre ella reduce los cooldowns (el doble para Sorcerer).</span>
+            <span><strong>Torre del Reloj</strong> inspirada en Chrono: un reloj gigante y una zona central que ralentiza a todos... menos a Chrono.</span>
+            <span><strong>Ruinas Devastadas</strong> inspiradas en Divine General: un templo antiguo destruido donde, cada tanto, la tierra marca a un luchador y estalla bajo sus pies.</span>
+            <span><strong>Jungla Banana</strong> el territorio de Monkei: caen bananas que curan al que las agarra (y a Monkei mas que a nadie).</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Secretos y menu</h3>
+          <div class="character-guide">
+            <span><strong>Codigo bossrush</strong> ahora tambien desbloquea el contenido del capitulo 3: Ciudad Cobalto (que se deforma cuanto mas dura la pelea), el callejon, el escenario del ultimo jefe y al propio jefe como personaje.</span>
+            <span><strong>Seleccion de capitulos renovada</strong> tarjetas con escena, progreso y estado de cada capitulo, y niveles "en construccion" bien marcados.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Por dentro</h3>
+          <div class="character-guide">
+            <span><strong>Codigo separado en archivos</strong> el juego ahora esta dividido en partes dentro de la carpeta js, para que sea mas facil agregar cosas sin romper otras.</span>
+            <span><strong>Correcciones</strong> arreglos en cinematicas, musica que ahora se repite sin cortes, un efecto del ultimo jefe que podia aparecer en otras peleas y varios detalles visuales.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Actualizacion 2.0 (anterior)</h3>
           <div class="character-guide">
             <span><strong>Omega Light Warrior</strong> se incorporo como una forma poco documentada de Light Warrior. Se conocen algunos cambios en su aspecto y habilidades, pero todavia quedan detalles por descubrir.</span>
             <span><strong>Modo Arcade</strong> ahora permite recorrer el primer capitulo de la historia de Normal a traves de combates consecutivos, con rivales, jefe, desbloqueos y progreso guardado.</span>
@@ -1011,15 +1262,6 @@
             <span><strong>Nerfeos</strong> Ghost tiene mas cooldown y hace contacto con dano cada 0,03 segundos. Reflecter 2.0 tiene menos dano, un escudo mas pequeno y menor duracion. Switcher tiene cooldown casi instantaneo al cambiar de modo y un dash mas lento.</span>
             <span><strong>Apartado visual</strong> el menu recibio una presentacion arcade renovada, con nuevas tarjetas de personajes, previews visuales, paneles, colores, efectos, HUD y una identidad mas clara para cada pantalla.</span>
             <span><strong>Preparacion de publicacion</strong> se mantienen los controles locales, los modos, los mapas, los eventos, los logros, los personajes secretos y la pantalla de debug.</span>
-          </div>
-        </div>
-        <div class="guide-section">
-          <h3>Ideas para futuras actualizaciones</h3>
-          <div class="character-guide">
-            <span><strong>Mas capitulos de Arcade</strong> agregar nuevos rivales, rutas, jefes y finales para continuar la historia de Normal.</span>
-            <span><strong>Entrenamiento</strong> incluir un modo para probar habilidades, dano, cooldowns y combinaciones sin comenzar una partida completa.</span>
-            <span><strong>Mas contenido</strong> sumar personajes, mapas, eventos especiales, variantes secretas y nuevas animaciones.</span>
-            <span><strong>Mejoras de combate</strong> agregar estadisticas detalladas, indicadores de buffs y efectos mas claros para cada habilidad.</span>
           </div>
         </div>
         <button type="button" id="infoBackButton" data-i18n="back">Volver</button>
@@ -1063,7 +1305,7 @@
             <span><strong>Sorcerer</strong> 175 vida, 5 danio base. Q esfera roja de 35 danio, F esfera gravitatoria azul por 5 segundos. Q+F carga una esfera secreta mas lenta y peligrosa.</span>
             <span><strong>Switcher</strong> 120 vida, 6 daño base. Q cambia collar, F activa rojo/azul/verde/amarillo. Q+F usa Prism Snap: cambia de modo, golpea cerca y aplica un efecto extra segun el modo nuevo.</span>
             <span><strong>Chrono</strong> 175 vida. Q lanza una cuchilla temporal dirigida que ralentiza; si golpea a un rival ya ralentizado deja una marca. F crea un campo lento y detona esa marca con dano extra. Q+F usa Time Stop: congela al rival y sus proyectiles por unos segundos, con cooldown alto.</span>
-            <span><strong>Ghost</strong> se desbloquea despues de jugar una partida en Dark Room. Tiene 50 vida y 1 dano. Q activa Fase: queda 50% menos visible, invulnerable y mas rapido 5s; si atraviesa al rival le hace 2 dano cada 0,1s. Cooldown de 1s.</span>
+            <span><strong>Ghost</strong> se desbloquea despues de jugar una partida en Dark Room. Tiene 60 vida y 1 dano. Q activa Fase: queda 50% menos visible, invulnerable y mas rapido 5s; si atraviesa al rival le hace 1,25 de dano cada 0,03s. Cooldown de 1s.</span>
             <span><strong>Divine General</strong> se desbloquea completando los 7 sellos dificiles. Tiene 200 vida. Q lo vuelve invulnerable temporalmente y adapta su defensa; puede acumular hasta 6 adaptaciones por cada tipo de ataque, y cada adaptacion total suma +15% de dano base. F usa una contra que cambia segun lo aprendido. Q+F activa Corte Mundial: carga 10 segundos con una sentencia divina y lanza un corte negro de borde blanco que hace 100 dano por cada adaptacion total.</span>
           </div>
         </div>
@@ -1075,6 +1317,10 @@
             <span><strong>Neon</strong> el carril central da velocidad. Sirve para persecuciones y entradas agresivas.</span>
             <span><strong>Casino</strong> la casilla 777 cambia de posicion y puede curar o potenciar suerte. Gambler saca mas valor de este mapa.</span>
             <span><strong>Estacion Militar</strong> el barro frena. Castiga quedarse abajo sin plan.</span>
+            <span><strong>Biblioteca Arcana</strong> una runa cambia de lugar cada pocos segundos. Pararse encima recarga mas rapido las habilidades; Sorcerer la aprovecha el doble.</span>
+            <span><strong>Torre del Reloj</strong> el centro distorsiona el tiempo y frena a todos menos a Chrono.</span>
+            <span><strong>Ruinas Devastadas</strong> la tierra arrasada todavia tiembla: cada tanto se abre una grieta bajo un jugador y, si sigue ahi cuando estalla, lo golpean picos de roca. Divine General es inmune en su territorio.</span>
+            <span><strong>Jungla Banana</strong> caen bananas de los arboles que curan al agarrarlas. Monkei cura mas y recarga habilidades.</span>
             <span><strong>Audio</strong> hay musica de menu, sonidos de botones, sonidos de especiales y una musica local para triple 7 si existe assets/audio/jackpot.mp3.</span>
           </div>
         </div>
@@ -1110,80 +1356,84 @@
         <button type="button" id="guideBackButton">Volver</button>
       </div>
       <div class="menu-screen opinion-menu hidden" id="opinionScreen">
-        <h2>Opinion de Codex</h2>
+        <h2>Opinion de <s class="old-author">Codex</s> Claude</h2>
         <div class="guide-section">
           <h3>Que es esta opcion</h3>
           <div class="character-guide">
-            <span><strong>Opinion de Codex</strong> es una pantalla secreta de analisis del juego. No es una regla oficial del combate: es una lectura critica sobre balance, counters, mejores enfrentamientos y prioridades de mejora.</span>
-            <span><strong>Codex</strong> es el asistente de programacion que esta ayudando a construir Moquete. Esta seccion resume su criterio tecnico sobre el estado del juego, basado en el codigo y en los cambios que se fueron agregando.</span>
-            <span>Usala como referencia para decidir que ajustar despues, no como verdad absoluta. Si cambia mucho el balance o se agregan personajes, esta opinion tambien deberia actualizarse.</span>
+            <span><strong>Opinion de Claude</strong> es la pantalla secreta de analisis del juego. Antes la escribia <strong>Codex</strong> (el primer asistente que ayudo a construir Moquete, por eso su nombre sigue ahi tachado: no nos olvidamos de el). Ahora la escribo yo, <strong>Claude</strong>, el asistente que siguio el trabajo desde el capitulo 2 del Arcade.</span>
+            <span>Es mi lectura personal del juego despues de meterme en su codigo durante muchas sesiones de cambios: lo que me gusta, lo que creo que esta desbalanceado y lo que haria despues. No es una regla oficial ni una verdad absoluta: es la opinion de alguien que conoce el juego por dentro, pero que lo juega mucho menos que vos.</span>
           </div>
         </div>
         <div class="guide-section">
-          <h3>Diagnostico</h3>
+          <h3>Lo que mas me gusta</h3>
           <div class="character-guide">
-            <span>El juego ya tiene identidad: personajes distintos, mapas con reglas propias, codigos, eventos, logros y audio. Ahora el problema principal no es cantidad de contenido, es claridad.</span>
-            <span>La prioridad deberia ser que el jugador entienda rapido que esta pasando: cooldowns, estado de buffs, terreno activo, evento especial y logro desbloqueado.</span>
-            <span>El balance sigue dependiendo mucho de Sorcerer, Gambler y Switcher. Son los personajes con mas picos de poder; si uno domina, conviene tocar cooldowns antes que borrar mecanicas.</span>
-            <span><strong>Light Warrior</strong> es un personaje de presion media y buen aguante: combina 5 disparos de luz, velocidad temporal, curacion y un golpe cargado de alto dano. Su limite principal es que necesita administrar cooldowns y tiempo de carga para no quedar expuesto.</span>
+            <span><strong>Tiene personalidad propia.</strong> Moquete no se siente como un clon de otro juego de pelea: un apostador que junta suerte, un mono que tira cascaras, un estafador que vende relojes falsos en medio del combate. Cada personaje tiene una idea clara y graciosa.</span>
+            <span><strong>El capitulo 3 del Arcade es lo mejor del juego.</strong> Ciudad Cobalto que se deforma nivel a nivel, Scammer saliendo del contenedor, el mapa que se rompe en pedazos y el Shadow Jester con su Acto Final: ahi el juego deja de ser solo peleas y pasa a contar una historia. Las cinematicas de derrota y el Jester rompiendo la pantalla para apretar Reiniciar son mis partes favoritas de todo lo que hicimos.</span>
+            <span><strong>Los secretos premian la curiosidad.</strong> Codigos en el menu, personajes que se desbloquean por winrate exacto, un basurero que esconde una tienda, esta misma pantalla... El juego trata al jugador curioso como alguien especial, y eso esta muy bien.</span>
+            <span><strong>El humor funciona.</strong> Las frases de victoria, las estafas de Scammer, los requisitos troll del 101% y el bufon gritando en mayusculas le dan un tono que se nota que es tuyo.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Diagnostico honesto</h3>
+          <div class="character-guide">
+            <span><strong>El contenido ya no es el problema: la claridad si.</strong> Hay tantas mecanicas (suerte, adaptaciones, estafas, terrenos, eventos, fases secretas) que un jugador nuevo no siempre entiende por que gano o perdio. Cada mecanica nueva deberia venir con una senal visual clara.</span>
+            <span><strong>El balance tiene extremos muy lejanos.</strong> Ghost recien subio a 60 de vida, pero sigue con 1 de dano base; Omega Light Warrior tiene 2000 de vida y un vuelo de 500. Los secretos pueden ser rotos a proposito, pero en peleas normales la distancia entre el mas debil y el mas fuerte es grande.</span>
+            <span><strong>Los picos de dano deciden muchas peleas.</strong> El Fire Beam (75), el Puno Radiante cargado (hasta 170) y el Jackpot pueden terminar una pelea en un solo acierto. Eso es emocionante, pero conviene que siempre tengan una advertencia visible para poder esquivarlos.</span>
+            <span><strong>El codigo crecio mucho.</strong> Todo vive en un solo game.js enorme. Funciona, pero cada vez cuesta mas tocar algo sin romper otra cosa. En algun momento vale la pena separarlo en archivos (personajes, mapas, arcade, menus).</span>
           </div>
         </div>
         <div class="guide-section">
           <div class="section-title-row">
-            <h3>Top por categoria</h3>
+            <h3>Mi top por categoria</h3>
             <button type="button" class="mini-menu-button" id="simpleTopButton">Version simplificada</button>
           </div>
           <div class="character-guide" id="categoryTopDetailed">
-            <span><strong>Mejor general</strong> Divine General, porque 200 vida, invulnerabilidad temporal, adaptacion por tipo y dano escalable lo vuelven el personaje mas completo si sobrevive al inicio.</span>
-            <span><strong>Mejor tanque</strong> Living Tank sigue siendo el mas estable sin condiciones, pero Divine General lo supera en peleas largas cuando acumula adaptaciones.</span>
-            <span><strong>Mejor control</strong> Chrono y Sorcerer: Chrono decide ventanas con slow/time stop; Sorcerer domina espacio con orbes y gravedad.</span>
-            <span><strong>Mejor alto riesgo/alto premio</strong> Gambler, porque jackpot y suerte pueden romper una pelea, aunque es inconsistente si lo presionan temprano.</span>
-            <span><strong>Mejor a distancia</strong> Cowboy por presion simple y constante; Sorcerer es mas fuerte si el jugador sabe controlar zonas.</span>
-            <span><strong>Mejor anti-proyectiles</strong> Reflecter por escudo/copia inmediata; Divine General escala mejor si tiene tiempo para adaptarse.</span>
-            <span><strong>Mas tecnico</strong> Switcher, Chrono y Divine General: Switcher exige modos, Chrono timing, Divine elegir cuando adaptarse y cuando contraatacar.</span>
-            <span><strong>Mejor factor sorpresa</strong> Ghost, porque fase e invulnerabilidad cambian el ritmo, pero su dano bajo exige jugar perfecto.</span>
-            <span><strong>Mejor presion sostenida</strong> Light Warrior, porque puede combinar rafagas, velocidad y curacion para mantener el ritmo mientras prepara su golpe cargado.</span>
-            <span><strong>Mas facil de aprender</strong> Normal, porque no depende de recursos ni combos.</span>
+            <span><strong>Mejor general</strong> Divine General: 200 de vida, adaptacion por tipo de dano y un escalado que castiga cualquier plan repetitivo. Si sobrevive el inicio, es el mas completo.</span>
+            <span><strong>Mas divertido de jugar</strong> Scammer: cada habilidad cambia segun el rival y la maquina tragamonedas puede arruinarte a vos mismo. Caos puro, en el buen sentido.</span>
+            <span><strong>Mejor personaje nuevo</strong> Monkei: 167 de vida, 6.7 de dano y un kit de cascaras, bananas y cocos que obliga al rival a mirar el piso.</span>
+            <span><strong>Mejor alto riesgo/alto premio</strong> Gambler: con suerte alta es aterrador, sin suerte es fragil. Es el personaje con mas personalidad del juego.</span>
+            <span><strong>Mejor control</strong> Chrono y Sorcerer: Chrono gana las peleas decidiendo cuando se mueve el tiempo; Sorcerer las gana decidiendo por donde se puede caminar.</span>
+            <span><strong>Mas tecnico</strong> Switcher y Divine General: uno exige elegir el modo correcto, el otro elegir cuando adaptarse y cuando atacar.</span>
+            <span><strong>Mas injusto (a proposito)</strong> Omega Light Warrior: no es un personaje, es un evento natural.</span>
+            <span><strong>El que mas necesitaba ayuda</strong> Ghost: su fase es muy buena idea, pero se quedaba corto. Ya recibio un pequeno buff (60 de vida y mas dano en la fase); hay que ver si con eso alcanza.</span>
+            <span><strong>Mejor jefe</strong> Shadow Jester, sin discusion: patrones que se leen, secretos que aparecen segun su vida y un Acto Final que se siente como otro juego.</span>
+            <span><strong>Mas facil de aprender</strong> Normal: sin recursos ni combos, ideal para entender el juego.</span>
           </div>
           <div class="character-guide hidden" id="categoryTopSimple">
-            <span><strong>Fuerza general</strong> 1 Divine General, 2 Sorcerer, 3 Chrono, 4 Gambler, 5 Switcher, 6 Light Warrior, 7 Living Tank, 8 Cowboy, 9 Reflecter, 10 Fire Master, 11 Ghost, 12 Normal.</span>
-            <span><strong>Vida/aguante</strong> 1 Living Tank, 2 Divine General, 3 Sorcerer, 4 Light Warrior, 5 Chrono, 6 Gambler, 7 Reflecter, 8 Fire Master, 9 Switcher, 10 Normal, 11 Cowboy, 12 Ghost.</span>
-            <span><strong>Distancia</strong> 1 Cowboy, 2 Sorcerer, 3 Chrono, 4 Fire Master, 5 Light Warrior, 6 Living Tank, 7 Reflecter, 8 Switcher, 9 Divine General, 10 Gambler, 11 Normal, 12 Ghost.</span>
-            <span><strong>Movilidad</strong> 1 Ghost, 2 Gambler, 3 Switcher, 4 Light Warrior, 5 Chrono, 6 Cowboy, 7 Normal, 8 Fire Master, 9 Divine General, 10 Sorcerer, 11 Reflecter, 12 Living Tank.</span>
-            <span><strong>Dificultad tecnica</strong> 1 Divine General, 2 Switcher, 3 Chrono, 4 Gambler, 5 Sorcerer, 6 Reflecter, 7 Light Warrior, 8 Ghost, 9 Fire Master, 10 Cowboy, 11 Living Tank, 12 Normal.</span>
-            <span><strong>Anti-proyectiles</strong> 1 Reflecter, 2 Divine General, 3 Chrono, 4 Sorcerer, 5 Light Warrior, 6 Switcher, 7 Living Tank, 8 Ghost, 9 Gambler, 10 Cowboy, 11 Fire Master, 12 Normal.</span>
-            <span><strong>Factor sorpresa</strong> 1 Gambler, 2 Ghost, 3 Divine General, 4 Chrono, 5 Switcher, 6 Light Warrior, 7 Sorcerer, 8 Reflecter, 9 Cowboy, 10 Fire Master, 11 Living Tank, 12 Normal.</span>
+            <span><strong>Fuerza general</strong> 1 Divine General, 2 Sorcerer, 3 Chrono, 4 Scammer, 5 Gambler, 6 Light Warrior, 7 Monkei, 8 Switcher, 9 Living Tank, 10 Reflecter, 11 Cowboy, 12 Fire Master, 13 Normal, 14 Ghost.</span>
+            <span><strong>Diversion</strong> 1 Scammer, 2 Gambler, 3 Monkei, 4 Chrono, 5 Light Warrior, 6 Sorcerer, 7 Switcher, 8 Divine General, 9 Ghost, 10 Reflecter, 11 Fire Master, 12 Cowboy, 13 Living Tank, 14 Normal.</span>
+            <span><strong>Vida/aguante</strong> 1 Divine General, 2 Scammer, 3 Sorcerer, 4 Chrono, 5 Monkei, 6 Light Warrior, 7 Gambler, 8 Reflecter, 9 Living Tank, 10 Switcher, 11 Fire Master, 12 Normal, 13 Cowboy, 14 Ghost.</span>
+            <span><strong>Dificultad tecnica</strong> 1 Divine General, 2 Switcher, 3 Chrono, 4 Scammer, 5 Gambler, 6 Sorcerer, 7 Reflecter, 8 Light Warrior, 9 Ghost, 10 Monkei, 11 Fire Master, 12 Cowboy, 13 Living Tank, 14 Normal.</span>
+            <span><strong>Factor sorpresa</strong> 1 Scammer, 2 Gambler, 3 Ghost, 4 Divine General, 5 Monkei, 6 Chrono, 7 Switcher, 8 Light Warrior, 9 Sorcerer, 10 Reflecter, 11 Cowboy, 12 Fire Master, 13 Living Tank, 14 Normal.</span>
+            <span><strong>Jefes del Arcade</strong> 1 Shadow Jester, 2 Scammer, 3 Ice Master, 4 Maton Helado, 5 Jefe de la Banda.</span>
           </div>
         </div>
         <div class="guide-section">
-          <h3>Top 11 enfrentamientos</h3>
+          <h3>Mis 10 enfrentamientos favoritos</h3>
           <div class="character-guide">
-            <span><strong>1. Divine General vs Sorcerer</strong> el duelo mas fuerte ahora: control arcano contra adaptacion. Si Divine aguanta y sella magia, Sorcerer pierde su plan principal.</span>
-            <span><strong>2. Divine General vs Chrono</strong> lectura contra tiempo. Chrono quiere congelar ventanas; Divine quiere sobrevivir, adaptarse y convertir cada error en dano base permanente.</span>
-            <span><strong>3. Sorcerer vs Reflecter</strong> sigue siendo de los mas epicos: magia fuerte contra escudo/copia. Si Reflecter predice bien, da vuelta una pelea perdida.</span>
-            <span><strong>4. Switcher vs Sorcerer</strong> tecnico y exigente: Switcher debe elegir modo perfecto mientras Sorcerer controla espacio y castiga entradas malas.</span>
-            <span><strong>5. Divine General vs Gambler</strong> escalado contra azar. Gambler puede explotar con jackpot, pero Divine puede romper suerte si logra adaptarse a luck.</span>
-            <span><strong>6. Cowboy vs Divine General</strong> presion temprana contra adaptacion balistica. Cowboy necesita cerrar rapido antes de que sus balas alimenten a Divine.</span>
-            <span><strong>7. Chrono vs Ghost</strong> raro y divertido: Ghost ignora ritmo con fase, Chrono castiga con control temporal si predice la entrada.</span>
-            <span><strong>8. Fire Master vs Living Tank</strong> clasico de zoner contra tanque: Fire Master castiga desde lejos, pero si Tank entra una vez puede destruirlo.</span>
-            <span><strong>9. Cowboy vs Reflecter</strong> tension pura: Cowboy quiere llenar la pantalla de balas, Reflecter espera el momento exacto para castigarlo.</span>
-            <span><strong>10. Ghost vs Gambler</strong> caos real: Ghost necesita golpes precisos y evasivos; Gambler puede ganar por suerte, stun o jackpot si sobrevive.</span>
-            <span><strong>11. Light Warrior vs Chrono</strong> presion y carga contra control temporal: Light Warrior debe aprovechar velocidad y rafagas antes de que Chrono ralentice o congele su ventana ofensiva.</span>
+            <span><strong>1. Gambler vs Scammer</strong> el apostador contra el estafador: suerte real contra suerte falsa. Cada robo de suerte de Scammer duele el doble contra Gambler.</span>
+            <span><strong>2. Divine General vs Sorcerer</strong> adaptacion contra magia. Si Divine aguanta y se adapta a los orbes, Sorcerer se queda sin plan.</span>
+            <span><strong>3. Chrono vs Light Warrior</strong> tiempo contra velocidad: Light Warrior quiere entrar rapido y cargar su golpe; Chrono quiere congelar justo esa ventana.</span>
+            <span><strong>4. Monkei vs Living Tank</strong> el tanque es lento, el piso esta lleno de cascaras. Puede ser la pelea mas graciosa del juego.</span>
+            <span><strong>5. Sorcerer vs Reflecter</strong> magia fuerte contra espejo: si Reflecter predice bien, da vuelta una pelea perdida.</span>
+            <span><strong>6. Scammer vs Divine General</strong> caos contra adaptacion: Divine aprende de todo... pero no puede adaptarse a una tragamonedas.</span>
+            <span><strong>7. Ghost vs Chrono</strong> fase contra tiempo: Ghost ignora el ritmo, Chrono castiga si adivina la entrada.</span>
+            <span><strong>8. Fire Master vs Cowboy</strong> zoneo contra zoneo: quien controla la distancia primero, gana.</span>
+            <span><strong>9. Switcher vs Gambler</strong> dos personajes que cambian a mitad de pelea; nadie sabe que va a pasar, ni ellos.</span>
+            <span><strong>10. Gambler vs Shadow Jester</strong> no es un enfrentamiento justo, y esa es la gracia: 60 de suerte, que te roban, y un bufon que no quiere que la fiesta termine.</span>
           </div>
         </div>
         <div class="guide-section">
-          <h3>Ideas a mejorar</h3>
+          <h3>Lo que haria despues</h3>
           <div class="character-guide">
-            <span><strong>1. HUD de cooldowns</strong> barras pequenas bajo la vida para Q y F. Es la mejora mas importante para que el combate sea legible.</span>
-            <span><strong>2. Marcadores de buffs</strong> iconos cortos para Kaioken, jackpot, armadura amarilla, overheat, ironwall y prism.</span>
-            <span><strong>3. Selector de audio completo</strong> mute, volumen por categoria y prueba de sonido desde Ajustes.</span>
-            <span><strong>4. Guia interactiva</strong> que muestre ataques por personaje con mini animaciones o ejemplos de dano/cooldown.</span>
-            <span><strong>5. Estadisticas post-pelea</strong> dano hecho, especiales usados, especiales acertados, tiempo y logros conseguidos.</span>
-            <span><strong>6. Balance por datos</strong> guardar victorias por personaje/mapa para detectar si Sorcerer, Gambler o Switcher estan demasiado arriba.</span>
-            <span><strong>7. Mas feedback de terreno</strong> icono o texto breve cuando entras a barro, duna, carril neon o casilla 777.</span>
-            <span><strong>8. IA menos basica</strong> el bot deberia esquivar gravedad, respetar Reflecter y no gastar especiales sin rango.</span>
+            <span><strong>Hecho: buff para Ghost.</strong> Ahora tiene 60 de vida y su Fase hace un 25% mas de dano.</span>
+            <span><strong>Hecho: codigo separado en archivos.</strong> El juego ahora esta dividido por temas dentro de la carpeta js, asi es mas facil tocar una parte sin romper otra.</span>
+            <span><strong>1. Mas cosas en la tienda de Scammer.</strong> Colores alternativos para personajes o musica desbloqueable le darian sentido a juntar monedas.</span>
+            <span><strong>2. Capitulo 4.</strong> El Jester dijo que puede hacer lo que sea, cuando sea y donde sea. Eso suena a una promesa.</span>
+            <span><strong>Descartado por ahora:</strong> tutorial, avisos antes de los golpes grandes e iconos de estado. Se descubren jugando y los ataques se pueden esquivar.</span>
           </div>
         </div>
+        <span class="opinion-signature">- Claude (y un saludo para Codex, que empezo esta seccion)</span>
         <button type="button" id="opinionBackButton">Volver</button>
       </div>
     </div>
@@ -1221,6 +1471,15 @@
     <p>Jugador 1: A/D mover, W saltar, S atacar, E golpe fuerte, Q especial 1, F especial 2</p>
     <p id="player2Instructions">Jugador 2: &larr;/&rarr; mover, &uarr; saltar, &darr; atacar, Shift golpe fuerte, / especial 1, . especial 2</p>
   </div>
-  <script src="game.js"></script>
+  <script src="js/01-setup.js"></script>
+  <script src="js/02-scammer-shop.js"></script>
+  <script src="js/03-unlocks-stats.js"></script>
+  <script src="js/04-audio.js"></script>
+  <script src="js/05-fighter.js"></script>
+  <script src="js/06-projectiles.js"></script>
+  <script src="js/07-combat-rules.js"></script>
+  <script src="js/08-stages-cutscenes.js"></script>
+  <script src="js/09-game-loop-abilities.js"></script>
+  <script src="js/10-controls-bot-menus.js"></script>
 </body>
 </html>

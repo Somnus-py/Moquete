@@ -109,7 +109,19 @@ El juego no necesita build ni dependencias. Los archivos principales son:
 
 - `index.html`: estructura de menus, HUD y pantallas
 - `style.css`: interfaz, personajes, mapas y efectos visuales
-- `game.js`: logica de combate, personajes, eventos, codigos y debug
+- `js/`: la logica del juego, dividida en partes que `index.html` carga en orden:
+  - `01-setup.js`: canvas, constantes, estado global, guardado, monedas y logros
+  - `02-scammer-shop.js`: la tienda de Scammer (el basurero del menu)
+  - `03-unlocks-stats.js`: desbloqueos de personajes y estadisticas
+  - `04-audio.js`: efectos de sonido y musica
+  - `05-fighter.js`: la clase `Fighter` (cada luchador)
+  - `06-projectiles.js`: proyectiles y efectos de habilidades
+  - `07-combat-rules.js`: dano, variantes secretas, terrenos y eventos
+  - `08-stages-cutscenes.js`: mapas, pantallas de victoria y cinematicas del Arcade
+  - `09-game-loop-abilities.js`: bucle principal, HUD, habilidades y Shadow Jester
+  - `10-controls-bot-menus.js`: controles, bot, menus e inicio
+
+Los archivos comparten variables globales, asi que el orden de las etiquetas `<script>` importa: el codigo que se ejecuta al cargar solo puede usar funciones de su propio archivo o de archivos anteriores.
 
 Para subir cambios:
 

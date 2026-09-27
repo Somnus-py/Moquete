@@ -1408,6 +1408,10 @@ body.menu-open .instructions {
   --accent: #f7fbff;
 }
 
+.monkey-option {
+  --accent: #ffe135;
+}
+
 .character-option.locked {
   cursor: not-allowed;
   filter: grayscale(0.75);
@@ -1516,12 +1520,182 @@ body.menu-open .instructions {
   --map-accent: #ff6d00;
 }
 
+.arcane-library-map {
+  --map-accent: #ce93d8;
+}
+
+.clock-tower-map {
+  --map-accent: #26c6da;
+}
+
+.ancient-ruins-map {
+  --map-accent: #ff6d00;
+}
+
+.jungle-map {
+  --map-accent: #66bb6a;
+}
+
+.arcane-library-map .map-sky {
+  background:
+    linear-gradient(90deg, #2a160c 0 16%, transparent 16% 84%, #2a160c 84%),
+    radial-gradient(circle at 56% 34%, #e1d5ff 0 9px, transparent 10px),
+    radial-gradient(ellipse at 50% 70%, #3b2a6b 0 30%, transparent 31%),
+    linear-gradient(180deg, #12071f, #2d1650);
+}
+
+.arcane-library-map .map-platform {
+  background: #1b1030;
+  border-top: 6px solid #7e57c2;
+}
+
+.arcane-library-map .map-detail {
+  background: radial-gradient(ellipse at 50% 80%, rgba(234, 128, 252, 0.8) 0 18%, transparent 20%);
+  bottom: 20px;
+  height: 28px;
+}
+
+.clock-tower-map .map-sky {
+  background:
+    radial-gradient(circle at 50% 38%, #0d1b2a 0 2px, #e0f7fa 3px 17px, #26c6da 18px 20px, transparent 21px),
+    linear-gradient(90deg, transparent 0 38%, #16233a 38% 62%, transparent 62%),
+    linear-gradient(180deg, #050b14, #0d1b2a);
+}
+
+.clock-tower-map .map-platform {
+  background:
+    linear-gradient(90deg, transparent 0 38%, rgba(38, 198, 218, 0.45) 38% 62%, transparent 62%),
+    #0f172a;
+  border-top: 6px solid #26c6da;
+}
+
+.clock-tower-map .map-detail {
+  background: linear-gradient(90deg, transparent 0 38%, rgba(38, 198, 218, 0.25) 38% 62%, transparent 62%);
+  bottom: 24px;
+  height: 30px;
+}
+
+.ancient-ruins-map .map-sky {
+  background:
+    radial-gradient(circle at 76% 28%, #b71c1c 0 11px, transparent 12px),
+    linear-gradient(90deg, transparent 0 8%, #6d5a4b 8% 16%, transparent 16% 84%, #6d5a4b 84% 92%, transparent 92%),
+    linear-gradient(180deg, #140606, #8a3a1a);
+}
+
+.ancient-ruins-map .map-platform {
+  background:
+    linear-gradient(115deg, transparent 0 46%, #ff6d00 47% 49%, transparent 50%),
+    #2b1d18;
+  border-top: 6px solid #4a2f24;
+}
+
+.ancient-ruins-map .map-detail {
+  background:
+    linear-gradient(135deg, transparent 0 40%, rgba(214, 196, 168, 0.6) 41% 44%, transparent 45%),
+    linear-gradient(135deg, transparent 0 55%, rgba(214, 196, 168, 0.6) 56% 59%, transparent 60%);
+  bottom: 24px;
+  height: 46px;
+}
+
+.jungle-map .map-sky {
+  background:
+    radial-gradient(circle at 20% 22%, #1b5e20 0 20px, transparent 21px),
+    radial-gradient(circle at 78% 20%, #1b5e20 0 22px, transparent 23px),
+    linear-gradient(90deg, transparent 0 17%, #5d3a1a 17% 23%, transparent 23% 75%, #5d3a1a 75% 81%, transparent 81%),
+    linear-gradient(180deg, #9be7c4, #1f5f3b);
+}
+
+.jungle-map .map-platform {
+  background: #5d4037;
+  border-top: 6px solid #43a047;
+}
+
+.jungle-map .map-detail {
+  background: radial-gradient(ellipse at 55% 80%, #ffe135 0 7px, transparent 8px);
+  bottom: 20px;
+  height: 20px;
+}
+
 .normal-arcade-map {
   --map-accent: #c62828;
 }
 
 .fire-arcade-map {
   --map-accent: #4fc3f7;
+}
+
+/* Chapter 3 maps (bossrush) */
+.cobalt-city-map {
+  --map-accent: #42a5f5;
+}
+
+.cobalt-city-map .map-sky {
+  background:
+    linear-gradient(90deg, transparent 0 8%, #0b1e45 8% 22%, transparent 22% 30%, #102a5c 30% 46%, transparent 46% 56%, #0b1e45 56% 70%, transparent 70% 78%, #102a5c 78% 92%, transparent 92%) bottom / 100% 60% no-repeat,
+    radial-gradient(circle at 50% 22%, #e3f2fd 0 9px, transparent 10px),
+    linear-gradient(180deg, #061a3a, #0d3b8a 55%, #1e6fd9);
+}
+
+.cobalt-city-map .map-platform {
+  background: #1a2440;
+  border-top: 6px solid #42a5f5;
+}
+
+.cobalt-city-map .map-detail {
+  background:
+    radial-gradient(circle at 20% 40%, #ff4081 0 3px, transparent 4px),
+    radial-gradient(circle at 44% 60%, #4fc3f7 0 3px, transparent 4px),
+    radial-gradient(circle at 70% 30%, #ff4081 0 3px, transparent 4px),
+    radial-gradient(circle at 86% 55%, #4fc3f7 0 3px, transparent 4px);
+  bottom: 30px;
+  height: 40px;
+}
+
+.gambler-alley-map {
+  --map-accent: #fdd835;
+}
+
+.gambler-alley-map .map-sky {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 9px, rgba(0, 0, 0, 0.28) 9px 11px),
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(0, 0, 0, 0.2) 18px 20px),
+    linear-gradient(180deg, #120e1c, #2b2238 60%, #3a2f45);
+}
+
+.gambler-alley-map .map-platform {
+  background: #262130;
+  border-top: 6px solid #5c5470;
+}
+
+.gambler-alley-map .map-detail {
+  background:
+    linear-gradient(180deg, #2e7d32 0 22%, #1b5e20 22%) 62% 100% / 34% 70% no-repeat,
+    radial-gradient(circle at 20% 30%, #fdd835 0 4px, transparent 5px);
+  bottom: 24px;
+  height: 42px;
+}
+
+.jester-rift-map {
+  --map-accent: #448aff;
+}
+
+.jester-rift-map .map-sky {
+  background:
+    radial-gradient(ellipse at 22% 35%, transparent 0 9px, #448aff 10px 12px, transparent 13px),
+    radial-gradient(ellipse at 74% 25%, transparent 0 12px, #448aff 13px 15px, transparent 16px),
+    radial-gradient(ellipse at 55% 60%, transparent 0 7px, #82b1ff 8px 9px, transparent 10px),
+    #000;
+}
+
+.jester-rift-map .map-platform {
+  background: radial-gradient(ellipse at center, #0d1b4d 0 60%, #000 70%);
+  border-top: 3px solid #448aff;
+}
+
+.jester-rift-map .map-detail {
+  background: radial-gradient(circle at 50% 50%, rgba(234, 128, 252, 0.8) 0 3px, transparent 4px);
+  bottom: 40px;
+  height: 30px;
 }
 
 .normal-arcade-map .map-sky {
@@ -2565,6 +2739,92 @@ body.menu-open .instructions {
   width: 78px;
 }
 
+.monkey-preview .preview-body,
+.selecting-player2 .monkey-preview .preview-body {
+  background: #7b4a26;
+  box-shadow: none;
+}
+
+.preview-monkey-face {
+  background: #f2c89b;
+  border: 3px solid #111;
+  border-radius: 50%;
+  display: block;
+  height: 30px;
+  left: 20px;
+  position: absolute;
+  top: 16px;
+  width: 30px;
+  z-index: 1;
+}
+
+.preview-monkey-face::before {
+  background: #111;
+  box-shadow: 11px 0 0 #111;
+  content: '';
+  height: 5px;
+  left: 7px;
+  position: absolute;
+  top: 8px;
+  width: 5px;
+}
+
+.preview-monkey-face::after {
+  border-bottom: 3px solid #111;
+  border-radius: 0 0 50% 50%;
+  content: '';
+  height: 5px;
+  left: 8px;
+  position: absolute;
+  top: 16px;
+  width: 11px;
+}
+
+.preview-monkey-ear {
+  background: #7b4a26;
+  border: 3px solid #111;
+  border-radius: 50%;
+  display: block;
+  height: 16px;
+  position: absolute;
+  top: 22px;
+  width: 16px;
+}
+
+.preview-monkey-ear.left {
+  left: 8px;
+}
+
+.preview-monkey-ear.right {
+  left: 46px;
+}
+
+.preview-monkey-tail {
+  border: 5px solid #5d3a1a;
+  border-color: transparent transparent #5d3a1a #5d3a1a;
+  border-radius: 50%;
+  display: block;
+  height: 26px;
+  left: 0;
+  position: absolute;
+  top: 44px;
+  transform: rotate(-30deg);
+  width: 22px;
+}
+
+.preview-monkey-banana {
+  border: 6px solid #ffe135;
+  border-color: transparent transparent #ffe135 transparent;
+  border-radius: 50%;
+  display: block;
+  height: 20px;
+  position: absolute;
+  right: 0;
+  top: 44px;
+  transform: rotate(-20deg);
+  width: 24px;
+}
+
 .preview-ghost-head {
   background: rgba(224, 247, 250, 0.72);
   border: 4px solid #111;
@@ -3252,6 +3512,29 @@ body.menu-open .instructions {
   left: 9px;
   top: 26px;
   width: 24px;
+}
+
+.fighter-portrait[data-character='monkey'] {
+  --portrait-main: #7b4a26;
+  --portrait-accent: #f2c89b;
+}
+
+.fighter-portrait[data-character='monkey']::before {
+  background: #f2c89b;
+  border-radius: 50%;
+  height: 22px;
+  left: 10px;
+  top: 8px;
+  width: 22px;
+}
+
+.fighter-portrait[data-character='monkey']::after {
+  background: #111;
+  box-shadow: 8px 0 0 #111;
+  height: 4px;
+  left: 16px;
+  top: 15px;
+  width: 4px;
 }
 
 .fighter-portrait[data-character='divineGeneral'] {
@@ -3973,6 +4256,107 @@ body.menu-open .instructions {
 .fireArcade-level-boss::before {
   color: #2447c7;
   content: 'ICE MASTER';
+}
+
+.gamblerArcade-chapter-option {
+  background:
+    linear-gradient(90deg, rgba(13, 71, 161, 0.22), transparent 38%),
+    #eaf2ff;
+}
+
+.gamblerArcade-chapter-option:hover,
+.gamblerArcade-chapter-option:focus-visible {
+  background: linear-gradient(90deg, #bbd3ff, #eaf2ff);
+}
+
+.gamblerArcade-chapter-option .gamblerArcade-level-scene {
+  background:
+    linear-gradient(90deg, transparent 0 6%, #0b2e66 6% 18%, transparent 18% 70%, #0f3f8c 70% 80%, transparent 80%),
+    radial-gradient(circle at 50% 18%, #e3f2fd 0 9px, transparent 10px),
+    linear-gradient(180deg, #061a3a, #1e6fd9);
+  border-color: #0a1f44;
+}
+
+.gamblerArcade-chapter-option .gamblerArcade-level-scene::before {
+  border-color: #29b6f6;
+}
+
+.gamblerArcade-chapter-option .gamblerArcade-level-player {
+  background:
+    linear-gradient(180deg, #111 0 14%, #212121 14% 100%);
+  border-color: #111;
+  box-shadow: inset 0 0 0 4px rgba(123, 31, 162, 0.5);
+}
+
+.gamblerArcade-chapter-option .gamblerArcade-level-player::before {
+  color: #7b1fa2;
+  content: 'GAMBLER';
+  text-shadow: 0 1px 0 #fff;
+}
+
+#gamblerArcadeChapterButton .arcade-level-enemies span:nth-child(1) {
+  background: linear-gradient(180deg, #8d6e63 0 60%, #56613f 60%) !important;
+}
+
+#gamblerArcadeChapterButton .arcade-level-enemies span:nth-child(2) {
+  background: linear-gradient(180deg, #6a1b9a 0 55%, #ff6d00 55%) !important;
+}
+
+#gamblerArcadeChapterButton .arcade-level-enemies span:nth-child(3) {
+  background: linear-gradient(180deg, #90a4ae 0 50%, #26c6da 50%) !important;
+}
+
+#gamblerArcadeChapterButton .arcade-level-enemies span:nth-child(4) {
+  background: linear-gradient(135deg, #56613f 0 33%, #ff6d00 33% 66%, #26c6da 66%) !important;
+}
+
+.gamblerArcade-chapter-option .gamblerArcade-level-boss {
+  background: repeating-linear-gradient(45deg, #111 0 8px, #fdd835 8px 16px);
+  border-color: #111;
+}
+
+.gamblerArcade-chapter-option .gamblerArcade-level-boss::before {
+  color: #0d47a1;
+  content: '???';
+}
+
+.arcade-level-option.coming-soon,
+.arcade-level-option.locked.coming-soon {
+  filter: none;
+  opacity: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.arcade-level-option.coming-soon .arcade-level-number,
+.arcade-level-option.coming-soon .arcade-level-copy {
+  filter: grayscale(0.9);
+  opacity: 0.45;
+}
+
+.arcade-level-option.coming-soon::after {
+  background: repeating-linear-gradient(-45deg, #fdd835 0 18px, #111 18px 36px);
+  border: 3px solid #111;
+  color: #fff;
+  content: 'EN CONSTRUCCION';
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 15px;
+  font-weight: 900;
+  left: -10%;
+  letter-spacing: 3px;
+  padding: 4px 0;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+  text-shadow: 0 0 4px #111, 0 0 2px #111;
+  top: 50%;
+  transform: translateY(-50%) rotate(-4deg);
+  width: 120%;
+}
+
+.arcade-level-option.coming-soon .arcade-level-status {
+  background: #fdd835;
+  color: #111;
 }
 
 @media (max-width: 560px) {
@@ -4702,4 +5086,1195 @@ body.menu-open .instructions {
   position: absolute;
   top: 18px;
   width: 32px;
+}
+
+/* Arcade chapter select: card grid that always fits and scrolls. */
+.arcade-chapters-menu {
+  align-items: stretch;
+  gap: 14px;
+  max-height: calc(100% - 40px);
+  overflow: hidden;
+  padding: 20px;
+  width: min(1100px, calc(100% - 24px));
+}
+
+.arcade-chapters-header {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 4px;
+  justify-items: center;
+  text-align: center;
+}
+
+.arcade-chapters-header h2 {
+  font-size: clamp(28px, 4.4vw, 44px);
+  margin: 0;
+}
+
+.arcade-chapters-header span {
+  color: #cfd8dc;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.arcade-chapters-panel {
+  align-content: start;
+  display: grid;
+  flex: 1 1 auto;
+  gap: 16px;
+  grid-auto-rows: max-content;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 14px;
+  scrollbar-color: #fdd835 #111820;
+  scrollbar-width: thin;
+}
+
+.arcade-chapters-menu > #arcadeChaptersBackButton {
+  align-self: center;
+  flex: 0 0 auto;
+  min-width: 180px;
+}
+
+.arcade-chapter-option,
+.arcade-chapter-option:has(.arcade-level-scene) {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding: 12px 12px 14px;
+  position: relative;
+  text-align: left;
+}
+
+.arcade-chapter-option .arcade-chapter-number {
+  font-size: 16px;
+  height: 28px;
+  min-width: 38px;
+  padding: 0 6px;
+  position: absolute;
+  right: 12px;
+  top: 124px;
+  width: auto;
+  z-index: 3;
+}
+
+.arcade-chapter-option .arcade-level-scene {
+  height: 130px;
+  padding-top: 26px;
+  width: 100%;
+  zoom: 0.8;
+}
+
+.arcade-chapter-option .arcade-chapter-copy {
+  display: grid;
+  gap: 4px;
+  order: 2;
+  padding-right: 48px;
+}
+
+.arcade-chapter-option .arcade-chapter-copy strong {
+  font-size: 19px;
+  line-height: 1.1;
+}
+
+.arcade-chapter-option .arcade-chapter-copy span {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.arcade-chapter-option .arcade-level-arrow {
+  display: none;
+}
+
+.arcade-chapter-option > * {
+  flex-shrink: 0;
+}
+
+.arcade-chapter-badge {
+  align-self: flex-start;
+  background: #111;
+  border: 2px solid #111;
+  color: #fdd835;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  order: 3;
+  padding: 3px 8px;
+}
+
+.arcade-chapter-badge[data-state='done'] {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.arcade-chapter-badge[data-state='progress'] {
+  background: #fdd835;
+  color: #111;
+}
+
+.arcade-chapter-badge[data-state='waiting'] {
+  background: repeating-linear-gradient(-45deg, #fdd835 0 8px, #111 8px 16px);
+  color: #fff;
+  text-shadow: 0 0 3px #111, 0 0 2px #111;
+}
+
+.arcade-chapter-progress {
+  order: 4;
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr auto;
+}
+
+.arcade-chapter-progress-bar {
+  background: #111;
+  border: 2px solid #111;
+  display: block;
+  height: 12px;
+  overflow: hidden;
+}
+
+.arcade-chapter-progress-bar span {
+  background: linear-gradient(90deg, #42a5f5, #fdd835, #ef5350);
+  display: block;
+  height: 100%;
+  transition: width 0.3s ease;
+  width: 0;
+}
+
+.arcade-chapter-progress-text {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+@media (max-width: 560px) {
+  .arcade-chapters-menu {
+    max-height: calc(100% - 20px);
+    padding: 14px 10px;
+    width: calc(100% - 12px);
+  }
+
+  .arcade-chapters-panel {
+    grid-template-columns: 1fr;
+    padding: 8px;
+  }
+
+  .arcade-chapter-option .arcade-chapter-number {
+    top: 116px;
+  }
+}
+
+/* Arcade cutscenes hide the fight HUD. */
+body.arcade-cutscene .health-panel {
+  visibility: hidden;
+}
+
+/* Shadow Jester: character select (bossrush) and HUD portrait. */
+.shadow-jester-option {
+  --accent: #b388ff;
+}
+
+.shadow-jester-preview .preview-body,
+.selecting-player2 .shadow-jester-preview .preview-body {
+  background: linear-gradient(90deg, #4527a0 0 50%, #1a1033 50%);
+  box-shadow: none;
+}
+
+.preview-jester-collar {
+  background: #fdd835;
+  bottom: 44px;
+  clip-path: polygon(0 0, 100% 0, 92% 100%, 83% 0, 75% 100%, 66% 0, 58% 100%, 50% 0, 42% 100%, 33% 0, 25% 100%, 17% 0, 8% 100%);
+  display: block;
+  height: 10px;
+  left: 17px;
+  position: absolute;
+  width: 36px;
+}
+
+.preview-jester-face {
+  background:
+    radial-gradient(circle at 34% 38%, #fdd835 0 3px, transparent 4px),
+    radial-gradient(circle at 66% 38%, #fdd835 0 3px, transparent 4px),
+    radial-gradient(ellipse at 50% 64%, #111 0 7px, transparent 8px),
+    #d6cff0;
+  border: 2px solid #111;
+  border-radius: 50%;
+  display: block;
+  height: 24px;
+  left: 23px;
+  position: absolute;
+  top: 12px;
+  width: 24px;
+}
+
+.preview-jester-hat {
+  background:
+    radial-gradient(circle at 6% 30%, #fdd835 0 4px, transparent 5px),
+    radial-gradient(circle at 94% 30%, #fdd835 0 4px, transparent 5px),
+    linear-gradient(90deg, #7e57c2 0 50%, #1a1033 50%);
+  clip-path: polygon(0 20%, 10% 40%, 35% 100%, 65% 100%, 90% 40%, 100% 20%, 60% 55%, 50% 0, 40% 55%);
+  display: block;
+  height: 18px;
+  left: 13px;
+  position: absolute;
+  top: 0;
+  width: 44px;
+}
+
+.fighter-portrait[data-character='gambler'][data-variant='shadowJester'] {
+  --portrait-main: #311b92;
+  --portrait-accent: #fdd835;
+}
+
+.fighter-portrait[data-character='gambler'][data-variant='shadowJester']::before {
+  background:
+    radial-gradient(circle at 32% 40%, #fdd835 0 2px, transparent 3px),
+    radial-gradient(circle at 68% 40%, #fdd835 0 2px, transparent 3px),
+    radial-gradient(ellipse at 50% 70%, #111 0 5px, transparent 6px),
+    #d6cff0;
+  border: 2px solid #111;
+  border-radius: 50%;
+  box-shadow: none;
+  height: 20px;
+  left: 9px;
+  top: 14px;
+  width: 20px;
+}
+
+.fighter-portrait[data-character='gambler'][data-variant='shadowJester']::after {
+  background: linear-gradient(90deg, #7e57c2 0 50%, #1a1033 50%);
+  border-radius: 0;
+  clip-path: polygon(0 0, 50% 60%, 100% 0, 80% 100%, 20% 100%);
+  height: 14px;
+  left: 4px;
+  top: 2px;
+  width: 34px;
+}
+
+/* Scammer: character select, HUD portrait and achievement icon. */
+.scammer-option {
+  --accent: #f48fb1;
+}
+
+.scammer-preview .preview-body,
+.selecting-player2 .scammer-preview .preview-body {
+  background:
+    radial-gradient(circle at 30% 82%, rgba(120, 120, 120, 0.6) 0 4px, transparent 5px),
+    radial-gradient(circle at 70% 90%, rgba(120, 120, 120, 0.6) 0 3px, transparent 4px),
+    #f2f2f2;
+  box-shadow: none;
+}
+
+.preview-scammer-jacket {
+  background:
+    linear-gradient(90deg, transparent 0 40%, #f2f2f2 40% 60%, transparent 60%),
+    #1b1b1b;
+  border-left: 4px solid #111;
+  border-right: 4px solid #111;
+  bottom: 18px;
+  display: block;
+  height: 26px;
+  left: 16px;
+  position: absolute;
+  width: 38px;
+}
+
+.preview-scammer-hair {
+  background: #111;
+  clip-path: polygon(0 100%, 6% 20%, 20% 45%, 32% 0, 46% 40%, 60% 5%, 72% 42%, 86% 10%, 100% 100%);
+  display: block;
+  height: 20px;
+  left: 12px;
+  position: absolute;
+  top: 4px;
+  width: 46px;
+}
+
+.preview-scammer-glasses {
+  background:
+    radial-gradient(circle at 25% 50%, #f48fb1 0 5px, #111 5px 7px, transparent 7px),
+    radial-gradient(circle at 75% 50%, #fdd835 0 5px, #111 5px 7px, transparent 7px);
+  display: block;
+  height: 16px;
+  left: 18px;
+  position: absolute;
+  top: 24px;
+  width: 34px;
+}
+
+.fighter-portrait[data-character='gambler'][data-variant='scammer'] {
+  --portrait-main: #f2f2f2;
+  --portrait-accent: #111;
+}
+
+.fighter-portrait[data-character='gambler'][data-variant='scammer']::before {
+  background:
+    radial-gradient(circle at 25% 50%, #f48fb1 0 4px, #111 4px 5px, transparent 5px),
+    radial-gradient(circle at 75% 50%, #fdd835 0 4px, #111 4px 5px, transparent 5px);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  height: 12px;
+  left: 8px;
+  top: 14px;
+  width: 26px;
+}
+
+.fighter-portrait[data-character='gambler'][data-variant='scammer']::after {
+  background: #111;
+  clip-path: polygon(0 100%, 10% 20%, 30% 60%, 50% 0, 70% 60%, 90% 20%, 100% 100%);
+  height: 10px;
+  left: 6px;
+  top: 2px;
+  width: 30px;
+}
+
+.achievement-icon-bigshot {
+  background:
+    radial-gradient(circle at 32% 44%, #f48fb1 0 7px, #111 7px 9px, transparent 9px),
+    radial-gradient(circle at 68% 44%, #fdd835 0 7px, #111 7px 9px, transparent 9px),
+    #f2f2f2;
+}
+
+.achievement-icon-bigshot::before {
+  background: #111;
+  clip-path: polygon(0 100%, 8% 10%, 24% 60%, 40% 0, 56% 55%, 72% 5%, 88% 55%, 100% 100%);
+  height: 14px;
+  left: 0;
+  top: 0;
+  width: 46px;
+}
+
+.achievement-icon-bigshot::after {
+  background: #1b1b1b;
+  bottom: 0;
+  clip-path: polygon(0 0, 40% 0, 50% 60%, 60% 0, 100% 0, 100% 100%, 0 100%);
+  height: 14px;
+  left: 0;
+  width: 46px;
+}
+
+.achievement-icon-jester {
+  background:
+    radial-gradient(circle at 36% 60%, #fdd835 0 3px, transparent 4px),
+    radial-gradient(circle at 64% 60%, #fdd835 0 3px, transparent 4px),
+    radial-gradient(ellipse at 50% 62%, #b8b0d8 0 16px, transparent 17px),
+    #1a1033;
+}
+
+.achievement-icon-jester::before {
+  background: linear-gradient(90deg, #7e57c2 0 50%, #111 50%);
+  clip-path: polygon(0 100%, 8% 0, 50% 70%, 92% 0, 100% 100%);
+  height: 18px;
+  left: 4px;
+  top: 2px;
+  width: 38px;
+}
+
+.achievement-icon-jester::after {
+  background: #1a1033;
+  border-radius: 0 0 50% 50%;
+  bottom: 9px;
+  height: 5px;
+  left: 17px;
+  width: 12px;
+}
+
+/* Shadow Jester climbing out of the screen to press "Reiniciar pelea" himself. */
+.jester-press-overlay {
+  height: 100vh;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: 9999;
+}
+
+#restartButton.jester-pressed {
+  filter: brightness(0.8);
+  transform: translateY(3px) scale(0.96);
+}
+
+/* Scammer's shop (the menu dumpster) */
+.menu-shop-badges {
+  display: flex;
+  gap: 6px;
+  left: 12px;
+  position: absolute;
+  top: 14px;
+}
+
+.menu-shop-badges .shop-badge {
+  background: #111;
+  border: 2px solid #fdd835;
+  color: #fdd835;
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 2px 6px;
+}
+
+.menu-shop-badges .shop-badge.watch {
+  border-radius: 50%;
+  height: 24px;
+  padding: 0;
+  position: relative;
+  width: 24px;
+}
+
+.menu-shop-badges .shop-badge.watch::before {
+  background: #fdd835;
+  content: '';
+  height: 8px;
+  left: 10px;
+  position: absolute;
+  top: 3px;
+  width: 2px;
+}
+
+.menu-shop-badges .shop-badge.watch::after {
+  background: #fdd835;
+  content: '';
+  height: 2px;
+  left: 10px;
+  position: absolute;
+  top: 10px;
+  width: 7px;
+}
+
+.scammer-intro-menu {
+  align-items: center;
+  background: linear-gradient(180deg, #07060c, #16121f 70%, #221b2d);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  justify-content: flex-end;
+  min-height: 420px;
+  overflow: hidden;
+  padding-bottom: 24px;
+  position: relative;
+}
+
+.scammer-intro-menu.hidden {
+  display: none;
+}
+
+.offcam-alley {
+  height: 170px;
+  position: relative;
+  width: 100%;
+}
+
+.offcam-dumpster {
+  background: linear-gradient(180deg, #2e7d32, #1b5e20);
+  border: 4px solid #0d260f;
+  bottom: 0;
+  height: 96px;
+  left: calc(50% - 90px);
+  position: absolute;
+  width: 180px;
+}
+
+.offcam-lid {
+  background: #1b5e20;
+  border: 4px solid #0d260f;
+  height: 16px;
+  left: -10px;
+  position: absolute;
+  top: -20px;
+  transform-origin: 8px 100%;
+  width: 192px;
+}
+
+.scammer-intro-menu.talking .offcam-dumpster {
+  animation: offcam-rattle 0.12s infinite;
+}
+
+.scammer-intro-menu.talking .offcam-lid {
+  animation: offcam-lid 0.24s infinite alternate;
+}
+
+@keyframes offcam-rattle {
+  0% { transform: translateX(-2px); }
+  50% { transform: translateX(2px) rotate(0.6deg); }
+  100% { transform: translateX(-1px); }
+}
+
+@keyframes offcam-lid {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-14deg); }
+}
+
+.offcam-dialog {
+  background: rgba(8, 6, 12, 0.94) !important;
+  border: 4px solid #fdd835 !important;
+  color: #fff !important;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 820px;
+  min-height: 118px;
+  overflow: visible !important;
+  padding: 26px 22px 14px !important;
+  position: relative;
+  text-align: left;
+  width: calc(100% - 40px);
+}
+
+.offcam-speaker {
+  background: #fdd835;
+  color: #111;
+  font-family: 'Courier New', monospace;
+  font-weight: 900;
+  left: 18px;
+  padding: 3px 16px;
+  position: absolute;
+  top: -16px;
+}
+
+.offcam-text {
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-transform: none;
+}
+
+.offcam-hint {
+  align-self: flex-end;
+  color: #fdd835;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  font-style: normal;
+}
+
+.scammer-shop-menu {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(244, 143, 177, 0.18), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0 2px, transparent 2px 46px),
+    linear-gradient(180deg, #221833, #120d1c 55%, #0b0812);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: 0 !important;
+}
+
+.shop-awning {
+  background:
+    radial-gradient(circle at 50% 0, transparent 0 13px, #120d1c 14px) 0 100% / 36px 14px repeat-x,
+    repeating-linear-gradient(90deg, #d81b60 0 36px, #f5f5f5 36px 72px);
+  align-self: stretch;
+  flex: 0 0 auto;
+  height: 28px;
+  margin: 0 -24px;
+}
+
+.shop-sign {
+  align-self: stretch;
+  align-items: center;
+  background: #0b0812;
+  border: 3px solid #fdd835;
+  box-shadow: 0 0 0 3px #0b0812, 0 0 18px rgba(253, 216, 53, 0.35), inset 0 0 14px rgba(253, 216, 53, 0.18);
+  display: flex;
+  gap: 14px;
+  padding: 8px 12px;
+}
+
+.shop-sign-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shop-sign h2 {
+  animation: shop-neon 2.6s infinite;
+  color: #fff59d;
+  font-size: 1.45rem;
+  margin: 0;
+  text-shadow: 0 0 6px #fdd835, 0 0 14px #ff6f00, 3px 3px 0 #b71c1c;
+}
+
+@keyframes shop-neon {
+  0%, 92%, 100% { opacity: 1; }
+  94% { opacity: 0.45; }
+  96% { opacity: 1; }
+  97% { opacity: 0.6; }
+}
+
+.shop-tagline {
+  color: #f48fb1;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.shop-seal {
+  align-items: center;
+  animation: shop-seal-spin 8s linear infinite;
+  background: radial-gradient(circle, #fdd835 0 55%, #f9a825 56%);
+  border: 3px dashed #111;
+  border-radius: 50%;
+  color: #111;
+  display: flex;
+  flex: 0 0 auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.6rem;
+  font-weight: 900;
+  height: 58px;
+  justify-content: center;
+  line-height: 1.1;
+  text-align: center;
+  width: 58px;
+}
+
+@keyframes shop-seal-spin {
+  from { transform: rotate(-12deg); }
+  to { transform: rotate(348deg); }
+}
+
+.shop-wallet {
+  flex: 0 0 auto;
+  margin-left: auto;
+  position: static;
+}
+
+.shop-counter {
+  align-self: stretch;
+  align-items: flex-end;
+  display: flex;
+  gap: 14px;
+  min-height: 96px;
+  padding: 0 6px;
+}
+
+.shop-scammer {
+  flex: 0 0 auto;
+  height: 104px;
+  position: relative;
+  width: 84px;
+}
+
+.shop-scammer .character-preview {
+  bottom: 0;
+  left: 6px;
+  position: absolute;
+  transform: scale(1.2);
+  transform-origin: 50% 100%;
+}
+
+.shop-scammer.talking .character-preview {
+  animation: shop-scammer-talk 0.22s infinite alternate;
+}
+
+.shop-scammer.hyped .character-preview {
+  animation: shop-scammer-hype 0.16s infinite alternate;
+}
+
+@keyframes shop-scammer-talk {
+  from { transform: scale(1.2) translateY(0); }
+  to { transform: scale(1.2) translateY(-5px); }
+}
+
+@keyframes shop-scammer-hype {
+  from { transform: scale(1.25) translateY(0) rotate(-4deg); }
+  to { transform: scale(1.25) translateY(-10px) rotate(4deg); }
+}
+
+.shop-bubble {
+  align-self: center;
+  background: #fff;
+  border: 3px solid #111;
+  box-shadow: 4px 4px 0 #111;
+  color: #111;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 62px;
+  padding: 10px 14px;
+  position: relative;
+}
+
+.shop-bubble::before {
+  border-bottom: 10px solid transparent;
+  border-right: 16px solid #111;
+  border-top: 10px solid transparent;
+  content: '';
+  left: -19px;
+  position: absolute;
+  top: 22px;
+}
+
+.shop-bubble-name {
+  color: #d81b60;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.shop-vendor-line {
+  font-family: Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  min-height: 1.2em;
+}
+
+.shop-items {
+  align-self: stretch;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.shop-item {
+  background: linear-gradient(180deg, #fffdf4, #f1ead0);
+  border: 3px solid #111;
+  box-shadow: 0 6px 0 #5d4037, 0 8px 0 #111;
+  color: #111;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  position: relative;
+  transition: transform 0.12s ease;
+}
+
+.shop-item:hover {
+  transform: translateY(-3px) rotate(-0.6deg);
+}
+
+.shop-item strong {
+  font-size: 0.86rem;
+  line-height: 1.15;
+}
+
+.shop-item p {
+  font-size: 0.7rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.shop-item .shop-price {
+  background: #d81b60;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  position: absolute;
+  right: -6px;
+  top: 8px;
+  transform: rotate(6deg);
+}
+
+.shop-item button {
+  box-sizing: border-box;
+  font-size: 0.8rem !important;
+  margin-top: auto;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 6px 8px !important;
+  width: 100%;
+}
+
+.shop-item.owned {
+  background: linear-gradient(180deg, #f1f8e9, #dcedc8);
+}
+
+.shop-item.owned::after {
+  border: 3px solid #2e7d32;
+  color: #2e7d32;
+  content: 'VENDIDO';
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  font-weight: 900;
+  left: 10px;
+  padding: 1px 6px;
+  position: absolute;
+  top: 44px;
+  transform: rotate(-14deg);
+}
+
+.shop-item.owned button {
+  opacity: 0.6;
+}
+
+.shop-icon {
+  display: block;
+  height: 46px;
+  margin: 2px 0 2px;
+  position: relative;
+  width: 46px;
+}
+
+.shop-icon.icon-luckChip {
+  background:
+    radial-gradient(circle, #f5f5f5 0 9px, #c62828 10px 15px, transparent 16px),
+    repeating-conic-gradient(#c62828 0 30deg, #f5f5f5 30deg 60deg);
+  border: 3px solid #111;
+  border-radius: 50%;
+}
+
+.shop-icon.icon-goldWatch {
+  background: radial-gradient(circle, #fffde7 0 13px, #fdd835 14px 18px, #f9a825 19px);
+  border: 3px solid #111;
+  border-radius: 50%;
+}
+
+.shop-icon.icon-goldWatch::before {
+  background: #111;
+  content: '';
+  height: 12px;
+  left: 19px;
+  position: absolute;
+  top: 8px;
+  width: 3px;
+}
+
+.shop-icon.icon-goldWatch::after {
+  background: #111;
+  content: '';
+  height: 3px;
+  left: 20px;
+  position: absolute;
+  top: 19px;
+  width: 10px;
+}
+
+.shop-icon.icon-doubleCoin {
+  background:
+    radial-gradient(circle at 34% 58%, #fff59d 0 6px, #fdd835 7px 14px, #111 15px 17px, transparent 18px),
+    radial-gradient(circle at 66% 40%, #fff59d 0 6px, #f9a825 7px 14px, #111 15px 17px, transparent 18px);
+}
+
+.shop-icon.icon-lifeInsurance {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 7px, #9e9e9e 7px 9px) 6px 10px / 26px 26px no-repeat,
+    #fafafa;
+  border: 3px solid #111;
+  height: 44px;
+  width: 36px;
+}
+
+.shop-icon.icon-lifeInsurance::after {
+  border: 2px solid #c62828;
+  color: #c62828;
+  content: 'VALIDO?';
+  font-family: 'Courier New', monospace;
+  font-size: 0.5rem;
+  font-weight: 900;
+  left: 6px;
+  padding: 0 2px;
+  position: absolute;
+  top: 18px;
+  transform: rotate(-18deg);
+}
+
+.shop-footer {
+  align-self: stretch;
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.shop-footnote {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.66rem;
+}
+
+/* Shop: more products, question menu and new menu badges */
+.shop-items {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 4px 6px 10px 2px;
+}
+
+.shop-scammer {
+  cursor: pointer;
+}
+
+.shop-scammer:hover .character-preview,
+.shop-scammer:focus-visible .character-preview {
+  filter: drop-shadow(0 0 6px #f48fb1);
+}
+
+.shop-talk-hint {
+  color: #9e9e9e;
+  font-size: 0.66rem;
+  font-style: italic;
+}
+
+.shop-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.shop-questions.hidden {
+  display: none;
+}
+
+.shop-questions button {
+  font-size: 0.74rem !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 4px 8px !important;
+}
+
+.shop-icon.icon-pocketMedkit {
+  background:
+    linear-gradient(#fff, #fff) 50% 50% / 8px 22px no-repeat,
+    linear-gradient(#fff, #fff) 50% 50% / 22px 8px no-repeat,
+    #d32f2f;
+  border: 3px solid #111;
+  border-radius: 6px;
+}
+
+.shop-icon.icon-coinMagnet {
+  background:
+    radial-gradient(circle at 50% 30%, transparent 0 9px, #d32f2f 10px 18px, transparent 19px) 0 0 / 46px 46px no-repeat,
+    linear-gradient(#bdbdbd, #bdbdbd) 11px 28px / 8px 10px no-repeat,
+    linear-gradient(#bdbdbd, #bdbdbd) 27px 28px / 8px 10px no-repeat;
+}
+
+.shop-icon.icon-sunglasses {
+  background:
+    radial-gradient(ellipse at 28% 50%, #111 0 9px, transparent 10px),
+    radial-gradient(ellipse at 72% 50%, #111 0 9px, transparent 10px),
+    linear-gradient(#111, #111) 50% 44% / 12px 3px no-repeat;
+}
+
+.shop-icon.icon-sunglasses::after {
+  background: radial-gradient(ellipse at 28% 50%, #f48fb1 0 5px, transparent 6px), radial-gradient(ellipse at 72% 50%, #fdd835 0 5px, transparent 6px);
+  content: '';
+  inset: 0;
+  opacity: 0.8;
+  position: absolute;
+}
+
+.shop-icon.icon-worldTrophy {
+  background:
+    radial-gradient(ellipse at 50% 18%, #fdd835 0 14px, transparent 15px),
+    linear-gradient(#f9a825, #f9a825) 50% 30px / 6px 8px no-repeat,
+    linear-gradient(#5d4037, #5d4037) 50% 40px / 24px 6px no-repeat;
+}
+
+.shop-icon.icon-plasticPlant {
+  background:
+    radial-gradient(ellipse at 30% 30%, #43a047 0 8px, transparent 9px),
+    radial-gradient(ellipse at 70% 26%, #66bb6a 0 8px, transparent 9px),
+    radial-gradient(ellipse at 50% 12%, #2e7d32 0 7px, transparent 8px),
+    linear-gradient(#8d6e63, #6d4c41) 50% 100% / 24px 18px no-repeat;
+}
+
+.shop-icon.icon-mysteryBox {
+  background:
+    linear-gradient(90deg, transparent 0 42%, #d81b60 42% 58%, transparent 58%),
+    #7e57c2;
+  border: 3px solid #111;
+}
+
+.shop-icon.icon-mysteryBox::after {
+  color: #fdd835;
+  content: '?';
+  font-family: 'Courier New', monospace;
+  font-size: 1.5rem;
+  font-weight: 900;
+  left: 5px;
+  position: absolute;
+  top: 4px;
+}
+
+.shop-icon.icon-millionBill {
+  background:
+    radial-gradient(circle, #a5d6a7 0 8px, transparent 9px),
+    #66bb6a;
+  border: 3px solid #1b5e20;
+  height: 26px;
+  margin-top: 12px;
+}
+
+.shop-icon.icon-millionBill::after {
+  color: #1b5e20;
+  content: '$1M';
+  font-family: 'Courier New', monospace;
+  font-size: 0.6rem;
+  font-weight: 900;
+  left: 11px;
+  position: absolute;
+  top: 5px;
+}
+
+.shop-icon.icon-extendedWarranty {
+  background: repeating-linear-gradient(180deg, transparent 0 6px, #bdbdbd 6px 8px) 5px 6px / 22px 30px no-repeat, #fafafa;
+  border: 3px solid #111;
+  height: 44px;
+  width: 36px;
+}
+
+.shop-icon.icon-extendedWarranty::after {
+  background: #fdd835;
+  border: 2px solid #111;
+  border-radius: 50%;
+  content: '';
+  height: 12px;
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 12px;
+}
+
+.menu-shop-badges .shop-badge.icon {
+  background: #111;
+  border-radius: 4px;
+  height: 24px;
+  padding: 0;
+  position: relative;
+  width: 28px;
+}
+
+.menu-shop-badges .shop-badge.sunglasses {
+  background:
+    radial-gradient(ellipse at 30% 55%, #f48fb1 0 4px, transparent 5px),
+    radial-gradient(ellipse at 70% 55%, #fdd835 0 4px, transparent 5px),
+    #111;
+}
+
+.menu-shop-badges .shop-badge.trophy {
+  background:
+    radial-gradient(ellipse at 50% 30%, #fdd835 0 7px, transparent 8px),
+    linear-gradient(#fdd835, #fdd835) 50% 78% / 12px 3px no-repeat,
+    #111;
+}
+
+.menu-shop-badges .shop-badge.plant {
+  background:
+    radial-gradient(ellipse at 35% 35%, #66bb6a 0 5px, transparent 6px),
+    radial-gradient(ellipse at 65% 30%, #43a047 0 5px, transparent 6px),
+    linear-gradient(#8d6e63, #8d6e63) 50% 90% / 12px 8px no-repeat,
+    #111;
+}
+
+.shop-counter {
+  align-items: flex-start;
+}
+
+.shop-bubble {
+  align-self: flex-start;
+  margin-top: 14px;
+}
+
+.shop-questions button {
+  box-shadow: none !important;
+  font-size: 0.68rem !important;
+  padding: 3px 8px !important;
+}
+
+.shop-awning,
+.shop-sign,
+.shop-counter,
+.shop-footer {
+  flex-shrink: 0;
+}
+
+.scammer-shop-menu .shop-items {
+  flex: 1 1 auto;
+  min-height: 150px;
+}
+
+/* Opinion screen: Codex crossed out, Claude next to it */
+.old-author {
+  opacity: 0.6;
+  text-decoration: line-through;
+  text-decoration-color: #e53935;
+  text-decoration-thickness: 3px;
+}
+
+.opinion-signature {
+  color: #b39ddb;
+  display: block;
+  font-style: italic;
+  margin: 8px 0 12px;
+  text-align: right;
+}
+
+/* Chapter 4: Reflecter in the abandoned robot factory */
+.reflecterArcade-chapter-option {
+  background:
+    linear-gradient(90deg, rgba(38, 50, 56, 0.28), transparent 38%),
+    #eceff1;
+}
+
+.reflecterArcade-chapter-option:hover,
+.reflecterArcade-chapter-option:focus-visible {
+  background: linear-gradient(90deg, #cfd8dc, #eceff1);
+}
+
+.reflecterArcade-chapter-option .reflecterArcade-level-scene {
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.35) 0 2px, transparent 2px 22px),
+    linear-gradient(180deg, transparent 0 82%, #fdd835 82% 86%, #1f252b 86%),
+    radial-gradient(ellipse at 50% 30%, rgba(255, 224, 130, 0.25), transparent 45%),
+    linear-gradient(180deg, #07090c, #1b2128);
+  border-color: #11151a;
+}
+
+.reflecterArcade-chapter-option .reflecterArcade-level-scene::before {
+  border-color: #ffb300;
+}
+
+.reflecterArcade-chapter-option .reflecterArcade-level-player {
+  background: linear-gradient(180deg, #e0f7fa 0 30%, #80deea 30%);
+  border-color: #111;
+  box-shadow: inset 0 0 0 4px rgba(0, 188, 212, 0.45);
+}
+
+.reflecterArcade-chapter-option .reflecterArcade-level-player::before {
+  color: #00838f;
+  content: 'REFLECTER';
+  text-shadow: 0 1px 0 #fff;
+}
+
+#reflecterArcadeChapterButton .arcade-level-enemies span {
+  background:
+    linear-gradient(180deg, transparent 0 20%, #101418 20% 34%, transparent 34%),
+    radial-gradient(circle at 60% 27%, #ff1744 0 3px, transparent 4px),
+    #78909c !important;
+}
+
+#reflecterArcadeChapterButton .arcade-level-enemies span:nth-child(2) {
+  background:
+    linear-gradient(180deg, transparent 0 20%, #101418 20% 34%, transparent 34%),
+    radial-gradient(circle at 60% 27%, #ff1744 0 3px, transparent 4px),
+    #8d6e63 !important;
+}
+
+#reflecterArcadeChapterButton .arcade-level-enemies span:nth-child(3) {
+  background:
+    linear-gradient(180deg, transparent 0 20%, #101418 20% 34%, transparent 34%),
+    radial-gradient(circle at 60% 27%, #ffee58 0 3px, transparent 4px),
+    #5c6bc0 !important;
+}
+
+.reflecterArcade-chapter-option .reflecterArcade-level-boss {
+  background: repeating-linear-gradient(45deg, #111 0 8px, #ffb300 8px 16px);
+  border-color: #111;
+}
+
+.reflecterArcade-chapter-option .reflecterArcade-level-boss::before {
+  color: #37474f;
+  content: 'EN OBRA';
 }
