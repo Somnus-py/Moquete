@@ -44,6 +44,10 @@ function applyAudioSettings() {
   if (scammerBattleTrack) scammerBattleTrack.volume = 0.7 * audioSettings.master * audioSettings.music;
   if (jesterTracks.battle) jesterTracks.battle.volume = getJesterBattleVolume();
   if (jesterDialogLoop.gain) jesterDialogLoop.gain.gain.value = getJesterMusicVolume();
+  Object.entries(reflecterBattleMusic.tracks).forEach(([key, track]) => {
+    track.volume = getReflecterBattleVolume(key);
+  });
+  if (typeof shopRadioPlayer !== 'undefined' && shopRadioPlayer.audio) shopRadioPlayer.audio.volume = getShopRadioVolume();
 }
 
 function ensureAudio() {
@@ -471,16 +475,198 @@ function isScammerArcadeFight() {
   return normalArcadeActive && arcadeChapter === 'gambler' && selectedNormalArcadeLevel === 5;
 }
 
+function getReflecterBattleTrackKey() {
+  if (scamChallenge.active) return scamChallenge.stage === 'neo' ? 'scamNeo' : 'scamNormal';
+  // versus against (or as) NEO SCAMMER plays BIG SHOT
+  if (!normalArcadeActive && (player1.secretVariant === 'neoScammer' || player2.secretVariant === 'neoScammer')) return 'scamNeo';
+  if (normalArcadeActive && arcadeChapter === 'knight' && player2.secretVariant === 'chefBoss') return 'furiousChef';
+  if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 8) return 'worldRoaring';
+  if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 7) return 'lightFinal';
+  if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 6) return 'lanternGuardian';
+  if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 5) return player2.sheriffStandActive ? 'lastStand' : 'sheriffShowdown';
+  if (normalArcadeActive && arcadeChapter === 'knight') return selectedNormalArcadeLevel === 4 ? 'madMuse' : selectedNormalArcadeLevel === 3 ? 'petalDance' : selectedNormalArcadeLevel === 2 ? 'darkOrder' : 'bushMonster';
+  if (!normalArcadeActive || arcadeChapter !== 'reflecter') return null;
+  if (selectedNormalArcadeLevel === 5) return 'chronoBoost';
+  if (selectedNormalArcadeLevel === 6) return ch6Stage === 'titan' ? 'titan' : 'factory';
+  if (selectedNormalArcadeLevel === 7) return 'judge';
+  return null;
+}
+
+function getReflecterBattleVolume(key) {
+  return (reflecterBattleTrackVolumes[key] || 0.5) * audioSettings.master * audioSettings.music * lightClashMusicFade;
+}
+
+function stopReflecterBattleMusic() {
+  Object.values(reflecterBattleMusic.tracks).forEach((track) => track.pause());
+}
+
+// Runs every frame: plays the chapter 4 fight track only while the fight itself is on screen,
+// pausing (not restarting) through mid-fight cutscenes.
+function updateReflecterBattleMusic() {
+  if (typeof Audio === 'undefined') return;
+  const midFightScene = arcadeCutscene.active && (ch7MidFightScenes.includes(arcadeCutscene.scene) || arcadeCutscene.scene === 'knightFarolTop' || arcadeCutscene.scene === 'knightRiftAngry');
+  const fighting = gameStarted && !gameOver && (!arcadeCutscene.active || midFightScene);
+  // Light Warrior arrives in the Bosque Lumina with his own cheerful theme
+  const lightScene = arcadeCutscene.active && arcadeCutscene.scene === 'knightLight' && arcadeCutscene.musicOn;
+  // the rescue at the foot of the farol: Light Warrior's theme
+  const abductScene = arcadeCutscene.active && arcadeCutscene.scene === 'knightRiftAbduct';
+  const key = lightScene ? 'lightTheme' : abductScene ? (arcadeCutscene.musicOn ? 'lightFinal' : null) : fighting ? getReflecterBattleTrackKey() : null;
+  if (!key) {
+    stopReflecterBattleMusic();
+    return;
+  }
+  if (!reflecterBattleMusic.tracks[key]) {
+    const track = new Audio(reflecterBattleTrackSources[key]);
+    track.preload = 'auto';
+    track.loop = true;
+    reflecterBattleMusic.tracks[key] = track;
+  }
+  const track = reflecterBattleMusic.tracks[key];
+  if (reflecterBattleMusic.current !== key || reflecterBattleMusic.restart) {
+    stopReflecterBattleMusic();
+    try {
+      track.currentTime = reflecterBattleTrackStartOffsets[key] || 0;
+    } catch (error) {
+      // Seeking can fail before metadata loads; playback still starts from the beginning.
+    }
+    reflecterBattleMusic.current = key;
+    reflecterBattleMusic.restart = false;
+  }
+  track.volume = getReflecterBattleVolume(key);
+  // skip the silence at the start (again after every loop)
+  const startOffset = reflecterBattleTrackStartOffsets[key] || 0;
+  if (startOffset && track.readyState > 0 && track.currentTime < startOffset - 0.25) {
+    try {
+      track.currentTime = startOffset;
+    } catch (error) {
+      // try again next frame
+    }
+  }
+  const loopPoints = reflecterBattleTrackLoops[key];
+  if (loopPoints && track.currentTime >= loopPoints.end) {
+    try {
+      track.currentTime = loopPoints.start;
+    } catch (error) {
+      // if seeking fails the file's own loop still restarts it
+    }
+  }
+  if (track.paused) {
+    const playPromise = track.play();
+    if (playPromise && playPromise.catch) playPromise.catch(() => {});
+  }
+}
+
 function stopOmegaBattleTrack() {
   if (!omegaBattleTrack) return;
   omegaBattleTrack.pause();
   omegaBattleTrack.currentTime = 0;
 }
 
+function playJudgeSound(soundName) {
+  // Juez de Bronce: heavy metal clangs, gold hums
+  if (soundName === 'judgeThrow') {
+    playNoise({ duration: 0.28, volume: 0.1, filterFrequency: 1300 });
+    playTone({ frequency: 320, duration: 0.28, type: 'sawtooth', volume: 0.05, slideTo: 140 });
+  } else if (soundName === 'judgeHammerHit') {
+    playKick({ volume: 0.4 });
+    playNoise({ duration: 0.3, volume: 0.16, filterFrequency: 900 });
+    playTone({ frequency: 1250, duration: 0.18, type: 'triangle', volume: 0.08, slideTo: 620 });
+    playTone({ frequency: 1760, duration: 0.6, type: 'sine', volume: 0.035, slideTo: 1700, delay: 0.02 });
+  } else if (soundName === 'judgeQuake') {
+    playKick({ volume: 0.45 });
+    playNoise({ duration: 0.6, volume: 0.18, filterFrequency: 420 });
+    playTone({ frequency: 95, duration: 0.45, type: 'sawtooth', volume: 0.12, slideTo: 38 });
+    playTone({ frequency: 1250, duration: 0.2, type: 'triangle', volume: 0.05, slideTo: 700 });
+  } else if (soundName === 'judgeStep') {
+    playKick({ volume: 0.36 });
+    playNoise({ duration: 0.16, volume: 0.08, filterFrequency: 320 });
+    playTone({ frequency: 70, duration: 0.2, type: 'sine', volume: 0.08, slideTo: 45 });
+  } else if (soundName === 'judgeLight') {
+    playTone({ frequency: 110, duration: 0.08, type: 'square', volume: 0.06 });
+    playNoise({ duration: 0.05, volume: 0.05, filterFrequency: 2200 });
+    playTone({ frequency: 880, duration: 0.32, type: 'triangle', volume: 0.03, delay: 0.05 });
+  } else if (soundName === 'judgeCore') {
+    playChord([220, 330, 440], { duration: 0.8, type: 'sawtooth', volume: 0.045 });
+    playTone({ frequency: 110, duration: 0.9, type: 'triangle', volume: 0.07, slideTo: 440 });
+  } else if (soundName === 'judgeParry') {
+    playTone({ frequency: 1500, duration: 0.12, type: 'square', volume: 0.06, slideTo: 1100 });
+    playTone({ frequency: 760, duration: 0.5, type: 'triangle', volume: 0.06, slideTo: 720 });
+    playNoise({ duration: 0.12, volume: 0.1, filterFrequency: 3200 });
+  } else if (soundName === 'judgeShieldUp') {
+    playTone({ frequency: 420, duration: 0.14, type: 'triangle', volume: 0.05, slideTo: 620 });
+    playNoise({ duration: 0.08, volume: 0.05, filterFrequency: 1800 });
+  } else if (soundName === 'judgeBeamCharge') {
+    playTone({ frequency: 180, duration: 0.95, type: 'sawtooth', volume: 0.05, slideTo: 900 });
+    playTone({ frequency: 360, duration: 0.95, type: 'triangle', volume: 0.035, slideTo: 1800 });
+  } else if (soundName === 'judgeBeamFire') {
+    playKick({ volume: 0.35 });
+    playNoise({ duration: 0.4, volume: 0.15, filterFrequency: 2600 });
+    playTone({ frequency: 900, duration: 0.45, type: 'sawtooth', volume: 0.07, slideTo: 300 });
+    playChord([523, 659, 784], { duration: 0.4, type: 'square', volume: 0.03 });
+  } else if (soundName === 'judgeSecretCharge') {
+    playTone({ frequency: 120, duration: 2, type: 'sawtooth', volume: 0.06, slideTo: 1200 });
+    playTone({ frequency: 240, duration: 2, type: 'square', volume: 0.03, slideTo: 2400 });
+    playNoise({ duration: 2, volume: 0.05, filterFrequency: 900 });
+  } else if (soundName === 'judgeSlam') {
+    playKick({ volume: 0.55 });
+    playNoise({ duration: 0.9, volume: 0.2, filterFrequency: 600 });
+    playTone({ frequency: 80, duration: 0.8, type: 'sawtooth', volume: 0.14, slideTo: 30 });
+    playChord([392, 523, 659], { duration: 0.7, type: 'triangle', volume: 0.04, delay: 0.1 });
+  } else if (soundName === 'judgeFinalStart') {
+    playKick({ volume: 0.5 });
+    playChord([196, 247, 294], { duration: 1.2, type: 'sawtooth', volume: 0.05 });
+    playChord([262, 330, 392], { duration: 1.2, type: 'square', volume: 0.035, delay: 0.5 });
+    playTone({ frequency: 110, duration: 1.6, type: 'triangle', volume: 0.08, slideTo: 55 });
+  } else if (soundName === 'judgeFinalMode') {
+    playChord([523, 659, 784], { duration: 0.18, type: 'square', volume: 0.04 });
+    playChord([659, 784, 1046], { duration: 0.25, type: 'square', volume: 0.04, delay: 0.12 });
+  } else if (soundName === 'judgeFinalWarn') {
+    playTone({ frequency: 880, duration: 0.06, type: 'square', volume: 0.03 });
+  } else if (soundName === 'judgeFinalHurt') {
+    playTone({ frequency: 300, duration: 0.2, type: 'square', volume: 0.06, slideTo: 120 });
+    playNoise({ duration: 0.15, volume: 0.08, filterFrequency: 1200 });
+  } else if (soundName === 'judgeTwinkle') {
+    playTone({ frequency: 2100, duration: 0.25, type: 'sine', volume: 0.05 });
+    playTone({ frequency: 3150, duration: 0.35, type: 'sine', volume: 0.035, delay: 0.08 });
+  } else if (soundName === 'judgeOverdrive') {
+    playKick({ volume: 0.4 });
+    playNoise({ duration: 0.5, volume: 0.12, filterFrequency: 1600 });
+    playChord([262, 392, 523], { duration: 0.9, type: 'sawtooth', volume: 0.05 });
+    playTone({ frequency: 130, duration: 1, type: 'square', volume: 0.05, slideTo: 520, delay: 0.1 });
+  } else {
+    return false;
+  }
+  return true;
+}
+
 function playSound(soundName, options = {}) {
+  if (soundName.startsWith('judge') && playJudgeSound(soundName)) return;
   if (soundName === 'scamItemWhoosh') {
     playNoise({ duration: 0.12, volume: 0.06, filterFrequency: 2400 });
     playTone({ frequency: 900, duration: 0.1, type: 'triangle', volume: 0.035, slideTo: 420 });
+  } else if (soundName === 'omegaKickCharge') {
+    playTone({ frequency: 220 + (options.pitch || 0) * 600, duration: 0.12, type: 'sawtooth', volume: 0.05, slideTo: 260 + (options.pitch || 0) * 700 });
+    playTone({ frequency: 880 + (options.pitch || 0) * 900, duration: 0.08, type: 'sine', volume: 0.03 });
+  } else if (soundName === 'omegaKickLaunch') {
+    playNoise({ duration: 0.35, volume: 0.12, filterFrequency: 2600 });
+    playTone({ frequency: 1400, duration: 0.3, type: 'sawtooth', volume: 0.07, slideTo: 300 });
+  } else if (soundName === 'omegaKickImpact') {
+    playNoise({ duration: 0.5, volume: 0.2, filterFrequency: 420 });
+    playTone({ frequency: 90, duration: 0.45, type: 'square', volume: 0.12, slideTo: 40 });
+    playTone({ frequency: 1800, duration: 0.18, type: 'triangle', volume: 0.05, slideTo: 600 });
+  } else if (soundName === 'omegaClashHit') {
+    playNoise({ duration: 0.25, volume: 0.14, filterFrequency: 1800 });
+    playTone({ frequency: 520, duration: 0.2, type: 'square', volume: 0.08, slideTo: 1040 });
+  } else if (soundName === 'gong') {
+    playTone({ frequency: 98, duration: 2.4, type: 'sine', volume: 0.2, slideTo: 92 });
+    playTone({ frequency: 147, duration: 2, type: 'triangle', volume: 0.08, slideTo: 140 });
+    playTone({ frequency: 233, duration: 1.4, type: 'sine', volume: 0.05 });
+    playNoise({ duration: 0.4, volume: 0.06, filterFrequency: 900 });
+  } else if (soundName === 'omegaHeartbeat') {
+    playTone({ frequency: 62, duration: 0.14, type: 'sine', volume: 0.22, slideTo: 44 });
+    playTone({ frequency: 58, duration: 0.12, type: 'sine', volume: 0.16, slideTo: 40, delay: 0.2 });
+  } else if (soundName === 'omegaClashMiss') {
+    playTone({ frequency: 300, duration: 0.3, type: 'sawtooth', volume: 0.08, slideTo: 120 });
   } else if (soundName === 'cutsceneStep') {
     playNoise({ duration: 0.05, volume: 0.05, filterFrequency: 380 });
     playTone({ frequency: 90, duration: 0.05, type: 'sine', volume: 0.05, slideTo: 60 });
@@ -623,6 +809,26 @@ function playSound(soundName, options = {}) {
     [0, 0.05, 0.11, 0.18, 0.26, 0.35].forEach((delay, index) => {
       playTone({ frequency: 3200 - index * 350, duration: 0.07, type: 'triangle', volume: 0.12, delay });
     });
+  } else if (soundName === 'titanLaserCharge') {
+    playTone({ frequency: 200, duration: 0.7, type: 'sawtooth', volume: 0.12, slideTo: 1400 });
+  } else if (soundName === 'titanLaser') {
+    playNoise({ duration: 0.45, volume: 0.25, filterFrequency: 6000 });
+    playTone({ frequency: 1500, duration: 0.45, type: 'square', volume: 0.12, slideTo: 1300 });
+  } else if (soundName === 'titanMissile') {
+    playNoise({ duration: 0.3, volume: 0.16, filterFrequency: 2200 });
+    playTone({ frequency: 300, duration: 0.3, type: 'sawtooth', volume: 0.08, slideTo: 1200 });
+  } else if (soundName === 'titanRoar') {
+    playTone({ frequency: 70, duration: 1.6, type: 'sawtooth', volume: 0.26, slideTo: 45 });
+    playTone({ frequency: 105, duration: 1.6, type: 'square', volume: 0.12, slideTo: 60 });
+    playNoise({ duration: 1.4, volume: 0.2, filterFrequency: 500 });
+  } else if (soundName === 'chronoTotalRewind') {
+    playTone({ frequency: 1600, duration: 1.1, type: 'sine', volume: 0.2, slideTo: 120 });
+    playTone({ frequency: 800, duration: 1.1, type: 'triangle', volume: 0.12, slideTo: 60, delay: 0.1 });
+    [0, 0.12, 0.24, 0.36, 0.48, 0.6].forEach((delay) => playTone({ frequency: 1400, duration: 0.03, type: 'square', volume: 0.08, delay }));
+    playNoise({ duration: 0.9, volume: 0.12, filterFrequency: 3000 });
+  } else if (soundName === 'chronoRam') {
+    playNoise({ duration: 0.35, volume: 0.25, filterFrequency: 1200 });
+    playTone({ frequency: 200, duration: 0.35, type: 'sawtooth', volume: 0.14, slideTo: 900 });
   } else if (soundName === 'robotDischarge') {
     playNoise({ duration: 0.25, volume: 0.2, filterFrequency: 5200 });
     playTone({ frequency: 1200, duration: 0.2, type: 'sawtooth', volume: 0.08, slideTo: 300 });
@@ -677,6 +883,10 @@ function playSound(soundName, options = {}) {
     });
   } else if (soundName === 'cutsceneBlip' && options.speaker === 'jester') {
     playTone({ frequency: 500 + Math.random() * 500, duration: 0.03, type: 'square', volume: 0.035 });
+  } else if (soundName === 'cutsceneBlip' && options.speaker === 'omegarius') {
+    playTone({ frequency: 175 + Math.random() * 30, duration: 0.05, type: 'triangle', volume: 0.05 });
+  } else if (soundName === 'cutsceneBlip' && options.speaker === 'neoScammer') {
+    playTone({ frequency: 260 + Math.random() * 520, duration: 0.03, type: 'sawtooth', volume: 0.035 });
   } else if (soundName === 'cutsceneBlip') {
     const baseFrequency = options.speaker === 'scammer' ? 460 : 230;
     playTone({ frequency: baseFrequency + Math.random() * 60, duration: 0.035, type: options.speaker === 'scammer' ? 'square' : 'triangle', volume: 0.035 });
@@ -792,6 +1002,16 @@ function playMenuMusicStep() {
 
 function startMenuMusic() {
   if (typeof shopMusic !== 'undefined' && shopMusic.timer) return;
+  // Radio del Contenedor: the shop's lounge or a saved link can replace the menu tune
+  const radioChoice = getShopRadioChoice();
+  if (radioChoice === 'lounge') {
+    startShopMusic();
+    return;
+  }
+  if (radioChoice !== 'menu') {
+    startShopRadioTrack(radioChoice);
+    return;
+  }
   const audio = ensureAudio();
   if (!audio || menuMusicPlaying) return;
 
@@ -801,6 +1021,9 @@ function startMenuMusic() {
 }
 
 function stopMenuMusic() {
+  // the lounge from the Radio del Contenedor stops with the menu music (but not inside the shop)
+  if (typeof shopMusic !== 'undefined' && shopMusic.timer && scammerShopScreen.classList.contains('hidden')) stopShopMusic();
+  if (typeof stopShopRadioTrack === 'function') stopShopRadioTrack();
   menuMusicPlaying = false;
   if (musicTimer) {
     clearInterval(musicTimer);

@@ -219,6 +219,7 @@ function activateCopycatShield(attacker) {
   }
 
   attacker.copycatShieldTimer = getDebugDuration(getReflecterShieldDuration(attacker), attacker);
+  if (attacker === player1 && isCh6Level()) ch6RunClean = false;
   recordSpecialUsed(attacker);
   attacker.copycatShieldCooldown = getDebugCooldown(getReflecterShieldCooldown(attacker), attacker);
   playSound('reflectShield');
@@ -649,12 +650,35 @@ function shootCowboyBullet(attacker, target) {
 }
 
 function getBotDifficultyProfile() {
-  return botDifficultySettings[botDifficulty] || botDifficultySettings.medium;
+  const profile = botDifficultySettings[botDifficulty] || botDifficultySettings.medium;
+  if (!normalArcadeActive) return profile;
+  const key = botDifficulty in botDifficultySettings ? botDifficulty : 'medium';
+  if (!arcadeBotProfileCache[key]) {
+    arcadeBotProfileCache[key] = {
+      ...profile,
+      attackDelay: Math.round(profile.attackDelay * arcadeBotProfileScale.attackDelay),
+      reactionChance: profile.reactionChance * arcadeBotProfileScale.chance,
+      dodgeChance: profile.dodgeChance * arcadeBotProfileScale.chance,
+      specialChance: profile.specialChance * arcadeBotProfileScale.chance,
+      strongAttackChance: profile.strongAttackChance * arcadeBotProfileScale.chance,
+    };
+  }
+  return arcadeBotProfileCache[key];
+}
+
+function isOmegariusBot() {
+  return Boolean(hybridEnemyTypes[player2.secretVariant] && hybridEnemyTypes[player2.secretVariant].model === 'bronze');
 }
 
 function getBotAttackRange() {
   if (player2.characterType === 'divineGeneral') return 150;
-  return player2.characterType === 'tank' ? 128 : 82;
+  // Omegarius is wider than a normal fighter, so it reaches a bit further
+  if (isOmegariusBot() || isNeoScammer(player2) || (!normalArcadeActive && isFactoryRobot(player2))) return 82 + (player2.width - 60) / 2;
+  if (player2.characterType === 'tank') return 128;
+  if (classicBotAI) return 82;
+  // the hit box starts at the bot's edge: it lands while the gap between both bodies is shorter than its width
+  const boxWidth = player2.attackBox ? player2.attackBox.width : 70;
+  return Math.max(82, player2.width / 2 + boxWidth + player1.width / 2 - 14);
 }
 
 function getBotMoveSpeed() {
@@ -713,6 +737,8 @@ function getIncomingBotProjectileThreat(profile) {
         type: 'projectile',
         centerX: projectile.position.x + projectile.width / 2,
         distance,
+        projectile,
+        speed: Math.abs(projectile.velocity.x),
       };
     }
   }
@@ -727,6 +753,8 @@ function getIncomingBotProjectileThreat(profile) {
         type: 'gravity',
         centerX: orb.centerX,
         distance,
+        projectile: orb,
+        speed: 0,
       };
     }
   }
@@ -735,16 +763,27 @@ function getIncomingBotProjectileThreat(profile) {
 }
 
 function dodgeBotThreat(threat, profile) {
-  if (!threat || Math.random() > profile.dodgeChance) return false;
+  if (!threat) return false;
+  // one decision per projectile: rerolling every frame made the bot dodge almost everything
+  if (!botBrain.decided.has(threat.projectile)) botBrain.decided.set(threat.projectile, Math.random() < profile.dodgeChance);
+  if (!botBrain.decided.get(threat.projectile)) return false;
 
   const botCenterX = player2.position.x + player2.width / 2;
-  const dodgeDirection = threat.centerX < botCenterX ? 1 : -1;
-  player2.velocity.x = getBotMoveSpeed() * dodgeDirection;
-
-  if (player2.velocity.y === 0 && (threat.type === 'projectile' || Math.random() < 0.55)) {
-    player2.velocity.y = getDebugJumpSpeed(-13, player2);
+  const awayDirection = threat.centerX < botCenterX ? 1 : -1;
+  if (threat.type === 'gravity') {
+    // walk out of the pull (jumping into it is worse)
+    player2.velocity.x = getBotMoveSpeed() * awayDirection;
+    if (isBotCornered(awayDirection) && player2.velocity.y === 0) botJump(-awayDirection);
+    return true;
   }
 
+  // jump just in time: a bit earlier the faster it comes (an easy bot is sloppier)
+  const brain = getBotBrainSettings();
+  const jumpDistance = 24 + threat.speed * 6 + (1 - brain.jumpTiming) * (Math.random() - 0.3) * 120;
+  if (threat.distance > jumpDistance || player2.velocity.y !== 0) return false;
+  // melee fighters jump over it toward the player; ranged ones jump in place to keep their spacing
+  const toward = getFighterCenterX(player1) >= botCenterX ? 1 : -1;
+  botJump(isRangedBot() ? 0 : toward);
   return true;
 }
 
@@ -782,6 +821,21 @@ function updateBotSwitcher(profile, absDistance) {
 function updateBotSpecials(profile, absDistance, threat) {
   const closePressure = absDistance < 180;
   const lowHealth = player2.health < player2.maxHealth * 0.45;
+
+  // the upgraded Chrono rewinds everything when the last 10 seconds went badly for him
+  if (isChronoRival(player2) && player2.chronoRivalRewindCooldown === 0 && getChronoRewindGain() >= chronoRivalRewindMinGain) {
+    if (castChronoTotalRewind(player2)) return true;
+  }
+
+  if (isOmegarius(player2)) return updateOmegariusBotSpecials(profile, absDistance);
+  if (isNeoScammer(player2)) return updateNeoScammerBotSpecials(profile, absDistance);
+  if (isKnight(player2) || isDarkKnight(player2)) return updateKnightBotSpecials(profile, absDistance);
+  if (isRobledalKid(player2)) return updateRobledalKidBotSpecials(profile, absDistance);
+  if (isMochi(player2)) return updateMochiBotSpecials(profile, absDistance);
+  if (player2.secretVariant === 'chefBoss') return updateChefBossBotSpecials(profile, absDistance);
+  if (player2.secretVariant === 'lanternGuard') return updateLanternGuardBotSpecials(profile, absDistance);
+  if (player2.secretVariant === 'shaolinMaster') return updateShaolinBotSpecials(profile, absDistance);
+  if (isMossBeast(player2)) return !(player2.mossRootCooldown > 0) && shouldBotUseSpecial(profile, 0.6) ? castMossRoots(player2, player1) : false;
 
   // factory robots only use their own robot abilities (never the base character's kit)
   if (isFactoryRobot(player2)) {
@@ -1006,6 +1060,7 @@ function updateBotSpecials(profile, absDistance, threat) {
   if (
     player2.characterType === 'chrono' &&
     player2.chronoTimeStopCooldown === 0 &&
+    !(isChronoRival(player2) && player2.health > player2.maxHealth / 2) &&
     absDistance < 360 &&
     shouldBotUseSpecial(profile, closePressure ? 0.6 : 0.25)
   ) {
@@ -1100,42 +1155,410 @@ function updateBotSpecials(profile, absDistance, threat) {
   return false;
 }
 
-function updateBotMovement(profile, distanceX, absDistance) {
-  const attackRange = getBotAttackRange();
-  const preferredRange = getBotPreferredRange();
-  const moveSpeed = getBotMoveSpeed();
-  const canPlaySpacing = Math.random() < profile.spacingChance;
-  const rangedBot =
-    player2.characterType === 'cowboy' ||
-    player2.characterType === 'lightWarrior' ||
-    player2.characterType === 'fireMaster' ||
-    player2.characterType === 'sorcerer' ||
-    player2.characterType === 'chrono';
+// the guard: the halberd sweep up close, the thrust from mid range, the lantern flash now and then
+function updateLanternGuardBotSpecials(profile, absDistance) {
+  const guard = player2;
+  if (guard.guardGap > 0 || guard.guardSweepTimer > 0 || guard.guardThrustTimer > 0 || guard.guardFallen) return false;
+  if (!(guard.guardSweepCooldown > 0) && absDistance < 170 && shouldBotUseSpecial(profile, 0.8)) return castGuardSweep(guard);
+  if (!(guard.guardThrustCooldown > 0) && absDistance > 140 && absDistance < 360 && shouldBotUseSpecial(profile, 0.6)) return castGuardThrust(guard);
+  if (!(guard.guardFlashCooldown > 0) && absDistance < 280 && shouldBotUseSpecial(profile, 0.4)) return castGuardFlash(guard, player1);
+  return false;
+}
 
-  if (rangedBot && absDistance < preferredRange && canPlaySpacing) {
-    player2.velocity.x = distanceX > 0 ? -moveSpeed : moveSpeed;
+// the furious chef: the pot when Knight is close, the rolling pin from mid range, pastry bombs whenever ready
+function updateChefBossBotSpecials(profile, absDistance) {
+  const chef = player2;
+  if (chef.chefGap > 0) return false;
+  if (!(chef.chefPotCooldown > 0) && absDistance < 150 && shouldBotUseSpecial(profile, 0.8)) return castChefPot(chef, player1);
+  if (!(chef.chefPinCooldown > 0) && absDistance > 120 && shouldBotUseSpecial(profile, 0.6)) return castChefPin(chef, player1);
+  if (!(chef.chefRainCooldown > 0) && shouldBotUseSpecial(profile, 0.5)) return castChefRain(chef, player1);
+  return false;
+}
+
+// Mochi: rushes in with his flurry, uppercuts when close, eats a crumb of cake when hurt
+function updateMochiBotSpecials(profile, absDistance) {
+  const mochi = player2;
+  if (mochi.mochiGap > 0 || mochi.mochiFlurryTimer > 0 || mochi.mochiUppercutTimer > 0) return false;
+  if (!(mochi.mochiCakeCooldown > 0) && mochi.health < mochi.maxHealth * 0.5 && shouldBotUseSpecial(profile, 0.5)) return castMochiCake(mochi);
+  if (!(mochi.mochiUppercutCooldown > 0) && absDistance < 110 && shouldBotUseSpecial(profile, 0.7)) return castMochiUppercut(mochi);
+  if (!(mochi.mochiFlurryCooldown > 0) && absDistance < 320 && shouldBotUseSpecial(profile, 0.6)) return castMochiFlurry(mochi);
+  return false;
+}
+
+// Celeste and Seto: they play with whatever trick is ready
+function updateRobledalKidBotSpecials(profile, absDistance) {
+  const kid = player2;
+  if (kid.robledalGap > 0 || kid.celesteBlinkTimer > 0) return false;
+  const ready = [];
+  if (kid.secretVariant === 'celesteGirl') {
+    if (!(kid.celesteThrowCooldown > 0) && absDistance > 120) ready.push(() => castCelesteThrow(kid, player1));
+    if (!(kid.celesteBlinkCooldown > 0)) ready.push(() => castCelesteBlink(kid));
+    if (!(kid.celesteRainCooldown > 0)) ready.push(() => castCelesteRain(kid, player1));
+  } else {
+    if (!(kid.setoTopCooldown > 0)) ready.push(() => castSetoTop(kid, player1));
+    if (!(kid.setoBalloonCooldown > 0) && absDistance > 100) ready.push(() => castSetoBalloon(kid, player1));
+    if (!(kid.setoBoxCooldown > 0) && absDistance < 260) ready.push(() => castSetoBox(kid, player1));
+  }
+  if (!ready.length || !shouldBotUseSpecial(profile, 0.6)) return false;
+  return ready[Math.floor(Math.random() * ready.length)]();
+}
+
+// the Knight bot: shield against a hit coming in, the leap when close, the lunge from mid range
+function updateKnightBotSpecials(profile, absDistance) {
+  const knight = player2;
+  if (knight.knightLungeTimer > 0 || knight.knightShieldTimer > 0 || knight.knightSlam || knight.knightGap > 0) return false;
+  const threatened = (player1.isAttacking && absDistance < 170) || robotShots.some((shot) => shot.active && shot.attacker === player1);
+  if (threatened && !(knight.knightShieldCooldown > 0) && shouldBotUseSpecial(profile, 0.9)) return castKnightShield(knight);
+  if (!(knight.knightSlamCooldown > 0) && absDistance < 230 && shouldBotUseSpecial(profile, 0.5)) return castKnightSlam(knight, player1);
+  if (!(knight.knightLungeCooldown > 0) && absDistance > 130 && absDistance < 380 && shouldBotUseSpecial(profile, 0.6)) return castKnightLunge(knight, player1);
+  return false;
+}
+
+function updateNeoScammerBotSpecials(profile, absDistance) {
+  const neo = player2;
+  if (neo.neoCharge > 0 || neo.neoGap > 0 || neo.neoExhausted) return false;
+  const ready = [];
+  if (!(neo.neoBigShotCooldown > 0) && absDistance > 140) ready.push(() => startNeoBigShot(neo, player1));
+  if (!(neo.neoPipisCooldown > 0)) ready.push(() => castNeoPipis(neo, player1));
+  if (!(neo.neoHeadsCooldown > 0)) ready.push(() => castNeoHeads(neo, player1));
+  if (!ready.length || !shouldBotUseSpecial(profile, 0.7)) return false;
+  // unpredictable: any of the ready abilities, at random
+  return ready[Math.floor(Math.random() * ready.length)]();
+}
+
+function updateOmegariusBotSpecials(profile, absDistance) {
+  const omegarius = player2;
+  if (omegarius.omegariusSecretActive || omegarius.omegariusExhausted) return false;
+  // the final act, as soon as it is down to 10 health
+  if (isOmegariusFinalUnlocked(omegarius)) return castOmegariusFinalAct(omegarius, player1);
+  if (omegarius.hybridAbilityCooldown > 0 || omegarius.omegariusParryTimer > 0 || omegarius.omegariusBeamCharge > 0) return false;
+  if (robotShots.some((shot) => shot.kind === 'hammer' && shot.attacker === omegarius)) return false;
+  // the secret ability, as soon as it is down to 100 health
+  if (!omegarius.omegariusSecretUsed && omegarius.health <= omegariusSecretHealth) return startOmegariusSecret(omegarius, player1);
+  // the energy shot, from a distance, once it is unlocked
+  if (omegarius.health <= omegariusBeamUnlockHealth && !(omegarius.omegariusBeamCooldown > 0) && absDistance > 150 && shouldBotUseSpecial(profile, 0.6)) {
+    return startOmegariusBeam(omegarius, player1);
+  }
+  // the parry when Reflecter comes close (especially when he is about to hit)
+  if (!(omegarius.omegariusParryCooldown > 0) && absDistance < 160 && (player1.isAttacking || Math.random() < 0.3) && shouldBotUseSpecial(profile, 0.7)) {
+    return raiseOmegariusParry(omegarius);
+  }
+  // the hammer boomerang when Reflecter keeps his distance
+  if (!(omegarius.omegariusThrowCooldown > 0) && absDistance > 140 && shouldBotUseSpecial(profile, 0.8)) {
+    return throwOmegariusHammer(omegarius, player1);
+  }
+  return false;
+}
+
+// ---------- the bot's brain ----------
+// The bot no longer rerolls everything every frame: it "thinks" every few frames (its reaction time),
+// picks a plan and sticks to it for a while: approach, footsies right at the edge of your reach,
+// pressure, hit and run, punishing a whiffed swing, jumping in. It reads your swings, notices when it
+// lands a hit or gets hit, does not let itself be cornered and times its jumps over projectiles.
+const botBrainSettings = {
+  easy: { think: 28, react: 16, whiffPunish: 0.15, evade: 0.1, footsies: 0.2, pressure: 0.2, jumpIn: 0.04, combo: 0.1, hitAndRun: 0.15, jumpTiming: 0.35, escape: 0.15 },
+  medium: { think: 16, react: 9, whiffPunish: 0.45, evade: 0.35, footsies: 0.42, pressure: 0.38, jumpIn: 0.1, combo: 0.35, hitAndRun: 0.3, jumpTiming: 0.75, escape: 0.45 },
+  hard: { think: 8, react: 4, whiffPunish: 0.85, evade: 0.7, footsies: 0.55, pressure: 0.5, jumpIn: 0.16, combo: 0.6, hitAndRun: 0.45, jumpTiming: 1, escape: 0.8 },
+};
+const botBrain = {};
+
+function resetBotBrain() {
+  Object.assign(botBrain, {
+    plan: 'approach',
+    planTimer: 0,
+    thinkTimer: 0,
+    reactTimer: -1,
+    decided: new WeakMap(),
+    stepIn: false,
+    jumped: false,
+    kite: true,
+    playerWasAttacking: false,
+    lastPlayerHealth: null,
+    lastBotHealth: null,
+  });
+}
+resetBotBrain();
+
+// in the arcade the enemies are a little less sharp (slower to react, read you less often)
+const arcadeBotBrainScale = { time: 1.7, chance: 0.55 };
+// and their basic stats too: slower swings, fewer dodges, specials and strong hits
+const arcadeBotProfileScale = { attackDelay: 1.3, chance: 0.75 };
+const arcadeBotProfileCache = {};
+const arcadeBotBrainCache = {};
+
+function getBotBrainSettings() {
+  const settings = botBrainSettings[botDifficulty] || botBrainSettings.medium;
+  if (!normalArcadeActive) return settings;
+  const key = botDifficulty in botBrainSettings ? botDifficulty : 'medium';
+  if (!arcadeBotBrainCache[key]) {
+    const softer = {};
+    Object.entries(settings).forEach(([name, value]) => {
+      softer[name] = name === 'think' || name === 'react' ? Math.round(value * arcadeBotBrainScale.time) : value * arcadeBotBrainScale.chance;
+    });
+    arcadeBotBrainCache[key] = softer;
+  }
+  return arcadeBotBrainCache[key];
+}
+
+function setBotPlan(plan, frames) {
+  botBrain.plan = plan;
+  botBrain.planTimer = frames;
+  botBrain.jumped = false;
+  botBrain.stepIn = false;
+}
+
+function isRangedBot() {
+  return ['cowboy', 'lightWarrior', 'fireMaster', 'sorcerer', 'chrono'].includes(player2.characterType);
+}
+
+// bosses built to always walk in and hit keep their old straightforward pattern
+function usesSimpleBotMovement() {
+  return isOmegariusBot() || isNeoScammer(player2) || (!normalArcadeActive && isFactoryRobot(player2));
+}
+
+function getPlayerReachOnBot() {
+  return player1.width / 2 + (player1.attackBox ? player1.attackBox.width : 70) + player2.width / 2;
+}
+
+// is there a wall behind the bot if it keeps going this way (-1 left / 1 right)?
+function isBotCornered(direction) {
+  return direction < 0 ? player2.position.x < 50 : player2.position.x + player2.width > canvas.width - 50;
+}
+
+function botMove(direction, speedFactor = 1) {
+  player2.velocity.x = direction * getBotMoveSpeed() * speedFactor;
+}
+
+function botJump(directionX = 0) {
+  if (player2.velocity.y !== 0) return false;
+  player2.velocity.y = getDebugJumpSpeed(-13, player2);
+  if (directionX) player2.velocity.x = directionX * getBotMoveSpeed();
+  return true;
+}
+
+function botTryAttack(profile, brain, { strong = false, delayFactor = 1 } = {}) {
+  if (botAttackCooldown > 0 || player2.isAttacking) return false;
+  const useStrong = player2.strongAttackCooldown === 0 && (strong || Math.random() < profile.strongAttackChance);
+  player2.attack(useStrong);
+  if (!player2.isAttacking) return false;
+  botAttackCooldown = getDebugCooldown(Math.round(profile.attackDelay * delayFactor), player2);
+  // after a swing: keep the string going, get out, or go back to playing the edge of the range
+  if (botBrain.plan === 'pressure' && Math.random() < brain.combo + 0.15) {
+    botAttackCooldown = Math.round(botAttackCooldown * 0.45);
+    return true;
+  }
+  const roll = Math.random();
+  if (roll < brain.combo) botAttackCooldown = Math.round(botAttackCooldown * 0.35);
+  else if (roll < brain.combo + brain.hitAndRun) setBotPlan('retreat', 16 + Math.floor(Math.random() * 18));
+  else if (roll < brain.combo + brain.hitAndRun + brain.footsies) setBotPlan('footsies', 40 + Math.floor(Math.random() * 40));
+  return true;
+}
+
+// what is the player doing? a swing starting, a hit landed, a hit taken
+function readPlayerForBot(brain, absDistance) {
+  const playerReach = getPlayerReachOnBot();
+  if (player1.isAttacking && !botBrain.playerWasAttacking) botBrain.reactTimer = brain.react;
+  botBrain.playerWasAttacking = player1.isAttacking;
+  if (botBrain.reactTimer > 0) {
+    botBrain.reactTimer -= 1;
+  } else if (botBrain.reactTimer === 0) {
+    botBrain.reactTimer = -1;
+    if (absDistance > playerReach + 4 && Math.random() < brain.whiffPunish) {
+      // he swung at the air: go in while he recovers
+      setBotPlan('punish', 36);
+    } else if (absDistance <= playerReach + 50 && player1.isAttacking && Math.random() < brain.evade) {
+      setBotPlan('evade', Math.max(6, (player1.attackDuration || 12) - (player1.attackTimer || 0) + 6));
+    }
+  }
+  const playerDrop = botBrain.lastPlayerHealth === null ? 0 : botBrain.lastPlayerHealth - player1.health;
+  const botDrop = botBrain.lastBotHealth === null ? 0 : botBrain.lastBotHealth - player2.health;
+  botBrain.lastPlayerHealth = player1.health;
+  botBrain.lastBotHealth = player2.health;
+  // landed a real hit up close: press the advantage
+  if (playerDrop >= 3 && absDistance < 200 && botBrain.plan !== 'pressure' && Math.random() < brain.pressure + 0.2) setBotPlan('pressure', 45);
+  // took a real hit: back off (or, if it is smart, play the edge of the range and wait for a whiff)
+  if (botDrop >= 3 && botBrain.plan !== 'punish' && botBrain.plan !== 'pressure' && Math.random() < 0.6) {
+    setBotPlan(Math.random() < brain.evade ? 'footsies' : 'retreat', 22 + Math.floor(Math.random() * 16));
+  }
+}
+
+function chooseBotPlan(brain, absDistance) {
+  const lowBot = player2.health < player2.maxHealth * 0.3;
+  const lowPlayer = player1.health < player1.maxHealth * 0.3;
+  const playerCornered = player1.position.x < 60 || player1.position.x + player1.width > canvas.width - 60;
+  if ((lowPlayer || playerCornered) && Math.random() < brain.pressure + 0.2) return setBotPlan('pressure', 60);
+  if (absDistance > 170 && absDistance < 320 && Math.random() < brain.jumpIn) return setBotPlan('jumpIn', 60);
+  const roll = Math.random();
+  const footsies = Math.min(0.85, brain.footsies * (lowBot ? 1.4 : 1));
+  if (roll < footsies) return setBotPlan('footsies', 50 + Math.floor(Math.random() * 50));
+  if (roll < footsies + brain.pressure) return setBotPlan('pressure', 40 + Math.floor(Math.random() * 30));
+  return setBotPlan('approach', 30);
+}
+
+function runBotPlan(profile, brain, toward, absDistance) {
+  const inRange = absDistance <= getBotAttackRange();
+  const playerReach = getPlayerReachOnBot();
+  if (botBrain.planTimer > 0) botBrain.planTimer -= 1;
+  const planOver = botBrain.planTimer <= 0;
+
+  if (botBrain.plan === 'evade') {
+    // step out of his swing; with a wall behind, jump over him instead
+    if (isBotCornered(-toward)) {
+      if (!botJump(toward) && inRange) botTryAttack(profile, brain);
+    } else {
+      botMove(-toward);
+    }
+    if (planOver) setBotPlan(Math.random() < brain.whiffPunish ? 'punish' : 'footsies', 36);
     return;
   }
 
-  if (absDistance > Math.max(attackRange, preferredRange) || absDistance > attackRange + 24) {
+  if (botBrain.plan === 'retreat') {
+    if (isBotCornered(-toward)) {
+      // nowhere to go: fight back, or (sometimes) leap over
+      player2.velocity.x = 0;
+      if (inRange) botTryAttack(profile, brain);
+      else if (absDistance < 160 && Math.random() < brain.escape * 0.05) botJump(toward);
+    } else {
+      botMove(-toward);
+    }
+    if (planOver) chooseBotPlan(brain, absDistance);
+    return;
+  }
+
+  if (botBrain.plan === 'punish') {
+    if (inRange) {
+      player2.velocity.x = 0;
+      if (botTryAttack(profile, brain, { strong: true, delayFactor: 0.6 })) setBotPlan('pressure', 30);
+    } else {
+      botMove(toward);
+    }
+    if (planOver) setBotPlan('approach', 20);
+    return;
+  }
+
+  if (botBrain.plan === 'jumpIn') {
+    if (!botBrain.jumped) {
+      if (botJump(toward)) botBrain.jumped = true;
+      return;
+    }
+    if (player2.velocity.y !== 0) {
+      botMove(toward);
+      if (inRange) botTryAttack(profile, brain, { delayFactor: 0.6 });
+      return;
+    }
+    setBotPlan('pressure', 30);
+    return;
+  }
+
+  if (botBrain.plan === 'footsies') {
+    // dance just outside his reach and step in to poke
+    const edge = playerReach + 14;
+    if (inRange && (botBrain.stepIn || !player1.isAttacking)) {
+      player2.velocity.x = 0;
+      if (botTryAttack(profile, brain)) botBrain.stepIn = false;
+    } else if (botBrain.stepIn) {
+      botMove(toward);
+    } else if (absDistance < edge - 8) {
+      if (isBotCornered(-toward)) botBrain.stepIn = true;
+      else botMove(-toward, 0.75);
+    } else if (absDistance > edge + 36) {
+      botMove(toward, 0.75);
+    } else {
+      // small shuffles at the edge so it does not stand there like a statue
+      player2.velocity.x = Math.sin(performance.now() / 260 + player2.position.x) > 0.6 ? toward * getBotMoveSpeed() * 0.4 : 0;
+    }
+    if (planOver) chooseBotPlan(brain, absDistance);
+    return;
+  }
+
+  if (botBrain.plan === 'pressure') {
+    if (inRange) {
+      player2.velocity.x = 0;
+      botTryAttack(profile, brain, { delayFactor: 0.6 });
+    } else {
+      botMove(toward);
+    }
+    if (planOver) chooseBotPlan(brain, absDistance);
+    return;
+  }
+
+  // approach
+  if (inRange) {
+    player2.velocity.x = 0;
+    botTryAttack(profile, brain);
+  } else {
+    botMove(toward);
+  }
+  if (planOver && absDistance < 260) chooseBotPlan(brain, absDistance);
+}
+
+// the old pattern, kept for the bosses designed around it
+function updateBotMovementSimple(profile, distanceX, absDistance) {
+  const attackRange = getBotAttackRange();
+  const moveSpeed = getBotMoveSpeed();
+  if (absDistance > attackRange) {
     player2.velocity.x = distanceX > 0 ? moveSpeed : -moveSpeed;
     return;
   }
-
   player2.velocity.x = 0;
-
-  if (botAttackCooldown === 0 && absDistance <= attackRange) {
-    const shouldUseStrongAttack =
-      player2.strongAttackCooldown === 0 &&
-      Math.random() < profile.strongAttackChance;
-    player2.attack(shouldUseStrongAttack);
+  if (botAttackCooldown === 0) {
+    player2.attack(player2.strongAttackCooldown === 0 && Math.random() < profile.strongAttackChance);
     botAttackCooldown = getDebugCooldown(profile.attackDelay, player2);
   }
 }
 
-function updateBotJumping(profile) {
-  if (player2.velocity.y !== 0) return;
+function updateBotMovement(profile, distanceX, absDistance, thinking) {
+  if (usesSimpleBotMovement()) {
+    updateBotMovementSimple(profile, distanceX, absDistance);
+    return;
+  }
+  const brain = getBotBrainSettings();
+  const toward = distanceX > 0 ? 1 : -1;
+  readPlayerForBot(brain, absDistance);
+  if (thinking) {
+    botBrain.kite = Math.random() < profile.spacingChance;
+    if (botBrain.planTimer <= 0) chooseBotPlan(brain, absDistance);
+    if (botBrain.plan === 'footsies' && Math.random() < 0.35) botBrain.stepIn = true;
+  }
 
+  // shooters keep their distance (and get out of corners instead of being pinned there)
+  if (isRangedBot() && botBrain.plan !== 'punish' && botBrain.plan !== 'evade') {
+    const preferredRange = getBotPreferredRange();
+    const inRange = absDistance <= getBotAttackRange();
+    if (botBrain.kite && absDistance < preferredRange) {
+      if (!isBotCornered(-toward)) {
+        botMove(-toward);
+        if (inRange) botTryAttack(profile, brain);
+        return;
+      }
+      // cornered: leap over and run to the other side, or stand and fight
+      if (thinking && absDistance < 170 && Math.random() < brain.escape) {
+        botJump(toward);
+        return;
+      }
+      runBotPlan(profile, brain, toward, absDistance);
+      return;
+    }
+    if (absDistance > preferredRange + 50) {
+      botMove(toward);
+      return;
+    }
+    // at a good distance: hold it (shuffling a little), and hit back if he comes close
+    if (inRange) {
+      player2.velocity.x = 0;
+      botTryAttack(profile, brain);
+    } else {
+      player2.velocity.x = Math.sin(performance.now() / 400) > 0.5 ? -toward * getBotMoveSpeed() * 0.4 : 0;
+    }
+    return;
+  }
+
+  runBotPlan(profile, brain, toward, absDistance);
+}
+
+function updateBotJumping(profile, thinking) {
+  if (player2.velocity.y !== 0 || !thinking) return;
+  // he is up in the air above: jump to meet him
   const playerAbove = player1.position.y + player1.height < player2.position.y;
   if (playerAbove && Math.random() < profile.reactionChance) {
     player2.velocity.y = getDebugJumpSpeed(-13, player2);
@@ -1152,37 +1575,70 @@ function updateBot() {
     player2.velocity.x = 0;
     return;
   }
+  // OMEGA LIGHT WARRIOR is flying his kicks (a script moves him)
+  if (player2.scriptedFlight) return;
+  // Omegarius stands still behind its shield or while it charges the energy shot
+  if (isNeoScammer(player2) && (player2.neoCharge > 0 || player2.neoExhausted)) {
+    player2.velocity.x = 0;
+    return;
+  }
+  if (isOmegarius(player2) && (player2.omegariusParryTimer > 0 || player2.omegariusBeamCharge > 0 || player2.omegariusSecretActive || player2.omegariusExhausted)) {
+    player2.velocity.x = 0;
+    if (player2.omegariusParryTimer > 0) player2.attacksToTheRight = getFighterCenterX(player1) >= getFighterCenterX(player2);
+    return;
+  }
 
   if (botAttackCooldown > 0) {
     botAttackCooldown -= 1;
   }
 
   const profile = getBotDifficultyProfile();
+  const brain = getBotBrainSettings();
   const playerCenter = player1.position.x + player1.width / 2;
   const botCenter = player2.position.x + player2.width / 2;
   const distanceX = playerCenter - botCenter;
   const absDistance = Math.abs(distanceX);
   const threat = getIncomingBotProjectileThreat(profile);
+  // it thinks every few frames: that is its reaction time
+  botBrain.thinkTimer -= 1;
+  const thinking = botBrain.thinkTimer <= 0;
+  if (thinking) botBrain.thinkTimer = brain.think + Math.floor(Math.random() * (brain.think / 2));
 
   if (Math.random() < profile.reactionChance) {
     updateBotSpecials(profile, absDistance, threat);
   }
 
-  if (dodgeBotThreat(threat, profile)) {
-    updateBotJumping(profile);
+  // the "classic bot" setting: the older AI, rerolling every frame
+  if (classicBotAI) {
+    if (dodgeBotThreatClassic(threat, profile)) {
+      updateBotJumpingClassic(profile);
+      return;
+    }
+    updateBotMovementClassic(profile, distanceX, absDistance);
+    updateBotJumpingClassic(profile);
     return;
   }
 
-  updateBotMovement(profile, distanceX, absDistance);
-  updateBotJumping(profile);
+  if (dodgeBotThreat(threat, profile)) return;
+
+  updateBotMovement(profile, distanceX, absDistance, thinking);
+  updateBotJumping(profile, thinking);
 }
 
 function startGame() {
+  // (a clash may have faded the music out in the last fight)
+  lightClashMusicFade = 1;
   jesterIntro.active = false;
   jesterOutroPlayed = false;
+  chronoOutroPlayed = false;
+  ch6OutroPlayed = false;
+  reflecterBattleMusic.restart = true;
   jesterLosePlayed = false;
   cancelJesterImpatience();
   jesterFinal.active = false;
+  omegariusFinal.active = false;
+  scamFinal.active = false;
+  dodgeRound.active = false;
   jesterWhiteFade = 0;
   stopJesterTracks();
   scammerOutroPlayed = false;
@@ -1213,6 +1669,10 @@ function configureNormalArcadeLevel() {
   }
   if (arcadeChapter === 'reflecter') {
     configureReflecterArcadeLevel();
+    return;
+  }
+  if (arcadeChapter === 'knight') {
+    configureKnightArcadeLevel();
     return;
   }
   if (selectedNormalArcadeLevel === 5) {
@@ -1288,6 +1748,10 @@ function configureNormalArcadeEnemy() {
     configureReflecterArcadeEnemy();
     return;
   }
+  if (arcadeChapter === 'knight') {
+    configureKnightArcadeEnemy();
+    return;
+  }
   player2.arcadeBossVariant = false;
   const fireArcadeBrute = arcadeChapter === 'fireMaster' && selectedNormalArcadeLevel <= 3;
   const fireArcadeMiniBoss = isFireArcadeMiniBoss();
@@ -1316,6 +1780,7 @@ function startNextNormalArcadeEnemy() {
   player2.reset({ x: 820, y: 0 });
   configureNormalArcadeEnemy();
   botAttackCooldown = 0;
+  resetBotBrain();
   fireballs = [];
   fireBeams = [];
   lightShots = [];
@@ -1385,7 +1850,12 @@ function getVisibleStatisticsCharacterTypes() {
 function selectCharacter(characterType, secretVariant = null) {
   if (secretVariant === 'superFireMaster' && !isSuperFireMasterUnlocked()) return;
   if (secretVariant === 'scammer' && !isScammerUnlocked()) return;
-  if (arcadeBossVariants.includes(secretVariant) && secretVariant !== 'scammer' && !arcadeBossesUnlocked) return;
+  if (arcadeBossVariants.includes(secretVariant) && secretVariant !== 'scammer' && secretVariant !== 'neoScammer' && secretVariant !== 'knight' && secretVariant !== 'shaolinMaster' && !(magicTownCodeActive && magicTownVariants.includes(secretVariant)) && !arcadeBossesUnlocked) return;
+  if (secretVariant === 'knight' && !isKnightUnlocked()) return;
+  if (secretVariant === 'shaolinMaster' && !isShaolinUnlocked()) return;
+  if (magicTownVariants.includes(secretVariant) && !magicTownCodeActive && !arcadeBossesUnlocked) return;
+  if (chapterFourBossVariants.includes(secretVariant) && !arcadeBossesUnlocked) return;
+  if (secretVariant === 'neoScammer' && !neoScammerCodeActive) return;
 
   const selectedCharacterType = blindMode ? blindCharacterMix[characterType] || characterType : characterType;
   const selectedSecretVariant = blindMode
@@ -1446,6 +1916,16 @@ function closeMapSelect() {
 }
 
 function selectMap(mapName) {
+  // the Templo Shaolin against the bot: Shang Ting
+  if (mapName === 'shaolinTemple' && botEnabled && !normalArcadeActive) {
+    startShaolinChallenge();
+    return;
+  }
+  // the Castillo de Valdoria against the bot: the Knight is waiting at the gate
+  if (mapName === 'medievalCastle' && botEnabled && !normalArcadeActive) {
+    startKnightChallenge();
+    return;
+  }
   selectedMap = mapName;
   configureNormalArcadeLevel();
   mapScreen.classList.add('hidden');
@@ -1456,6 +1936,8 @@ function selectMap(mapName) {
 
 function openCharacterSelect() {
   syncMonkeyUnlockUI();
+  syncKnightUnlockUI();
+  syncShaolinUnlockUI();
   syncScammerUnlockUI();
   characterSelectionPlayer = 1;
   characterSelectTitle.innerText = 'Personaje Jugador 1';
@@ -1466,6 +1948,10 @@ function openCharacterSelect() {
     button.classList.toggle('arcade-disabled', arcadeDisabled);
   });
   arcadeBossCharacterButtons.forEach((button) => {
+    button.disabled = normalArcadeActive;
+    button.classList.toggle('arcade-disabled', normalArcadeActive);
+  });
+  magicTownCharacterButtons.forEach((button) => {
     button.disabled = normalArcadeActive;
     button.classList.toggle('arcade-disabled', normalArcadeActive);
   });
@@ -1516,6 +2002,7 @@ function closeCharacterSelect() {
 }
 
 function openSettings() {
+  syncShopUnlocks();
   titleScreen.classList.add('hidden');
   oldDaysScreen.classList.add('hidden');
   mapScreen.classList.add('hidden');
@@ -1578,16 +2065,17 @@ function getArcadeChapterProgress(chapter) {
   const highestLevel = getNormalArcadeHighestLevel();
   const totalLevels = getArcadeChapterLevelCount();
   arcadeChapter = previousChapter;
-  const playableLevels = chapter === 'gambler' ? gamblerArcadePlayableLevels : chapter === 'reflecter' ? reflecterArcadePlayableLevels : totalLevels;
+  const playableLevels = chapter === 'gambler' ? gamblerArcadePlayableLevels : chapter === 'reflecter' ? reflecterArcadePlayableLevels : chapter === 'knight' ? knightArcadePlayableLevels : totalLevels;
   let completedLevels = Math.min(playableLevels, highestLevel - 1);
   if (chapter === 'normal' && unlockedAchievements.normalArcadeCompleted) completedLevels = totalLevels;
   if (chapter === 'fireMaster' && unlockedAchievements.fireArcadeCompleted) completedLevels = totalLevels;
   if (chapter === 'gambler' && unlockedAchievements.gamblerArcadeCompleted) completedLevels = totalLevels;
+  if (chapter === 'reflecter' && unlockedAchievements.reflecterArcadeCompleted) completedLevels = totalLevels;
   return { completedLevels, playableLevels, totalLevels };
 }
 
 function syncArcadeChapterProgress() {
-  ['normal', 'fireMaster', 'gambler', 'reflecter'].forEach((chapter) => {
+  ['normal', 'fireMaster', 'gambler', 'reflecter', 'knight'].forEach((chapter) => {
     const { completedLevels, playableLevels, totalLevels } = getArcadeChapterProgress(chapter);
     const fill = document.querySelector(`[data-chapter-fill="${chapter}"]`);
     const text = document.querySelector(`[data-chapter-progress="${chapter}"]`);
@@ -1619,16 +2107,21 @@ function isHybridEnemy(fighter) {
   return Boolean(fighter && hybridEnemyTypes[fighter.secretVariant]);
 }
 
-function useHybridAbility(attacker, target) {
+function useHybridAbility(attacker, target, forcedIndex = null) {
   const hybrid = hybridEnemyTypes[attacker.secretVariant];
   if (!hybrid || attacker.hybridAbilityCooldown > 0 || !canFighterAct(attacker) || attacker.gamblerStunTimer > 0 || gameOver) return false;
+  if (forcedIndex !== null) attacker.hybridAbilityIndex = forcedIndex;
 
-  let ability = hybrid.abilities[attacker.hybridAbilityIndex % hybrid.abilities.length];
+  // Omegarius needs its hammer back before any other attack
+  if (hybrid.model === 'bronze' && robotShots.some((shot) => shot.kind === 'hammer' && shot.attacker === attacker)) return false;
+  const abilityList = attacker.judgeOverdrive && hybrid.overdriveAbilities ? hybrid.overdriveAbilities : hybrid.abilities;
+  if (!abilityList.length) return false;
+  let ability = abilityList[attacker.hybridAbilityIndex % abilityList.length];
   attacker.hybridAbilityIndex += 1;
   // T-0 only rewinds when 3 seconds ago it had noticeably more health than now
   const rewindPoint = attacker.robotHistory && attacker.robotHistory[0];
   if (ability === 'rewind' && (!rewindPoint || !(rewindPoint.health - attacker.health >= 8))) {
-    ability = hybrid.abilities[attacker.hybridAbilityIndex % hybrid.abilities.length];
+    ability = abilityList[attacker.hybridAbilityIndex % abilityList.length];
     attacker.hybridAbilityIndex += 1;
   }
   const attackerCenterX = attacker.position.x + attacker.width / 2;
@@ -1693,6 +2186,57 @@ function useHybridAbility(attacker, target) {
     attacker.robotChargeHit = false;
     attacker.attacksToTheRight = direction > 0;
     playSound('robotCharge');
+  } else if (ability === 'laserEyes') {
+    // a sweeping laser from the eyes, low over the floor: jump over it
+    const eyeX = direction > 0 ? attacker.position.x + attacker.width - 30 : attacker.position.x + 30;
+    const beamY = ground - 58;
+    const width = direction > 0 ? canvas.width - eyeX : eyeX;
+    robotShots.push(new RobotShot({ kind: 'laser', x: direction > 0 ? eyeX : 0, y: beamY, direction, attacker, target, width, timer: 70 }));
+    attacker.robotLaserCharge = 46;
+    playSound('titanLaserCharge');
+  } else if (ability === 'fistSlam') {
+    const fistX = Math.max(10, Math.min(canvas.width - 40, targetCenterX - 15));
+    robotShots.push(new RobotShot({ kind: 'drop', variant: 'fist', x: fistX, y: ground - 30, attacker, target, timer: 60 }));
+    playSound('robotCharge');
+  } else if (ability === 'missileSwarm') {
+    for (let missile = 0; missile < 5; missile += 1) {
+      const missileX = Math.max(10, Math.min(canvas.width - 40, targetCenterX - 15 + (missile - 2) * 90 + (Math.random() - 0.5) * 30));
+      robotShots.push(new RobotShot({ kind: 'drop', variant: 'missile', x: missileX, y: ground - 30, attacker, target, timer: 44 + missile * 9 }));
+    }
+    playSound('titanMissile');
+  } else if (ability === 'hammerThrow') {
+    robotShots.push(new RobotShot({ kind: 'hammer', x: attackerCenterX - 23, y: Math.max(attacker.position.y + 40, ground - 110), direction, attacker, target, velocityX: getDebugProjectileSpeed(13, attacker) * direction }));
+    attacker.attacksToTheRight = direction > 0;
+    playSound('judgeThrow');
+  } else if (ability === 'hammerQuake') {
+    // slams the hammer: two gold shockwaves run out to both sides
+    [-1, 1].forEach((side) => {
+      robotShots.push(new RobotShot({ kind: 'discharge', variant: 'gold', x: attackerCenterX - 17, y: ground - 30, direction: side, attacker, target, velocityX: getDebugProjectileSpeed(10, attacker) * side }));
+    });
+    attacker.robotSlamFlash = 14;
+    attacker.judgeSwing = 18;
+    playSound('judgeQuake');
+  } else if (ability === 'hammerDash') {
+    attacker.robotChargeTimer = robotChargeFrames;
+    attacker.robotChargeDirection = direction;
+    attacker.robotChargeHit = false;
+    attacker.attacksToTheRight = direction > 0;
+    playSound('judgeThrow');
+  } else if (ability === 'judgmentRain') {
+    // three gold hammers fall around the opponent
+    [-110, 0, 110].forEach((offset, index) => {
+      const dropX = Math.max(10, Math.min(canvas.width - 40, targetCenterX - 15 + offset + (Math.random() - 0.5) * 30));
+      robotShots.push(new RobotShot({ kind: 'drop', variant: 'hammer', x: dropX, y: ground - 30, attacker, target, timer: 50 + index * 12 }));
+    });
+    attacker.judgeSwing = 18;
+    playSound('judgeCore');
+  } else if (ability === 'coreBeam') {
+    // overdrive only: a gold beam from the core, low over the floor (jump over it)
+    const coreX = direction > 0 ? attacker.position.x + attacker.width - 20 : attacker.position.x + 20;
+    const width = direction > 0 ? canvas.width - coreX : coreX;
+    robotShots.push(new RobotShot({ kind: 'laser', variant: 'gold', x: direction > 0 ? coreX : 0, y: ground - 58, direction, attacker, target, width, timer: 64 }));
+    attacker.robotLaserCharge = 40;
+    playSound('titanLaserCharge');
   } else if (ability === 'magnetPull') {
     attacker.robotMagnetTimer = 75;
     playSound('robotMagnet');
@@ -1707,7 +2251,7 @@ function useHybridAbility(attacker, target) {
     playSound('sorcererOrb');
   }
   recordSpecialUsed(attacker);
-  attacker.hybridAbilityCooldown = getDebugCooldown(hybrid.cooldown, attacker);
+  attacker.hybridAbilityCooldown = getDebugCooldown(Math.round(hybrid.cooldown * (attacker.judgeOverdrive ? 0.7 : 1)), attacker);
   return true;
 }
 
@@ -1722,12 +2266,14 @@ function getArcadeChapterMap() {
   if (arcadeChapter === 'fireMaster') return 'fireArcade';
   if (arcadeChapter === 'gambler') return 'gamblerArcade';
   if (arcadeChapter === 'reflecter') return 'robotFactory';
+  if (arcadeChapter === 'knight') return 'enchantedForest';
   return 'normalArcade';
 }
 
 function getArcadeChapterLevelCount() {
   if (arcadeChapter === 'gambler') return gamblerArcadeLevelCount;
   if (arcadeChapter === 'reflecter') return reflecterArcadeLevelCount;
+  if (arcadeChapter === 'knight') return knightArcadeLevelCount;
   return 5;
 }
 
@@ -1735,18 +2281,135 @@ function getArcadeProgressStorageKey() {
   if (arcadeChapter === 'fireMaster') return fireArcadeProgressStorageKey;
   if (arcadeChapter === 'gambler') return gamblerArcadeProgressStorageKey;
   if (arcadeChapter === 'reflecter') return reflecterArcadeProgressStorageKey;
+  if (arcadeChapter === 'knight') return knightArcadeProgressStorageKey;
   return normalArcadeProgressStorageKey;
 }
 
+// '1' = unlocked, '2' = beaten
+function isReflecterSecretLevelUnlocked() {
+  try {
+    return ['1', '2'].includes(localStorage.getItem(reflecterSecretLevelStorageKey));
+  } catch (error) {
+    return false;
+  }
+}
+
+function isReflecterSecretLevelBeaten() {
+  try {
+    return localStorage.getItem(reflecterSecretLevelStorageKey) === '2';
+  } catch (error) {
+    return false;
+  }
+}
+
+function markReflecterSecretLevelBeaten() {
+  try {
+    localStorage.setItem(reflecterSecretLevelStorageKey, '2');
+  } catch (error) {
+    // only lasts this session if storage is blocked
+  }
+}
+
+function unlockReflecterSecretLevel() {
+  if (isReflecterSecretLevelUnlocked()) return false;
+  try {
+    localStorage.setItem(reflecterSecretLevelStorageKey, '1');
+  } catch (error) {
+    // the unlock only lasts this session if storage is blocked
+  }
+  return true;
+}
+
+function showCustomToast(title, description) {
+  if (!achievementToast || !achievementToastTitle || !achievementToastDescription) return;
+  achievementToastTitle.innerText = title;
+  achievementToastDescription.innerText = description;
+  achievementToast.classList.remove('hidden');
+  achievementToast.classList.add('show');
+  if (achievementToastTimer) clearTimeout(achievementToastTimer);
+  achievementToastTimer = setTimeout(() => {
+    achievementToast.classList.remove('show');
+    achievementToastTimer = setTimeout(() => achievementToast.classList.add('hidden'), 220);
+  }, 3600);
+}
+
+// the three requirements of the secret level 8 of chapter 5
+function getKnightSecretLevelRequirements() {
+  return [
+    { label: 'Nivel secreto del capitulo 4 desbloqueado', done: isReflecterSecretLevelUnlocked() },
+    { label: 'Tener la Maquina Rara', done: Boolean(scammerShop.owned && scammerShop.owned.rareMachine) },
+    { label: 'Knight desbloqueado (Castillo de Valdoria)', done: isKnightUnlocked() },
+  ];
+}
+
+function isKnightSecretLevelBeaten() {
+  try {
+    return localStorage.getItem(knightSecretBeatenStorageKey) === '1';
+  } catch (error) {
+    return false;
+  }
+}
+
+function isKnightSecretLevelUnlocked() {
+  return getKnightSecretLevelRequirements().every((requirement) => requirement.done);
+}
+
 function isArcadeLevelComingSoon(level) {
-  if (arcadeChapter === 'reflecter') return level > reflecterArcadePlayableLevels;
+  if (arcadeChapter === 'knight' && level === knightSecretLevel) return isKnightSecretLevelUnlocked() && !knightSecretLevelReady;
+  if (arcadeChapter === 'reflecter') return level > reflecterArcadePlayableLevels && level !== 7;
+  if (arcadeChapter === 'knight') return level > knightArcadePlayableLevels;
   return arcadeChapter === 'gambler' && level > gamblerArcadePlayableLevels;
+}
+
+function configureChronoRival() {
+  player2.setCharacterType('chrono');
+  player2.secretVariant = 'chronoRival';
+  botDifficulty = 'hard';
+  applyBotDifficulty();
+  player2.setMaxHealth(chronoRivalHealth);
+  player2.health = player2.maxHealth;
+  player2.damageMultiplier = chronoRivalDamageMultiplier;
+  player2.chronoRivalRewindCooldown = 0;
+  player2.chronoAuraBoost = 0;
+  player2.chronoAscentDone = false;
+  chronoRivalHistory = [];
+  updateHealthBars();
+  updateCombatHudIdentity();
+}
+
+function configureCh6Chrono() {
+  player2.setCharacterType('chrono');
+  botDifficulty = 'hard';
+  applyBotDifficulty();
+  player2.health = player2.maxHealth;
+  updateHealthBars();
+  updateCombatHudIdentity();
 }
 
 function configureReflecterArcadeLevel() {
   const levelData = reflecterArcadeLevels[selectedNormalArcadeLevel] || reflecterArcadeLevels[1];
   player1.setCharacterType('reflecter');
   selectedMap = 'robotFactory';
+  ch6Stage = 'robots';
+  if (selectedNormalArcadeLevel === 7) {
+    // secret level: the hidden sector and Omegarius. Reflecter wears the armor Omegarius gives him (+50 health).
+    selectedMap = 'factoryHidden';
+    normalArcadeEnemiesRemaining = 0;
+    normalArcadeEnemyIndex = 1;
+    botEnabled = true;
+    player1.omegariusArmor = true;
+    player1.setMaxHealth(getReflecterHealth(player1) + omegariusArmorHealth);
+    player1.health = player1.maxHealth;
+    configureFactoryRobotEnemy('omegarius', 'hard');
+    return;
+  }
+  if (selectedNormalArcadeLevel === 5) {
+    normalArcadeEnemiesRemaining = 0;
+    normalArcadeEnemyIndex = 1;
+    botEnabled = true;
+    configureChronoRival();
+    return;
+  }
   normalArcadeEnemiesRemaining = levelData.enemies.length - 1;
   normalArcadeEnemyIndex = 1;
   botEnabled = true;
@@ -1754,44 +2417,322 @@ function configureReflecterArcadeLevel() {
 }
 
 function configureReflecterArcadeEnemy() {
+  if (selectedNormalArcadeLevel === 7) {
+    configureFactoryRobotEnemy('omegarius', 'hard');
+    return;
+  }
+  if (selectedNormalArcadeLevel === 5) {
+    configureChronoRival();
+    return;
+  }
   const levelData = reflecterArcadeLevels[selectedNormalArcadeLevel] || reflecterArcadeLevels[1];
   const enemyIndex = Math.min(levelData.enemies.length - 1, normalArcadeEnemyIndex - 1);
-  const robotId = levelData.enemies[enemyIndex];
+  configureFactoryRobotEnemy(levelData.enemies[enemyIndex], levelData.difficulties[enemyIndex] || 'medium');
+}
+
+function configureFactoryRobotEnemy(robotId, difficulty) {
   const robot = hybridEnemyTypes[robotId];
   player2.setCharacterType(robot.baseType);
   player2.secretVariant = robotId;
-  if (robot.color) player2.color = robot.color;
+  botDifficulty = difficulty;
+  applyBotDifficulty();
+  applyFactoryRobotSetup(player2, robot);
+  updateHealthBars();
+  updateCombatHudIdentity();
+}
+
+// a chapter 4 robot's stats and a clean state for a new fight (either player)
+function applyFactoryRobotSetup(fighter, robot) {
+  if (robot.color) fighter.color = robot.color;
+  fighter.moveSpeed = playerMoveSpeed * (robot.moveSpeedMultiplier || 1);
+  fighter.setMaxHealth(robot.health);
+  fighter.health = fighter.maxHealth;
+  fighter.damageMultiplier = robot.damageMultiplier || 1;
+  if (robot.size) {
+    fighter.width = robot.size.width;
+    fighter.height = robot.size.height;
+    fighter.position.y = Math.min(fighter.position.y, ground - fighter.height);
+  }
+  Object.assign(fighter, {
+    hybridAbilityCooldown: 90,
+    hybridAbilityIndex: 0,
+    robotHistory: [],
+    robotMagnetTimer: 0,
+    robotRewindFlash: 0,
+    robotChargeTimer: 0,
+    robotSlamFlash: 0,
+    robotLaserCharge: 0,
+    judgeOverdrive: false,
+    judgeOverdriveFlash: 0,
+    judgeSwing: 0,
+    omegariusThrowCooldown: 120,
+    omegariusParryCooldown: 180,
+    omegariusBeamCooldown: 0,
+    omegariusParryTimer: 0,
+    omegariusParryFlash: 0,
+    omegariusBeamCharge: 0,
+    omegariusMercyDone: false,
+    omegariusExcitedDone: false,
+    omegariusSecretUsed: false,
+    omegariusSecretActive: false,
+    omegariusBeamSecret: false,
+    omegariusFinalUsed: false,
+    omegariusExhausted: false,
+  });
+  getOpponent(fighter).omegariusPushTimer = 0;
+  resetFactoryRobotGlitch(fighter);
+}
+
+// versus with bossrush: the chapter 4 bosses keep their arcade stats
+function prepareVersusBossFighter(fighter) {
+  if (isFactoryRobot(fighter)) {
+    applyFactoryRobotSetup(fighter, hybridEnemyTypes[fighter.secretVariant]);
+  } else if (isKnight(fighter)) {
+    resetKnightState(fighter);
+  } else if (isNeoScammer(fighter)) {
+    // a fresh NEO SCAMMER for each versus fight
+    Object.assign(fighter, { neoBigShotCooldown: 90, neoPipisCooldown: 150, neoHeadsCooldown: 220, neoCharge: 0, neoGap: 60, neoTiredDone: false, neoTired: false, neoFinalUsed: false, neoExhausted: false, neoBroken: false, neoUltimateUsed: false });
+  } else if (isChronoRival(fighter)) {
+    fighter.setMaxHealth(chronoRivalHealth);
+    fighter.health = fighter.maxHealth;
+    fighter.damageMultiplier = chronoRivalDamageMultiplier;
+    fighter.chronoRivalRewindCooldown = 0;
+    fighter.chronoAuraBoost = 0;
+    // the drag to the roof only happens in the arcade
+    fighter.chronoAscentDone = true;
+  }
+}
+
+// a human playing a chapter 4 robot: slots 0/1/2 are Q/F/R (player 1) or / . Enter (player 2)
+function handleFactoryRobotKey(fighter, target, slot, held) {
+  if (!isFactoryRobot(fighter)) return false;
+  if (isOmegarius(fighter)) {
+    // 2nd + 3rd key: secret energy shot; 1st + 2nd key: final act
+    if ((slot === 1 && held[2]) || (slot === 2 && held[1])) {
+      startOmegariusSecret(fighter, target);
+      return true;
+    }
+    if ((slot === 0 && held[1]) || (slot === 1 && held[0])) {
+      castOmegariusFinalAct(fighter, target);
+      return true;
+    }
+    if (slot === 0 && !(fighter.omegariusThrowCooldown > 0)) throwOmegariusHammer(fighter, target);
+    if (slot === 1 && !(fighter.omegariusParryCooldown > 0) && !fighter.omegariusBeamCharge) raiseOmegariusParry(fighter);
+    if (slot === 2 && !(fighter.omegariusBeamCooldown > 0)) startOmegariusBeam(fighter, target);
+    return true;
+  }
+  const robot = hybridEnemyTypes[fighter.secretVariant];
+  if (robot.abilities.length) useHybridAbility(fighter, target, slot % robot.abilities.length);
+  return true;
+}
+
+function syncKnightArcadeChapterUI() {
+  const levelTitles = ['Un bosque que no asusta', 'Sombras en el camino', 'Amigos muy entusiastas', 'Un baño muy merecido', 'Se busca: caballero', 'El guardian de la luz', 'La luz contra la sombra'];
+  const levelDescriptions = [
+    'El rey envio a Knight al Bosque Lumina, un lugar magico del que circulan rumores terribles. Dicen que es aterrador... aunque quizas no tanto.',
+    'Un pueblo enorme asoma en el horizonte... pero la Orden Sombria custodia el camino: cuatro caballeros oscuros y su capitan.',
+    'Robledal por fin. Light Warrior dejo una nota: sus amigos del pueblo son un poco locos, adoran las caras nuevas... y adoran pelear.',
+    'Las Aguas Termales del Loto: jacuzzis, faroles y pasteles magicos. Un lugar perfecto para descansar... si no fuera por su pequeño campeon.',
+    'Junto a la prision de Robledal espera el nuevo sheriff del pueblo. Y en su pared hay un cartel de SE BUSCA... con una cara conocida.',
+    'El Gran Farol esta cerca. Pero alguien lo cuida noche y dia... y Knight ya no esta seguro de lo que vino a hacer.',
+    'Light Warrior protege el farol. Todavia podes darte la vuelta... pero si seguis avanzando, los espiritus de Robledal van a elegir un bando.',
+  ];
+  // the secret level 8: a checklist of its requirements until they are all met
+  const requirements = getKnightSecretLevelRequirements();
+  if (requirements.every((requirement) => requirement.done)) {
+    levelTitles.push('Detras del telon');
+    levelDescriptions.push('Al pie del farol, Knight por fin puede descansar... pero alguien vino a cobrar una deuda. Y no viene solo.');
+  } else {
+    levelTitles.push('??? (nivel secreto)');
+    levelDescriptions.push(`Requisitos:  ${requirements.map((requirement) => `${requirement.done ? '[X]' : '[ ]'} ${requirement.label}`).join('   ')}`);
+  }
+  normalArcadeLevelButtons.forEach((levelButton, index) => {
+    const title = levelButton.querySelector('.arcade-level-copy strong');
+    const description = levelButton.querySelector('.arcade-level-copy span');
+    if (title) title.innerText = levelTitles[index];
+    if (description) description.innerText = levelDescriptions[index];
+  });
+  arcadeLevelsTitle.innerText = 'Capitulo de Knight';
+  arcadeStoryKicker.innerText = 'Una mision encantada';
+  arcadeStoryParagraphOne.innerText =
+    'Despues de su derrota en Valdoria, Knight juro hacerse mas fuerte. Su primera mision fuera del castillo lo lleva al Bosque Lumina: un lugar magico y misterioso del que todos hablan con miedo.';
+  arcadeStoryParagraphTwo.innerText =
+    'Dicen que nadie vuelve igual despues de entrar... pero tal vez los rumores no cuenten toda la verdad.';
+}
+
+function configureKnightArcadeLevel() {
+  if (!isKnight(player1)) player1.setCharacterType('normal', 'knight');
+  resetKnightState(player1);
+  player1.spiritCount = 0;
+  player2.spiritCount = 0;
+  player2.eyeLook = undefined;
+  player1.setMaxHealth(getArcadeBossVariantHealth(player1));
+  player1.health = player1.maxHealth;
+  player1.riftResolve = false;
+  player1.damageMultiplier = 1;
+  if (selectedNormalArcadeLevel === knightSecretLevel) {
+    // the secret level: SHADOW JESTER at the foot of the farol, the rift still open behind him
+    selectedMap = 'farolRift';
+    normalArcadeEnemiesRemaining = 0;
+    normalArcadeEnemyIndex = 1;
+    botEnabled = true;
+    player1.knightPossessed = false;
+    player1.riftResolve = true;
+    player1.damageMultiplier = riftKnightDamage;
+    player2.duoActive = false;
+    player2.sheriffBadge = false;
+    player2.setCharacterType('gambler', 'shadowJester');
+    botDifficulty = 'hard';
+    applyBotDifficulty();
+    player2.setMaxHealth(riftJesterHealth);
+    player2.health = player2.maxHealth;
+    player2.damageMultiplier = riftJesterDamage;
+    // (his final act belongs to Gambler's chapter)
+    player2.jesterFinalActUsed = true;
+    player2.riftFinalStarted = false;
+    riftClash.active = false;
+    riftTerrainBroken = false;
+    lightClashMusicFade = 1;
+    updateHealthBars();
+    updateCombatHudIdentity();
+    return;
+  }
+  if (selectedNormalArcadeLevel === 7) {
+    // high above Robledal: Light Warrior, both with three spirits of the town
+    selectedMap = 'lightSkyPlatform';
+    normalArcadeEnemiesRemaining = 0;
+    normalArcadeEnemyIndex = 1;
+    botEnabled = true;
+    player1.knightPossessed = false;
+    player1.spiritCount = 3;
+    omegaKickFight.active = false;
+    player2.scriptedFlight = false;
+    lightClashMusicFade = 1;
+    player1.setMaxHealth(playableKnightHealth + spiritKnightHealthBonus * 3);
+    player1.health = player1.maxHealth;
+    player2.duoActive = false;
+    player2.sheriffBadge = false;
+    player2.setCharacterType('lightWarrior');
+    player2.setColor('#fdd835');
+    botDifficulty = 'hard';
+    applyBotDifficulty();
+    player2.spiritCount = 3;
+    player2.lightBoxIndex = 0;
+    player2.lightBoxTimer = lightBoxFirstDelay;
+    player2.setMaxHealth(lightWarriorHealth + spiritLightHealthBonus * 3);
+    player2.health = player2.maxHealth;
+    updateHealthBars();
+    updateCombatHudIdentity();
+    return;
+  }
+  if (selectedNormalArcadeLevel === 6) {
+    // the foot of the Gran Farol: its guard
+    selectedMap = 'lanternHill';
+    normalArcadeEnemiesRemaining = 0;
+    normalArcadeEnemyIndex = 1;
+    botEnabled = true;
+    player1.knightPossessed = false;
+    configureKnightArcadeEnemy();
+    return;
+  }
+  if (selectedNormalArcadeLevel === 5) {
+    // the jail of Robledal: the new sheriff
+    selectedMap = 'robledalJail';
+    normalArcadeEnemiesRemaining = 0;
+    normalArcadeEnemyIndex = 1;
+    botEnabled = true;
+    configureKnightArcadeEnemy();
+    return;
+  }
+  if (selectedNormalArcadeLevel === 4) {
+    // the hot springs: Mochi, powered up by the chef's magic cake (every tub whole again)
+    selectedMap = 'hotSprings';
+    hotSpringTubsBroken = [false, false, false, false];
+    knightChefFuryDone = false;
+    knightSpaOutroPlayed = false;
+    normalArcadeEnemiesRemaining = 0;
+    normalArcadeEnemyIndex = 1;
+    botEnabled = true;
+    configureKnightArcadeEnemy();
+    return;
+  }
+  if (selectedNormalArcadeLevel === 3) {
+    // the village square: Celeste, then her friend Seto
+    selectedMap = 'villagePlaza';
+    normalArcadeEnemiesRemaining = knightArcadeLevels[3].enemies.length - 1;
+    normalArcadeEnemyIndex = 1;
+    botEnabled = true;
+    configureKnightArcadeEnemy();
+    return;
+  }
+  if (selectedNormalArcadeLevel === 2) {
+    // the road to Robledal: four dark knights and their captain, one after the other
+    selectedMap = 'villageRoad';
+    normalArcadeEnemiesRemaining = knightArcadeLevels[2].enemies.length - 1;
+    normalArcadeEnemyIndex = 1;
+    botEnabled = true;
+    configureKnightArcadeEnemy();
+    return;
+  }
+  selectedMap = 'enchantedForest';
+  normalArcadeEnemiesRemaining = 0;
+  normalArcadeEnemyIndex = 1;
+  botEnabled = true;
+  player2.setCharacterType('normal', 'mossBeast');
+  botDifficulty = 'medium';
+  applyBotDifficulty();
+  player2.health = player2.maxHealth;
+  Object.assign(player2, { mossRootCooldown: 150, mossRoots: [], mossRescued: false });
+  updateHealthBars();
+  updateCombatHudIdentity();
+}
+
+function configureKnightArcadeEnemy() {
+  const levelData = knightArcadeLevels[selectedNormalArcadeLevel];
+  if (!levelData) return;
+  const enemyIndex = Math.min(levelData.enemies.length - 1, normalArcadeEnemyIndex - 1);
+  const enemy = levelData.enemies[enemyIndex];
+  player2.duoActive = false;
+  player2.duoPartnerActor = null;
+  player2.sheriffBadge = false;
+  if (enemy === 'sheriffCowboy') {
+    // Cowboy himself, now with a sheriff's star and a little more health
+    player2.setCharacterType('cowboy');
+    player2.setColor('#c62828');
+    player2.sheriffBadge = true;
+    botDifficulty = levelData.difficulties[enemyIndex] || 'hard';
+    applyBotDifficulty();
+    player2.setMaxHealth(sheriffCowboyHealth);
+    player2.health = player2.maxHealth;
+    Object.assign(player2, { sheriffStandStarted: false, sheriffStandActive: false, sheriffStandOver: false, sheriffStandTimer: 0, sheriffFurious: false, sheriffJusticeChecked: false });
+    updateHealthBars();
+    updateCombatHudIdentity();
+    return;
+  }
+  player2.setCharacterType('normal', enemy === 'robledalDuo' ? 'celesteGirl' : enemy);
   botDifficulty = levelData.difficulties[enemyIndex] || 'medium';
   applyBotDifficulty();
-  player2.setMaxHealth(robot.health);
   player2.health = player2.maxHealth;
-  if (robot.damageMultiplier) player2.damageMultiplier = robot.damageMultiplier;
-  if (robot.size) {
-    player2.width = robot.size.width;
-    player2.height = robot.size.height;
-    player2.position.y = Math.min(player2.position.y, ground - player2.height);
-  }
-  player2.hybridAbilityCooldown = 90;
-  player2.hybridAbilityIndex = 0;
-  player2.robotHistory = [];
-  player2.robotMagnetTimer = 0;
-  player2.robotRewindFlash = 0;
-  player2.robotChargeTimer = 0;
-  player2.robotSlamFlash = 0;
-  resetFactoryRobotGlitch(player2);
+  resetKnightState(player2);
+  resetRobledalKid(player2);
+  player2.darkDealDone = false;
+  if (enemy === 'robledalDuo') setupRobledalDuo(player2);
+  if (enemy === 'mochiMouse') resetMochi(player2);
+  if (enemy === 'lanternGuard') resetLanternGuard(player2);
   updateHealthBars();
   updateCombatHudIdentity();
 }
 
 function syncReflecterArcadeChapterUI() {
-  const levelTitles = ['Acceso restringido', 'Linea de montaje', 'Control de calidad', 'Deposito de descartes', 'En construccion', 'En construccion'];
+  const levelTitles = ['Acceso restringido', 'Linea de montaje', 'Control de calidad', 'Deposito de descartes', 'Colision temporal', 'El piso cuatro', 'Sector oculto'];
   const levelDescriptions = [
     'La puerta trasera de la Planta 7 sigue custodiada. Un Dron de Chatarra: poca vida... y muchas fallas.',
     'La cinta transportadora todavia se mueve sola. Un Dron de Chatarra y un enorme Guardia Oxidado, con canon y escudo antidisturbios, bloquean el paso.',
     'Aca terminaban los robots que no pasaban las pruebas: el Prototipo T-0, una copia fallida de Chrono que puede rebobinarse 3 segundos atras, y una Unidad Sobrecargada.',
     'Tres descartes y, al fondo, la Ensambladora Defectuosa: una maquina gigante que se armo a si misma con restos de las demas. 240 de vida.',
-    'Este sector de la fabrica todavia esta en construccion.',
-    'Este sector de la fabrica todavia esta en construccion.',
+    'Explosiones en el fondo de la fabrica... El viejo rival de Reflecter volvio, mejorado por Tempus Corp.: mas vida, mas dano, un poder para retroceder el tiempo... y ganas de llevarte hasta el techo.',
+    'Chrono no se rindio. Todas las unidades de la Planta 7 despiertan a la vez... y algo enorme espera en el piso cuatro.',
+    'Chrono te arrastra a una parte de la Planta 7 que ni el conocia... Alguien estuvo encerrado ahi durante años. Jefe secreto.',
   ];
   normalArcadeLevelButtons.forEach((levelButton, index) => {
     const title = levelButton.querySelector('.arcade-level-copy strong');
@@ -1908,7 +2849,19 @@ function syncGamblerArcadeChapterUI() {
 }
 
 function syncArcadeChapterUI() {
-  if (arcadeLevelSixButton) arcadeLevelSixButton.classList.toggle('hidden', arcadeChapter !== 'gambler' && arcadeChapter !== 'reflecter');
+  if (arcadeLevelSixButton) arcadeLevelSixButton.classList.toggle('hidden', arcadeChapter !== 'gambler' && arcadeChapter !== 'reflecter' && arcadeChapter !== 'knight');
+  const knightSecretButton = document.querySelector(`[data-arcade-level="${knightSecretLevel}"]`);
+  if (knightSecretButton) knightSecretButton.classList.toggle('hidden', arcadeChapter !== 'knight');
+  const secretLevelButton = document.querySelector('[data-arcade-level="7"]');
+  if (secretLevelButton) {
+    secretLevelButton.classList.toggle('hidden', !(arcadeChapter === 'knight' || (arcadeChapter === 'reflecter' && isReflecterSecretLevelUnlocked())));
+    // in chapter 5 the 7th level is a normal one, not a secret
+    secretLevelButton.classList.toggle('arcade-level-secret', arcadeChapter !== 'knight');
+  }
+  if (arcadeChapter === 'knight') {
+    syncKnightArcadeChapterUI();
+    return;
+  }
   if (arcadeChapter === 'gambler') {
     syncGamblerArcadeChapterUI();
     return;
@@ -1958,6 +2911,7 @@ function openArcadeChapter(chapter = 'normal') {
   arcadeLevelsScreen.classList.remove('hidden');
   syncArcadeChapterUI();
   syncNormalArcadeLevels();
+  syncHardcorePanel();
 }
 
 function closeArcadeChapters() {
@@ -1985,14 +2939,22 @@ function syncNormalArcadeLevels() {
   normalArcadeLevelButtons.forEach((levelButton) => {
     const level = Number(levelButton.dataset.arcadeLevel);
     const comingSoon = isArcadeLevelComingSoon(level);
-    const unlocked = level <= highestLevel && !comingSoon;
+    // the secret level 7 of chapter 4 has its own unlock (a clean run of level 6), not the normal progress
+    const secretLevel = (arcadeChapter === 'reflecter' && level === 7) || (arcadeChapter === 'knight' && level === knightSecretLevel);
+    const knightSecret = arcadeChapter === 'knight' && level === knightSecretLevel;
+    const unlocked = knightSecret
+      ? isKnightSecretLevelUnlocked() && knightSecretLevelReady
+      : secretLevel
+        ? isReflecterSecretLevelUnlocked()
+        : level <= highestLevel && !comingSoon;
+    const completed = knightSecret ? isKnightSecretLevelBeaten() : secretLevel ? isReflecterSecretLevelBeaten() : !comingSoon && level < highestLevel;
     levelButton.disabled = !unlocked;
     levelButton.classList.toggle('locked', !unlocked);
     levelButton.classList.toggle('coming-soon', comingSoon);
-    levelButton.classList.toggle('completed', !comingSoon && level < highestLevel);
+    levelButton.classList.toggle('completed', completed);
     const status = levelButton.querySelector('.arcade-level-status');
     if (status) {
-      status.textContent = comingSoon ? 'PROXIMAMENTE' : unlocked ? (level < highestLevel ? 'SUPERADO' : 'DISPONIBLE') : 'BLOQUEADO';
+      status.textContent = comingSoon ? 'PROXIMAMENTE' : unlocked ? (completed ? 'SUPERADO' : secretLevel ? 'SECRETO' : 'DISPONIBLE') : 'BLOQUEADO';
     }
   });
 }
@@ -2348,6 +3310,7 @@ function applyBotDifficulty() {
   if (botEnabled) {
     player2.setMaxHealth(
       isArcadeBossFighter(player2) ||
+      isFactoryRobot(player2) ||
       player2.characterType === 'monkey' ||
       player2.characterType === 'tank' ||
       player2.characterType === 'cowboy' ||
@@ -2370,6 +3333,8 @@ function applyBotDifficulty() {
 
 function getCharacterMaxHealth(characterType, fighter = null) {
   if (isArcadeBossFighter(fighter)) return getArcadeBossVariantHealth(fighter);
+  if (isFactoryRobot(fighter)) return hybridEnemyTypes[fighter.secretVariant].health;
+  if (isChronoRival(fighter)) return chronoRivalHealth;
   if (characterType === 'monkey') return monkeyHealth;
   if (characterType === 'fireMaster') return getFireMasterHealth(fighter);
   if (characterType === 'lightWarrior') return lightWarriorHealth;
@@ -2487,6 +3452,16 @@ gangBossCharacterButton.addEventListener('click', () => selectCharacter('normal'
 icedThugCharacterButton.addEventListener('click', () => selectCharacter('normal', 'icedThug'));
 iceMasterCharacterButton.addEventListener('click', () => selectCharacter('fireMaster', 'iceMaster'));
 shadowJesterCharacterButton.addEventListener('click', () => selectCharacter('gambler', 'shadowJester'));
+assemblerCharacterButton.addEventListener('click', () => selectCharacter('normal', 'defectiveAssembler'));
+chronoBoostCharacterButton.addEventListener('click', () => selectCharacter('chrono', 'chronoRival'));
+titanCharacterButton.addEventListener('click', () => selectCharacter('normal', 'titanUnit'));
+omegariusCharacterButton.addEventListener('click', () => selectCharacter('normal', 'omegarius'));
+neoScammerCharacterButton.addEventListener('click', () => selectCharacter('gambler', 'neoScammer'));
+knightCharacterButton.addEventListener('click', () => selectCharacter('normal', 'knight'));
+magicTownCharacterButtons.forEach((button) => {
+  button.addEventListener('click', () => selectCharacter('normal', button.dataset.magicVariant));
+});
+if (shaolinCharacterButton) shaolinCharacterButton.addEventListener('click', () => selectCharacter('normal', 'shaolinMaster'));
 randomCharacterButton.addEventListener('click', selectRandomCharacter);
 characterBackButton.addEventListener('click', closeCharacterSelect);
 mapBackButton.addEventListener('click', closeMapSelect);
@@ -2497,22 +3472,45 @@ normalArcadeChapterButton.addEventListener('click', () => openArcadeChapter('nor
 fireArcadeChapterButton.addEventListener('click', () => openArcadeChapter('fireMaster'));
 gamblerArcadeChapterButton.addEventListener('click', () => openArcadeChapter('gambler'));
 reflecterArcadeChapterButton.addEventListener('click', () => openArcadeChapter('reflecter'));
+// chapter 5 is still under construction
+knightArcadeChapterButton.addEventListener('click', () => openArcadeChapter('knight'));
 normalArcadeLevelButtons.forEach((levelButton) => {
   levelButton.addEventListener('click', () => {
     if (levelButton.disabled) return;
-    selectedNormalArcadeLevel = Number(levelButton.dataset.arcadeLevel);
+    // a single level from the menu is never part of a hardcore run
+    endHardcoreRun();
+    startArcadeLevel(Number(levelButton.dataset.arcadeLevel));
+  });
+});
+
+function startArcadeLevel(level) {
+    const levelButton = document.querySelector(`[data-arcade-level="${level}"]`);
+    selectedNormalArcadeLevel = level;
     normalArcadeActive = true;
     if (isArcadeLevelComingSoon(selectedNormalArcadeLevel)) return;
     player1.setCharacterType(getArcadeChapterHero());
+    if (arcadeChapter === 'knight') player1.setCharacterType('normal', 'knight');
     player2.setCharacterType('normal');
     selectedMap = getArcadeChapterMap();
     normalArcadeLevelButtons.forEach((button) => button.classList.remove('selected'));
     levelButton.classList.add('selected');
+    // a fresh attempt at the secret-level requirement starts every time level 6 is entered from this menu
+    if (arcadeChapter === 'reflecter' && selectedNormalArcadeLevel === 6) ch6RunClean = true;
     startGame();
     if (arcadeChapter === 'gambler' && selectedNormalArcadeLevel === 5) startGamblerScammerCutscene();
     if (arcadeChapter === 'gambler' && selectedNormalArcadeLevel === 6) startJesterIntro();
-  });
-});
+    if (arcadeChapter === 'reflecter' && selectedNormalArcadeLevel === 5) startChronoRivalCutscene();
+    if (arcadeChapter === 'reflecter' && selectedNormalArcadeLevel === 6) startCh6IntroCutscene();
+    if (arcadeChapter === 'reflecter' && selectedNormalArcadeLevel === 7) startCh7IntroCutscene();
+    if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === 1) startKnightForestIntro();
+    if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === 2) startKnightVillageIntro();
+    if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === 3) startKnightPlazaIntro();
+    if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === 4) startKnightSpaIntro();
+    if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === 5) startKnightJailIntro();
+    if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === 6) startKnightGuardIntro();
+    if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === 7) startKnightApproach();
+    if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === knightSecretLevel) startKnightRiftIntro();
+}
 guideButton.addEventListener('click', openGuide);
 achievementsButton.addEventListener('click', openAchievements);
 statsButton.addEventListener('click', openStatistics);
@@ -2558,8 +3556,26 @@ secretCharactersBackButton.addEventListener('click', closeSecretCharacters);
 eventGuideBackButton.addEventListener('click', closeEventGuide);
 simpleTopButton.addEventListener('click', toggleSimpleTop);
 botToggle.addEventListener('change', updateBotSetting);
-restartButton.addEventListener('click', resetFight);
-menuButton.addEventListener('click', returnToMenu);
+if (classicBotToggle) {
+  classicBotToggle.checked = classicBotAI;
+  classicBotToggle.addEventListener('change', () => {
+    classicBotAI = classicBotToggle.checked;
+    try {
+      localStorage.setItem(classicBotStorageKey, classicBotAI ? '1' : '0');
+    } catch (error) {
+      // the setting still works for this session
+    }
+    resetBotBrain();
+  });
+}
+restartButton.addEventListener('click', () => (hardcoreRun.pending ? continueHardcore() : resetFight()));
+menuButton.addEventListener('click', () => {
+  endHardcoreRun();
+  returnToMenu();
+});
+document.querySelectorAll('[data-hardcore]').forEach((button) => {
+  button.addEventListener('click', () => startHardcoreRun(button.dataset.hardcore));
+});
 
 syncShopBadges();
 loadAudioSettings();
@@ -2575,3 +3591,197 @@ syncMonkeyUnlockUI();
 syncScammerUnlockUI();
 updateHealthBars();
 animate();
+
+syncKnightUnlockUI();
+
+// ---------- the classic bot (the AI from before the bot's brain) ----------
+function dodgeBotThreatClassic(threat, profile) {
+  if (!threat || Math.random() > profile.dodgeChance) return false;
+
+  const botCenterX = player2.position.x + player2.width / 2;
+  const dodgeDirection = threat.centerX < botCenterX ? 1 : -1;
+  player2.velocity.x = getBotMoveSpeed() * dodgeDirection;
+
+  if (player2.velocity.y === 0 && (threat.type === 'projectile' || Math.random() < 0.55)) {
+    player2.velocity.y = getDebugJumpSpeed(-13, player2);
+  }
+
+  return true;
+}
+
+function updateBotMovementClassic(profile, distanceX, absDistance) {
+  const attackRange = getBotAttackRange();
+  const preferredRange = getBotPreferredRange();
+  const moveSpeed = getBotMoveSpeed();
+  const canPlaySpacing = Math.random() < profile.spacingChance;
+
+  if (isRangedBot() && absDistance < preferredRange && canPlaySpacing) {
+    player2.velocity.x = distanceX > 0 ? -moveSpeed : moveSpeed;
+    return;
+  }
+
+  // Omegarius always closes in until it can hit (other bots wait a little outside their range)
+  const approachSlack = usesSimpleBotMovement() ? 0 : 24;
+  if (absDistance > Math.max(attackRange, preferredRange) || absDistance > attackRange + approachSlack) {
+    player2.velocity.x = distanceX > 0 ? moveSpeed : -moveSpeed;
+    return;
+  }
+
+  player2.velocity.x = 0;
+
+  if (botAttackCooldown === 0 && absDistance <= attackRange) {
+    const shouldUseStrongAttack =
+      player2.strongAttackCooldown === 0 &&
+      Math.random() < profile.strongAttackChance;
+    player2.attack(shouldUseStrongAttack);
+    botAttackCooldown = getDebugCooldown(profile.attackDelay, player2);
+  }
+}
+
+function updateBotJumpingClassic(profile) {
+  if (player2.velocity.y !== 0) return;
+
+  const playerAbove = player1.position.y + player1.height < player2.position.y;
+  if (playerAbove && Math.random() < profile.reactionChance) {
+    player2.velocity.y = getDebugJumpSpeed(-13, player2);
+  }
+}
+
+// Shang Ting: the stance against a swing, a hundred fists up close, the palm from afar, the crane kick in between
+function updateShaolinBotSpecials(profile, absDistance) {
+  const master = player2;
+  if (!master.shaolinPalms) resetShaolin(master);
+  if (isShaolinBusy(master)) return true;
+  // every move that makes sense right now, then one of them at random (so he mixes all four)
+  const options = [];
+  if (player1.isAttacking && absDistance < 170 && !(master.shaolinStanceCooldown > 0)) options.push(() => castShaolinStance(master));
+  if (absDistance < 170 && !(master.shaolinFistsCooldown > 0)) options.push(() => castShaolinFists(master), () => castShaolinFists(master));
+  if (absDistance > 180 && !(master.shaolinPalmCooldown > 0)) options.push(() => castShaolinPalm(master));
+  if (absDistance > 110 && absDistance < 420 && !(master.shaolinCraneCooldown > 0) && master.velocity.y === 0) options.push(() => castShaolinCrane(master, player1), () => castShaolinCrane(master, player1));
+  if (!options.length || !shouldBotUseSpecial(profile, 0.08)) return false;
+  return options[Math.floor(Math.random() * options.length)]();
+}
+
+// ---------- HARDCORE mode ----------
+// the last level of each chapter, without its secret level
+function getChapterFinalLevel(chapter) {
+  if (chapter === 'gambler') return gamblerArcadePlayableLevels;
+  if (chapter === 'reflecter') return reflecterArcadePlayableLevels;
+  if (chapter === 'knight') return knightArcadePlayableLevels;
+  return 5;
+}
+
+function isArcadeChapterDone(chapter) {
+  try {
+    if (localStorage.getItem(`moqueteChapterDone_${chapter}`) === '1') return true;
+  } catch (error) {
+    // fall back to the rewards
+  }
+  return Boolean(coinWallet.arcadeLevels && coinWallet.arcadeLevels[`${chapter}-${getChapterFinalLevel(chapter)}`]);
+}
+
+function markArcadeChapterDone(chapter) {
+  try {
+    localStorage.setItem(`moqueteChapterDone_${chapter}`, '1');
+  } catch (error) {
+    // the reward record still counts
+  }
+}
+
+function loadHardcoreRecords() {
+  try {
+    return JSON.parse(localStorage.getItem(hardcoreStorageKey) || '{}') || {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function syncHardcorePanel() {
+  const panel = document.getElementById('hardcorePanel');
+  if (!panel) return;
+  const unlocked = isArcadeChapterDone(arcadeChapter);
+  const records = loadHardcoreRecords()[arcadeChapter] || {};
+  panel.classList.toggle('locked', !unlocked);
+  document.getElementById('hardcoreStatus').innerText = unlocked
+    ? `${getChapterFinalLevel(arcadeChapter)} niveles seguidos, sin volver al menu. Se pierde todo al quedarse sin vidas.`
+    : 'Termina el capitulo para desbloquearlo (los niveles secretos no cuentan).';
+  panel.querySelectorAll('[data-hardcore]').forEach((button) => {
+    button.disabled = !unlocked;
+    const best = button.querySelector('[data-hardcore-best]');
+    const done = Boolean(records[button.dataset.hardcore]);
+    button.classList.toggle('completed', done);
+    if (best) best.innerText = done ? 'SUPERADO' : unlocked ? `Premio: ${hardcoreRewards[button.dataset.hardcore].toLocaleString('es-ES')} monedas` : 'BLOQUEADO';
+  });
+}
+
+function startHardcoreRun(mode) {
+  if (!isArcadeChapterDone(arcadeChapter)) return;
+  Object.assign(hardcoreRun, { active: true, mode, chapter: arcadeChapter, lives: mode === 'harder' ? 1 : 3, carry: null, pending: null });
+  playSound('judgeFinalStart');
+  startArcadeLevel(1);
+}
+
+function endHardcoreRun() {
+  Object.assign(hardcoreRun, { active: false, pending: null, carry: null });
+  if (restartButton) restartButton.innerText = 'Reiniciar pelea';
+}
+
+// called at the end of every fight of a run
+function hardcoreAfterFight(won) {
+  const run = hardcoreRun;
+  // (a fight only counts once)
+  if (run.pending) return;
+  const finalLevel = getChapterFinalLevel(run.chapter);
+  if (won) {
+    if (selectedNormalArcadeLevel >= finalLevel) {
+      run.pending = 'done';
+      const records = loadHardcoreRecords();
+      const chapterRecords = records[run.chapter] || {};
+      const firstTime = !chapterRecords[run.mode];
+      chapterRecords[run.mode] = true;
+      records[run.chapter] = chapterRecords;
+      try {
+        localStorage.setItem(hardcoreStorageKey, JSON.stringify(records));
+      } catch (error) {
+        // only this session
+      }
+      if (firstTime) awardCoins(hardcoreRewards[run.mode]);
+      victoryTitle.innerText = run.mode === 'harder' ? 'HARDERCORE SUPERADO!' : 'HARDCORE SUPERADO!';
+      restartButton.innerText = 'Volver al menu';
+      showCustomToast(run.mode === 'harder' ? 'HARDERCORE SUPERADO' : 'HARDCORE SUPERADO', firstTime ? `Capitulo completo sin caer. +${hardcoreRewards[run.mode].toLocaleString('es-ES')} monedas.` : 'Lo hiciste otra vez. Leyenda.');
+      playSound('achievement');
+      return;
+    }
+    if (run.mode === 'harder') run.carry = player1.health;
+    run.pending = 'next';
+    restartButton.innerText = `Siguiente nivel (${selectedNormalArcadeLevel + 1}/${finalLevel})`;
+    return;
+  }
+  run.lives -= 1;
+  if (run.lives > 0) {
+    run.pending = 'retry';
+    restartButton.innerText = `Reintentar nivel (${run.lives} ${run.lives === 1 ? 'vida' : 'vidas'})`;
+    return;
+  }
+  run.pending = 'over';
+  victoryTitle.innerText = run.mode === 'harder' ? 'HARDERCORE PERDIDO' : 'HARDCORE PERDIDO';
+  restartButton.innerText = 'Volver al menu';
+}
+
+function continueHardcore() {
+  const run = hardcoreRun;
+  const pending = run.pending;
+  run.pending = null;
+  restartButton.innerText = 'Reiniciar pelea';
+  if (pending === 'done' || pending === 'over') {
+    endHardcoreRun();
+    returnToMenu();
+    return;
+  }
+  const level = pending === 'next' ? selectedNormalArcadeLevel + 1 : selectedNormalArcadeLevel;
+  const keep = { ...run };
+  returnToMenu();
+  Object.assign(hardcoreRun, keep, { active: true, pending: null });
+  arcadeChapter = keep.chapter;
+  startArcadeLevel(level);
+}

@@ -458,7 +458,9 @@ function getDebugJumpSpeed(jumpSpeed, fighter = null) {
 }
 
 function getDebugCooldown(cooldown, fighter = null) {
-  return Math.max(0, Math.round(cooldown * getDebugMultiplier('cooldownMultiplier', fighter)));
+  // the spirits of Robledal (chapter 5, level 7) shorten the cooldowns a little
+  const spirits = fighter && fighter.spiritCount > 0 ? spiritCooldownMultiplier : 1;
+  return Math.max(0, Math.round(cooldown * getDebugMultiplier('cooldownMultiplier', fighter) * spirits));
 }
 
 function getDebugDuration(duration, fighter = null) {
@@ -585,6 +587,9 @@ function clearActiveCodes() {
   deactivateBlindMode();
   lockDarkRoomMap();
   lockArcadeBosses();
+  lockNeoScammerCode();
+  lockMedievalCode();
+  lockMagicTownCode();
   syncSecretBodyModes();
 
   [player1, player2].forEach((fighter) => {
@@ -862,6 +867,8 @@ function applyDamage(attacker, target, damage, { isSpecial = false, ignoreDebug 
   if (!ignoreInvincible && target.gamblerInvincibleTimer > 0) return 0;
   if (!ignoreInvincible && target.ghostPhaseTimer > 0) return 0;
 
+  // Shang Ting's iron mountain stance
+  if (tryShaolinCounter(target, attacker)) return 0;
   const resolvedDamageType = getDamageType(attacker, isSpecial, damageType);
   if (!ignoreInvincible && target.characterType === 'divineGeneral' && target.divineAdaptTimer > 0) {
     recordDivineAdaptation(target, resolvedDamageType);
@@ -872,14 +879,62 @@ function applyDamage(attacker, target, damage, { isSpecial = false, ignoreDebug 
     ? fireArcadeMiniBossDamageTakenMultiplier
     : isIceMaster(target)
       ? iceMasterDamageTakenMultiplier
-      : 1;
+      : (hybridEnemyTypes[target.secretVariant] && hybridEnemyTypes[target.secretVariant].damageTakenMultiplier) || 1;
   const frostVulnerabilityMultiplier = target.icedVulnerableTimer > 0 ? icedThugFrostVulnerability : 1;
   const scamMultiplier = (target.scamVulnerableTimer > 0 ? scamVulnerableMultiplier : 1) * (attacker && attacker.scamWeakTimer > 0 ? scamWeakDamageMultiplier : 1);
-  const targetDamageMultiplier = icedThugArmorMultiplier * frostVulnerabilityMultiplier * scamMultiplier;
+  const omegariusArmorMultiplier = (target.omegariusArmorPlus ? omegariusArmorPlusDamageTaken : 1) * (target.secretVariant === 'neoScammer' ? neoScammerDamageTaken : 1);
+  // the Knight's shield wall stops most of the damage
+  // (the Knight in the middle of his Juicio del Rey has super armor)
+  const knightShieldMultiplier = (target.knightShieldTimer > 0 ? knightShieldDamageTaken : 1) * (target.mochiShieldTimer > 0 ? 0.5 : 1) * (target.knightSlam ? knightSlamArmor : 1);
+  if (target.knightShieldTimer > 0 && damage > 0) {
+    target.knightBlockFlash = 14;
+    playSound('robotHit');
+  }
+  // the spirits of Robledal (chapter 5, level 7) also protect whoever carries them
+  // (with all six spirits, after Light Warrior gives his away, even more)
+  const spiritArmorMultiplier = target.spiritCount > 3 ? omegaSpiritArmor : target.spiritCount > 0 ? spiritDamageTakenMultiplier : 1;
+  const spiritPowerMultiplier = attacker && attacker.spiritCount > 3 ? omegaSpiritDamageBoost : 1;
+  // level 8: Knight takes Shadow Jester's hits better
+  const riftArmorMultiplier = target.riftResolve ? riftKnightArmor : 1;
+  const targetDamageMultiplier = icedThugArmorMultiplier * frostVulnerabilityMultiplier * scamMultiplier * omegariusArmorMultiplier * knightShieldMultiplier * spiritArmorMultiplier * spiritPowerMultiplier * riftArmorMultiplier;
   const adaptedDamage = getDivineAdaptedDamage(target, damage * targetDamageMultiplier, resolvedDamageType);
   const previousHealth = Math.max(0, target.health);
   target.health = Math.max(0, target.health - (ignoreDebug ? adaptedDamage : getDebugDamage(adaptedDamage, attacker)));
+  // chapter 5, level 7: Light Warrior holds on until his last BOX ATTACK is over
+  if (target === player2 && typeof isLightBoxFight === 'function' && isLightBoxFight() && !target.lightFinaleDone) {
+    target.health = Math.max(target.health, target.maxHealth * lightWarriorBoxFloorRatio);
+  }
+  // ...and OMEGA LIGHT WARRIOR only falls with the clash
+  if (target === player2 && omegaKickFight.active && !omegaKickFight.won) target.health = Math.max(target.health, 1);
+  if (target === player2 && typeof isRiftFight === 'function' && isRiftFight()) target.health = Math.max(target.health, 1);
   if (jesterNeedsFinalAct(target)) target.health = Math.max(1, target.health);
+  if (isCh6ProtectedChrono(target)) target.health = Math.max(1, target.health);
+  // the Bestia del Musgo never falls before Light Warrior shows up
+  if (target.secretVariant === 'mossBeast' && normalArcadeActive && !target.mossRescued) target.health = Math.max(1, target.health);
+  // the sheriff stays at 1 health: first until his last stand starts, then for the whole 25 seconds
+  if (target.sheriffBadge && normalArcadeActive && arcadeChapter === 'knight' && !target.sheriffStandOver) target.health = Math.max(1, target.health);
+  // during the last stand every hit on the sheriff gives Knight a little health back
+  if (target.sheriffStandActive && target.sheriffBadge && normalArcadeActive && attacker === player1 && previousHealth > 0) {
+    const heal = target.sheriffFurious ? sheriffFuriousHealPerHit : sheriffStandHealPerHit;
+    attacker.health = Math.min(attacker.maxHealth, attacker.health + heal);
+    attacker.sheriffHealFx = 20;
+    attacker.sheriffHealAmount = heal;
+  }
+  // Mochi never falls before calling the chef
+  if (target.secretVariant === 'mochiMouse' && normalArcadeActive && !target.mochiChefCalled) target.health = Math.max(1, target.health);
+  // the guard of the farol does not fall in the fight itself (his end is in the scene at 10%)
+  if (target.secretVariant === 'lanternGuard' && normalArcadeActive && !target.guardFallen) target.health = Math.max(1, target.health);
+  // the dark captain never falls before making his offer
+  if (target.secretVariant === 'darkKnightBoss' && normalArcadeActive && !target.darkDealDone) target.health = Math.max(1, target.health);
+  // Omegarius never lets the sparring end before it has stopped to help Reflecter
+  if (isOmegariusMercyPending(target)) target.health = Math.max(1, target.health);
+  // Omegarius cannot fall in the middle of its secret ability
+  if (target.omegariusSecretActive) target.health = Math.max(1, target.health);
+  // NEO SCAMMER holds on at 10 health until his ULTIMA OFERTA
+  if (target.secretVariant === 'neoScammer' && scamChallenge.active && !target.neoFinalUsed) target.health = Math.max(neoScammerFinalHealth, target.health);
+  // Omegarius holds on at 10 health until it has used its final act
+  // (in versus only when the bot plays it, so a human Omegarius is never stuck at 10)
+  if (isOmegarius(target) && (isOmegariusSparring() || (target === player2 && botEnabled)) && !target.omegariusFinalUsed) target.health = Math.max(omegariusFinalHealth, target.health);
   const actualDamage = previousHealth - target.health;
 
   if (actualDamage > 0) {
@@ -1660,8 +1715,32 @@ function formatFightDuration(milliseconds) {
 }
 
 function getVictoryPhrase(fighter, opponent) {
+  if (fighter.secretVariant === 'shaolinMaster') {
+    const shaolinPhrases = ['你还需要练习。(Te falta practicar.)', '承让。(Fue un honor... para vos.)', '回去练功吧。(Volve a entrenar.)'];
+    return shaolinPhrases[Math.floor(Math.random() * shaolinPhrases.length)];
+  }
+  if (opponent && opponent.secretVariant === 'shaolinMaster') {
+    if (fighter.characterType === 'monkey') return '谢谢指教，师父！(Gracias por la leccion, maestro!)';
+    if (fighter.characterType === 'sorcerer') return 'Fue un honor, maestro. ...谢谢指教.';
+    return 'No entendi nada de lo que dijo... pero gane!';
+  }
   if (fighter.characterType === 'lightWarrior' && Math.random() < 0.01) {
     return 'Jarona!';
+  }
+
+  if (isKnight(fighter)) {
+    // chapter 5: the win came thanks to Light Warrior
+    if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 8) return '(Continuara...)';
+    if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 7) return '...Gracias, Light Warrior.';
+    if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 6) return '...Que hice?';
+    if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 5) return 'Una recompensa por mi cabeza... Alguien me quiere fuera del camino.';
+    // level 4 ends in the alley, with the new order from the Orden Sombria
+    if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 4) return 'Destruir el Gran Farol... Que estoy haciendo?';
+    if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 3) return 'Que pueblo tan... energico. Necesito descansar.';
+    if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 2) return 'Un trato es un trato... por ahora.';
+    if (normalArcadeActive && arcadeChapter === 'knight') return 'Gracias, guerrero de luz... La proxima la gano yo solo.';
+    const knightPhrases = ['Por Valdoria! El honor sigue intacto.', 'Mi espada nunca descansa.', 'Una victoria digna de un caballero.'];
+    return knightPhrases[Math.floor(Math.random() * knightPhrases.length)];
   }
 
   if (isShadowJester(fighter)) {
@@ -1716,8 +1795,8 @@ function drawWrappedText(text, x, y, maxWidth, lineHeight) {
 }
 
 function drawVictoryCharacter(fighter, x, y, scale = 1) {
-  if (isShadowJester(fighter)) {
-    // Shadow Jester uses his real sprite on the result screen
+  if (isShadowJester(fighter) || isKnight(fighter) || isMossBeast(fighter) || isDarkKnight(fighter) || isRobledalKid(fighter) || isMochi(fighter) || fighter.secretVariant === 'chefBoss' || fighter.secretVariant === 'lanternGuard' || fighter.secretVariant === 'shaolinMaster') {
+    // Shadow Jester, Knight and the Bestia del Musgo use their real sprite on the result screen
     const savedPosition = { ...fighter.position };
     const savedFacing = fighter.attacksToTheRight;
     ctx.save();

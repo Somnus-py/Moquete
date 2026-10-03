@@ -55,6 +55,22 @@
       <em id="achievementToastDescription">Descripcion</em>
     </div>
     <div class="main-menu" id="mainMenu">
+      <button type="button" class="shop-radio hidden" id="shopRadioButton" title="Radio del Contenedor: elegir musica del menu" aria-label="Radio del Contenedor">
+        <span class="shop-radio-body"></span>
+      </button>
+      <div class="shop-radio-panel hidden" id="shopRadioPanel">
+        <div class="shop-radio-head">
+          <strong>Radio del Contenedor</strong>
+          <button type="button" id="shopRadioClose" aria-label="Cerrar">X</button>
+        </div>
+        <span class="shop-radio-hint">Pega un enlace de musica (mp3, ogg, wav o YouTube). Se guarda para la proxima.</span>
+        <div class="shop-radio-add">
+          <input type="text" id="shopRadioLink" placeholder="https://... o assetsaudio/cancion.mp3" />
+          <button type="button" id="shopRadioAdd">Agregar</button>
+        </div>
+        <span class="shop-radio-status" id="shopRadioStatus"></span>
+        <div class="shop-radio-list" id="shopRadioList"></div>
+      </div>
       <div class="menu-screen title-menu" id="titleScreen">
         <div class="menu-wallet" aria-label="Monedas">
           <span class="coin-symbol" aria-hidden="true"></span>
@@ -250,6 +266,113 @@
               <span class="preview-jester-hat"></span>
             </span>
           </button>
+          <button type="button" class="character-option shaolin-option hidden" id="shaolinCharacterButton">
+            <span>Shang Ting</span>
+            <span class="character-preview shaolin-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option knight-option hidden" id="knightCharacterButton">
+            <span>Knight</span>
+            <span class="character-preview knight-preview" aria-hidden="true">
+              <span class="preview-knight-plume"></span>
+              <span class="preview-body"></span>
+              <span class="preview-knight-helmet"></span>
+              <span class="preview-knight-sword"></span>
+              <span class="preview-knight-shield"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option arcade-boss-option neo-scammer-option hidden" id="neoScammerCharacterButton">
+            <span>NEO SCAMMER</span>
+            <span class="character-preview neo-scammer-preview" aria-hidden="true">
+              <span class="preview-neo-wing left"></span>
+              <span class="preview-neo-wing right"></span>
+              <span class="preview-body"></span>
+              <span class="preview-scammer-hair"></span>
+              <span class="preview-scammer-glasses"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option arcade-boss-option assembler-option hidden" id="assemblerCharacterButton">
+            <span>Ensambladora Defectuosa</span>
+            <span class="character-preview assembler-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-robot-eyes"></span>
+              <span class="preview-robot-core"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option arcade-boss-option chrono-boost-option hidden" id="chronoBoostCharacterButton">
+            <span>Chrono Potenciado</span>
+            <span class="character-preview chrono-boost-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-robot-eyes"></span>
+              <span class="preview-robot-core"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option arcade-boss-option titan-option hidden" id="titanCharacterButton">
+            <span>Proyecto Titan</span>
+            <span class="character-preview titan-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-robot-eyes"></span>
+              <span class="preview-robot-core"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option arcade-boss-option omegarius-option hidden" id="omegariusCharacterButton">
+            <span>Omegarius</span>
+            <span class="character-preview omegarius-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-robot-eyes"></span>
+              <span class="preview-robot-core"></span>
+              <span class="preview-omegarius-hammer"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option magic-town-option hidden" data-magic-variant="mossBeast">
+            <span>Bestia del Musgo</span>
+            <span class="character-preview mtown-preview mtown-mossBeast" aria-hidden="true">
+              <span class="preview-body"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option magic-town-option hidden" data-magic-variant="darkKnight">
+            <span>Caballero Oscuro</span>
+            <span class="character-preview mtown-preview mtown-darkKnight" aria-hidden="true">
+              <span class="preview-body"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option magic-town-option hidden" data-magic-variant="darkKnightBoss">
+            <span>Capitan Oscuro</span>
+            <span class="character-preview mtown-preview mtown-darkKnightBoss" aria-hidden="true">
+              <span class="preview-body"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option magic-town-option hidden" data-magic-variant="celesteGirl">
+            <span>Celeste</span>
+            <span class="character-preview mtown-preview mtown-celesteGirl" aria-hidden="true">
+              <span class="preview-body"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option magic-town-option hidden" data-magic-variant="setoBoy">
+            <span>Seto</span>
+            <span class="character-preview mtown-preview mtown-setoBoy" aria-hidden="true">
+              <span class="preview-body"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option magic-town-option hidden" data-magic-variant="mochiMouse">
+            <span>Mochi</span>
+            <span class="character-preview mtown-preview mtown-mochiMouse" aria-hidden="true">
+              <span class="preview-body"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option magic-town-option hidden" data-magic-variant="chefBoss">
+            <span>Chef Furioso</span>
+            <span class="character-preview mtown-preview mtown-chefBoss" aria-hidden="true">
+              <span class="preview-body"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option magic-town-option hidden" data-magic-variant="lanternGuard">
+            <span>Guardia del Farol</span>
+            <span class="character-preview mtown-preview mtown-lanternGuard" aria-hidden="true">
+              <span class="preview-body"></span>
+            </span>
+          </button>
         </div>
         <div class="character-actions">
           <button type="button" id="randomCharacterButton" aria-label="Elegir personaje aleatorio">?</button>
@@ -387,6 +510,134 @@
               <span class="map-detail"></span>
             </span>
           </button>
+          <button type="button" class="map-option magic-town-map mtown-map-enchantedForest hidden" data-map="enchantedForest">
+            <span>Bosque Lumina</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option magic-town-map mtown-map-villageRoad hidden" data-map="villageRoad">
+            <span>Camino a Robledal</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option magic-town-map mtown-map-villagePlaza hidden" data-map="villagePlaza">
+            <span>Plaza de Robledal</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option magic-town-map mtown-map-hotSprings hidden" data-map="hotSprings">
+            <span>Aguas Termales del Loto</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option magic-town-map mtown-map-robledalJail hidden" data-map="robledalJail">
+            <span>Prision de Robledal</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option magic-town-map mtown-map-robledalAlley hidden" data-map="robledalAlley">
+            <span>Callejon de Robledal</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option magic-town-map mtown-map-lanternHill hidden" data-map="lanternHill">
+            <span>El Gran Farol</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option magic-town-map mtown-map-lightSkyPlatform hidden" data-map="lightSkyPlatform">
+            <span>Plataforma de Luz</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option magic-town-map mtown-map-farolTop hidden" data-map="farolTop">
+            <span>Cima del Farol</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option shaolin-temple-map hidden" data-map="shaolinTemple" id="shaolinTempleMapButton">
+            <span>Templo Shaolin</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option medieval-map-option medieval-castle-map hidden" data-map="medievalCastle" id="medievalCastleMapButton">
+            <span>Castillo de Valdoria</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option bigshot-map-option scam-showroom-map hidden" data-map="scamShowroom" id="scamShowroomMapButton">
+            <span>Sala de Ventas VIP</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option arcade-map-option factory-map hidden" data-map="robotFactory">
+            <span>Planta 7</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option arcade-map-option factory-roof-map hidden" data-map="factoryRoof">
+            <span>Techo</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option arcade-map-option factory-vault-map hidden" data-map="factoryVault">
+            <span>Piso 4</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
+          <button type="button" class="map-option arcade-map-option factory-hidden-map hidden" data-map="factoryHidden">
+            <span>Sector 0</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
         </div>
         <button type="button" id="mapBackButton">Volver</button>
       </div>
@@ -413,6 +664,10 @@
             </label>
           </div>
         </div>
+        <label class="setting-row" title="Devuelve la IA anterior del bot: mas simple y mas facil de vencer. Sirve si una parte del arcade se te hace imposible.">
+          <span data-i18n="classicBot">Bot clasico (mas facil de vencer)</span>
+          <input type="checkbox" id="classicBotToggle" />
+        </label>
         <label class="setting-row audio-setting">
           <span data-i18n="masterVolume">Volumen general</span>
           <input type="range" id="masterVolumeControl" min="0" max="1" step="0.05" value="1" />
@@ -483,6 +738,38 @@
               <input type="radio" name="player1Color" value="#cd7f32" />
               <span style="--swatch: #cd7f32;"></span>
             </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="neonPaint" title="Verde neon (tienda)">
+              <input type="radio" name="player1Color" value="#39ff14" />
+              <span style="--swatch: #39ff14;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="neonPaint" title="Magenta neon (tienda)">
+              <input type="radio" name="player1Color" value="#ff00ff" />
+              <span style="--swatch: #ff00ff;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="neonPaint" title="Cian neon (tienda)">
+              <input type="radio" name="player1Color" value="#00e5ff" />
+              <span style="--swatch: #00e5ff;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="neonPaint" title="Naranja neon (tienda)">
+              <input type="radio" name="player1Color" value="#ff3d00" />
+              <span style="--swatch: #ff3d00;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="jewelPaint" title="Platino (tienda)">
+              <input type="radio" name="player1Color" value="#e5e4e2" />
+              <span style="--swatch: #e5e4e2;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="jewelPaint" title="Rubi (tienda)">
+              <input type="radio" name="player1Color" value="#9b111e" />
+              <span style="--swatch: #9b111e;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="jewelPaint" title="Esmeralda (tienda)">
+              <input type="radio" name="player1Color" value="#046307" />
+              <span style="--swatch: #046307;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="jewelPaint" title="Zafiro (tienda)">
+              <input type="radio" name="player1Color" value="#0f52ba" />
+              <span style="--swatch: #0f52ba;"></span>
+            </label>
           </div>
         </div>
         <div class="setting-row color-setting">
@@ -539,6 +826,60 @@
             <label class="color-swatch" title="Bronce">
               <input type="radio" name="player2Color" value="#cd7f32" />
               <span style="--swatch: #cd7f32;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="neonPaint" title="Verde neon (tienda)">
+              <input type="radio" name="player2Color" value="#39ff14" />
+              <span style="--swatch: #39ff14;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="neonPaint" title="Magenta neon (tienda)">
+              <input type="radio" name="player2Color" value="#ff00ff" />
+              <span style="--swatch: #ff00ff;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="neonPaint" title="Cian neon (tienda)">
+              <input type="radio" name="player2Color" value="#00e5ff" />
+              <span style="--swatch: #00e5ff;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="neonPaint" title="Naranja neon (tienda)">
+              <input type="radio" name="player2Color" value="#ff3d00" />
+              <span style="--swatch: #ff3d00;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="jewelPaint" title="Platino (tienda)">
+              <input type="radio" name="player2Color" value="#e5e4e2" />
+              <span style="--swatch: #e5e4e2;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="jewelPaint" title="Rubi (tienda)">
+              <input type="radio" name="player2Color" value="#9b111e" />
+              <span style="--swatch: #9b111e;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="jewelPaint" title="Esmeralda (tienda)">
+              <input type="radio" name="player2Color" value="#046307" />
+              <span style="--swatch: #046307;"></span>
+            </label>
+            <label class="color-swatch shop-swatch hidden" data-shop-item="jewelPaint" title="Zafiro (tienda)">
+              <input type="radio" name="player2Color" value="#0f52ba" />
+              <span style="--swatch: #0f52ba;"></span>
+            </label>
+          </div>
+        </div>
+        <div class="setting-row shop-extras-setting hidden" id="shopExtrasSetting">
+          <span>Extras de la tienda</span>
+          <div class="shop-extras-options">
+            <label class="shop-extra-toggle hidden" data-shop-item="casinoTheme">
+              <input type="checkbox" data-shop-toggle="casinoTheme" />
+              <span>Tema Noche de Casino</span>
+            </label>
+            <label class="shop-extra-toggle hidden" data-shop-item="neonSign">
+              <input type="checkbox" data-shop-toggle="neonSign" />
+              <span>Cartel de neon en el titulo</span>
+            </label>
+
+            <label class="shop-extra-toggle hidden" data-shop-item="plasticCrown">
+              <input type="checkbox" data-shop-toggle="plasticCrown" />
+              <span>Corona de Rey (jugador 1)</span>
+            </label>
+            <label class="shop-extra-toggle hidden" data-shop-item="victoryConfetti">
+              <input type="checkbox" data-shop-toggle="victoryConfetti" />
+              <span>Confeti de victoria (jugador 1)</span>
             </label>
           </div>
         </div>
@@ -649,6 +990,27 @@
             </span>
             <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
           </button>
+          <button type="button" class="arcade-chapter-option knightArcade-chapter-option" id="knightArcadeChapterButton">
+            <span class="arcade-chapter-number">05</span>
+            <span class="arcade-level-scene knightArcade-level-scene" aria-hidden="true">
+              <span class="arcade-level-player knightArcade-level-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss knightArcade-level-boss"></span>
+              <span class="knightArcade-tape">EN CONSTRUCCION</span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong>El juramento de Knight</strong>
+              <span>Capitulo 5. El guardian de Valdoria deja su castillo para cumplir un juramento: su primera mision lo lleva a un bosque magico. Todavia en construccion.</span>
+            </span>
+            <span class="arcade-chapter-badge" data-chapter-badge="knight">NUEVO</span>
+            <span class="arcade-chapter-progress">
+              <span class="arcade-chapter-progress-bar"><span data-chapter-fill="knight"></span></span>
+              <span class="arcade-chapter-progress-text" data-chapter-progress="knight">0 niveles</span>
+            </span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+          </button>
         </div>
         <button type="button" id="arcadeChaptersBackButton" data-i18n="back">Volver</button>
       </div>
@@ -694,6 +1056,34 @@
               <span class="arcade-level-number">06</span>
               <span class="arcade-level-copy"><strong>???</strong><span>Proximamente.</span></span>
               <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+            <button type="button" class="arcade-level-option arcade-level-secret locked hidden" data-arcade-level="7" disabled>
+              <span class="arcade-level-number">07</span>
+              <span class="arcade-level-copy"><strong>???</strong><span>Proximamente.</span></span>
+              <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+            <button type="button" class="arcade-level-option arcade-level-secret locked hidden" data-arcade-level="8" disabled>
+              <span class="arcade-level-number">08</span>
+              <span class="arcade-level-copy"><strong>???</strong><span>Proximamente.</span></span>
+              <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+          </div>
+        </div>
+        <div class="hardcore-panel locked" id="hardcorePanel">
+          <div class="hardcore-head">
+            <strong>MODO HARDCORE</strong>
+            <span id="hardcoreStatus">Termina el capitulo para desbloquearlo.</span>
+          </div>
+          <div class="hardcore-options">
+            <button type="button" class="hardcore-option" data-hardcore="normal" disabled>
+              <strong>HARDCORE</strong>
+              <span>Todo el capitulo de corrido con solo 3 vidas.</span>
+              <em data-hardcore-best="normal"></em>
+            </button>
+            <button type="button" class="hardcore-option harder" data-hardcore="harder" disabled>
+              <strong>HARDERCORE</strong>
+              <span>Todo el capitulo con 1 sola vida. La vida que te quede pasa al siguiente nivel.</span>
+              <em data-hardcore-best="harder"></em>
             </button>
           </div>
         </div>
@@ -968,6 +1358,26 @@
             <strong>El desafio de Normal</strong>
             <span>Completa el capitulo de Normal en el modo Arcade.</span>
           </div>
+          <div class="achievement-card" data-achievement="reflecterArcadeCompleted">
+            <span class="achievement-icon achievement-icon-mirror" aria-hidden="true"></span>
+            <strong>Espejo irrompible</strong>
+            <span>Destrui al Proyecto Titan y completa el capitulo de Reflecter en el modo Arcade.</span>
+          </div>
+          <div class="achievement-card" data-achievement="omegariusDefeated">
+            <span class="achievement-icon achievement-icon-hammer" aria-hidden="true"></span>
+            <strong>MARTILLO DE LA JUSTICIA</strong>
+            <span>Derrota a Omegarius en el nivel secreto del capitulo de Reflecter en el modo Arcade. El veredicto: buen sparring, hermanito.</span>
+          </div>
+          <div class="achievement-card" data-achievement="knightUnlocked">
+            <span class="achievement-icon achievement-icon-sword" aria-hidden="true"></span>
+            <strong>POR VALDORIA!</strong>
+            <span>Vence al Caballero Guardian en el Castillo de Valdoria y reclama la recompensa. Knight ahora lucha a tu lado.</span>
+          </div>
+          <div class="achievement-card" data-achievement="shaolinDefeated">
+            <span class="achievement-icon achievement-icon-shaolin" aria-hidden="true"></span>
+            <strong>谢谢指教 (GRACIAS POR LA LECCION)</strong>
+            <span>Derrota a Shang Ting, el maestro Shaolin, en su templo. Como llegaste hasta ahi? Nadie sabe. (Dicen que un vendedor muy insistente podria convencerlo de unirse...)</span>
+          </div>
           <div class="achievement-card" data-achievement="gamblerArcadeCompleted">
             <span class="achievement-icon achievement-icon-jester" aria-hidden="true"></span>
             <strong>EL MUNDO GIRA Y GIRA!</strong>
@@ -1159,6 +1569,18 @@
           <em class="offcam-hint">ENTER / CLICK</em>
         </button>
       </div>
+      <div class="menu-screen scam-challenge-menu hidden" id="scamChallengeScreen">
+        <div class="scam-challenge-head">
+          <span class="scam-challenge-portrait" id="scamChallengePortrait"></span>
+          <p class="scam-challenge-line" id="scamChallengeLine"></p>
+        </div>
+        <h2>ELEGI A TU LUCHADOR!</h2>
+        <div class="scam-challenge-timer">
+          <span class="scam-challenge-bar"><span id="scamChallengeTimerBar"></span></span>
+          <strong id="scamChallengeTimerText">10</strong>
+        </div>
+        <div class="scam-challenge-grid" id="scamChallengeGrid"></div>
+      </div>
       <div class="menu-screen scammer-shop-menu hidden" id="scammerShopScreen">
         <div class="shop-awning" aria-hidden="true"></div>
         <div class="shop-sign">
@@ -1197,7 +1619,93 @@
       <div class="menu-screen info-menu hidden" id="infoScreen">
         <h2 data-i18n="information">Changelog</h2>
         <div class="guide-section">
-          <h3>Actualizacion 2.5</h3>
+          <h3>Actualizacion 3.0</h3>
+          <div class="character-guide">
+            <span><strong>El final del capitulo de Reflecter, el capitulo 5 de Knight completo, el modo Hardcore, algun que otro secreto</strong> y una tienda de Scammer mas peligrosa (y mas rara) que nunca.</span>
+            <span><em>"Y la 2.6?" Se convirtio en la 3.0 mientras nadie miraba.</em></span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Arcade: capitulo 4 de Reflecter</h3>
+          <div class="character-guide">
+            <span><strong>Nivel 5: Chrono Potenciado</strong> Chrono entra a la fabrica destruyendo todo, con una mejora de Tempus Corp. Si los ultimos 10 segundos le salieron mal, rebobina el tiempo, y a mitad de la pelea arrastra a Reflecter hasta el techo de la fabrica. Al perder... intenta aplastarte desde el cielo.</span>
+            <span><strong>Nivel 6: la Planta 7 despierta</strong> una oleada de robots, Chrono otra vez en el piso cuatro y, cuando ya no le queda nada, el secreto mejor guardado de Tempus: el PROYECTO TITAN, un jefe gigante con laser, puños y misiles.</span>
+            <span><strong>Nivel 7: ???</strong> un nivel secreto que solo se abre si superas el nivel 6 sin caer ni una vez y sin usar el escudo. Alguien lleva años esperando en un sector que no figura en ningun plano... y tiene un martillo enorme.</span>
+            <span><strong>Reflecter 2.0 y Mirror Luck en la historia</strong> si jugas el capitulo con alguna de estas versiones, todos los dialogos cambian: el 2.0 habla en rojo, frio y amenazante, y sus enemigos le tienen miedo; Mirror Luck habla en verde, como un apostador... y a veces aparece un invitado inesperado.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Arcade: capitulo 5 de Knight</h3>
+          <div class="character-guide">
+            <span><strong>El juramento de Knight</strong> despues de su derrota en Valdoria, Knight sale del castillo con una mision. 7 niveles nuevos con cinematicas, mapas, jefes y musica propios.</span>
+            <span><strong>Un pueblo lleno de caras nuevas</strong> amigos muy entusiastas, un sheriff con pocas pulgas y alguien que cuida la luz noche y dia. Que tan dificil puede ser una simple mision?</span>
+            <span><strong>???</strong> dicen que hay algo mas despues del final... pero solo para quien haya visto todo lo que esconde Moquete.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Modo Hardcore</h3>
+          <div class="character-guide">
+            <span><strong>Hardcore</strong> todo un capitulo de corrido con solo 3 vidas. <strong>Hardercore</strong> todo el capitulo con una sola vida, y la vida que te quede pasa al siguiente nivel.</span>
+            <span>Aparece en la seleccion de niveles de cada capitulo y se desbloquea al terminarlo (los niveles secretos no cuentan). Da monedas la primera vez.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Un secreto mas</h3>
+          <div class="character-guide">
+            <span><strong>???</strong> en algun lugar de Moquete alguien medita en silencio. Nadie sabe como llegar hasta el.</span>
+            <span><strong>Una pista</strong> la fortuna favorece a los que tienen hambre... y paciencia.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Personajes</h3>
+          <div class="character-guide">
+            <span><strong>Knight</strong> un caballero medieval secreto con espada y escudo. Q Estocada, F Muro de escudo (bloquea el 80% del daño), R Juicio del Rey. Para jugarlo tenes que vencer al guardian de su castillo... y para encontrar el castillo, escribi algo bien medieval en el menu.</span>
+            <span><strong>???</strong> alguien muy insistente va a tener su [[OPORTUNIDAD]] de ser jugable. Solo hace falta encontrar la palabra justa.</span>
+            <span><strong>Reflecter 2.0 rediseñado</strong> chasis negro con la misma silueta de siempre, circuitos de luz, nucleo prismatico y dos fragmentos de espejo flotando a su alrededor.</span>
+            <span><strong>Chrono Potenciado</strong> su Retroceso total ahora tambien funciona cuando lo controla un jugador (R o Enter).</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Mapas nuevos</h3>
+          <div class="character-guide">
+            <span><strong>Castillo de Valdoria</strong> el patio de un castillo al atardecer. Si peleas ahi contra el bot, el guardian del castillo te espera en la puerta.</span>
+            <span><strong>Sala de Ventas VIP</strong> el showroom de Scammer, con billetes cayendo y luces de neon. <strong>Sector 0</strong> una parte oculta de la fabrica que nadie deberia haber encontrado.</span>
+            <span><strong>Los mapas del capitulo 5</strong> un bosque magico, un pueblo entero por recorrer... y lugares a los que vas a tener que llegar por tu cuenta.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Musica</h3>
+          <div class="character-guide">
+            <span><strong>Temas nuevos</strong> para los niveles 5 y 6 del capitulo 4 y para cada nivel del capitulo 5.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Tienda de Scammer</h3>
+          <div class="character-guide">
+            <span><strong>Productos nuevos</strong> pinturas neon y joyas para tus colores, el tema "Noche de Casino", un cartel de neon, una corona de "oro macizo", confeti de victoria y la Radio del Contenedor para poner tu propia musica.</span>
+            <span><strong>La Maquina Rara</strong> nadie sabe que hace. Cuesta 9.999.999 monedas... o tal vez haya otra forma de conseguirla, si sos lo bastante insistente.</span>
+            <span><strong>Mas cosas para comprar</strong> un pato de goma (tocalo), aire embotellado de Valdoria, un poster autografiado de Scammer, galletas de la fortuna (muy precisas) y "La Historia de Moquete", un libro de tapa dura con dibujos del autor. No lo des vuelta.</span>
+            <span><strong>Mas preguntas</strong> para hacerle a Scammer: cuanta plata tiene, si escribio el libro y si tiene amigos.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>IA y ajustes</h3>
+          <div class="character-guide">
+            <span><strong>Bot renovado</strong> ahora piensa con tiempo de reaccion, se mueve al borde de tu alcance, castiga tus golpes al aire, presiona, se escapa de las esquinas y salta los proyectiles a tiempo. En el arcade es un poco menos inteligente.</span>
+            <span><strong>Bot clasico</strong> una opcion nueva en Ajustes que devuelve la IA anterior, mas facil de vencer, por si una parte del arcade se te hace imposible.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Secretos, menu y correcciones</h3>
+          <div class="character-guide">
+            <span><strong>Codigo bossrush</strong> ahora tambien desbloquea los jefes y mapas del capitulo 4. <strong>El desafio del caballero</strong> cada personaje tiene su propio dialogo al llegar al castillo.</span>
+            <span><strong>Pantalla VS</strong> antes de cada pelea ahora toma los colores de los luchadores que se enfrentan.</span>
+            <span><strong>Nuevos logros</strong> por completar el capitulo de Reflecter, por el habitante del nivel secreto, por vencer al guardian de Valdoria y... alguno que otro mas.</span>
+            <span><strong>Arreglos</strong> la musica ya no se corta en las escenas a mitad de pelea, los avisos de recompensas ya no quedan tapados y varios detalles visuales del menu y los jefes.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Actualizacion 2.5 (anterior)</h3>
           <div class="character-guide">
             <span><strong>La actualizacion mas grande hasta ahora.</strong> Dos capitulos nuevos de Arcade, un personaje secreto, mapas nuevos, jefes con cinematicas, musica y muchos cambios por dentro.</span>
             <span><em>"Que paso con las 2.1, 2.2, 2.3 y 2.4, senor creador de Moquete?" Nunca lo sabras, amigo. Nunca lo sabras.</em></span>

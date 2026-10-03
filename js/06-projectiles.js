@@ -2011,7 +2011,7 @@ class IcedThugFrostField {
 // Chapter 4 robot attacks. kind: 'discharge' (electric spark rolling along the floor), 'rivet' (rusty bolt),
 // 'scrap' (junk thrown in an arc) or 'tickBomb' (a clock bomb that explodes after a countdown).
 class RobotShot {
-  constructor({ kind, x, y, direction = 1, attacker, target, velocityX = 0, velocityY = 0 }) {
+  constructor({ kind, x, y, direction = 1, attacker, target, velocityX = 0, velocityY = 0, width = null, timer = null, variant = null }) {
     this.kind = kind;
     this.attacker = attacker;
     this.target = target;
@@ -2022,7 +2022,36 @@ class RobotShot {
     this.width = kind === 'discharge' ? 34 : kind === 'rivet' ? 26 : kind === 'scrap' ? 20 : 30;
     this.height = kind === 'discharge' ? 30 : kind === 'rivet' ? 12 : kind === 'scrap' ? 20 : 30;
     this.timer = kind === 'tickBomb' ? 100 : 0;
+    if (width !== null) this.width = width;
+    if (timer !== null) this.timer = timer;
+    if (kind === 'laser') this.height = 20;
+    this.variant = variant;
     this.life = 220;
+    if (kind === 'hammer') {
+      this.width = 46;
+      this.height = 46;
+      this.life = 400;
+    }
+    if (kind === 'energy') {
+      this.width = 64;
+      this.height = 44;
+      this.life = 300;
+    }
+    if (kind === 'bigShot') {
+      this.width = variant === 'small' ? 30 : 56;
+      this.height = variant === 'small' ? 22 : 40;
+      this.life = 260;
+    }
+    if (kind === 'pipis') {
+      this.width = 22;
+      this.height = 26;
+      this.life = 260;
+    }
+    if (kind === 'neoHead') {
+      this.width = 24;
+      this.height = 24;
+      this.life = variant === 'homing' ? 320 : 200;
+    }
     this.spin = Math.random() * Math.PI;
     this.exploded = 0;
     this.active = true;
@@ -2033,7 +2062,151 @@ class RobotShot {
     const centerY = this.position.y + this.height / 2;
     const time = performance.now() / 1000;
     ctx.save();
-    if (this.kind === 'discharge') {
+    if (this.kind === 'pipis') {
+      // a white egg with pink and yellow spots
+      ctx.translate(centerX, centerY);
+      ctx.rotate(this.spin);
+      ctx.fillStyle = '#f5f5f5';
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ff4081';
+      ctx.beginPath();
+      ctx.arc(-4, -4, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fdd835';
+      ctx.beginPath();
+      ctx.arc(4, 5, 3, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (this.kind === 'neoHead') {
+      // a little flying Scammer head
+      ctx.translate(centerX, centerY);
+      ctx.rotate(this.variant === 'homing' ? Math.sin(time * 12) * 0.2 : this.spin);
+      ctx.fillStyle = '#f2f2f2';
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 2;
+      ctx.fillRect(-11, -9, 22, 20);
+      ctx.strokeRect(-11, -9, 22, 20);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-12, -13, 24, 5);
+      ctx.fillStyle = '#f48fb1';
+      ctx.beginPath();
+      ctx.arc(-5, -1, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fdd835';
+      ctx.beginPath();
+      ctx.arc(5, -1, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-6, 5, 12, 3);
+      if (this.variant === 'homing') {
+        ctx.strokeStyle = 'rgba(233, 30, 99, 0.6)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 1, 16, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    } else if (this.kind === 'bigShot') {
+      // NEO SCAMMER's BIG SHOT: a big yellow bullet with a pink trail
+      const trail = ctx.createLinearGradient(centerX - this.direction * 120, centerY, centerX, centerY);
+      trail.addColorStop(0, 'rgba(255, 64, 129, 0)');
+      trail.addColorStop(1, 'rgba(255, 64, 129, 0.6)');
+      ctx.fillStyle = trail;
+      ctx.fillRect(Math.min(centerX, centerX - this.direction * 120), centerY - 10, 120, 20);
+      ctx.shadowColor = '#fdd835';
+      ctx.shadowBlur = 22;
+      ctx.fillStyle = '#fdd835';
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff59d';
+      ctx.beginPath();
+      ctx.ellipse(centerX + this.direction * 8, centerY - 4, this.width / 5, this.height / 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.font = '900 9px Courier New, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('BIG', centerX, centerY + 3);
+    } else if (this.kind === 'energy') {
+      // Omegarius's energy shot: gold, or Reflecter's cyan once his shield bounces it back
+      const rgb = this.reflected ? '38, 198, 218' : '255, 202, 40';
+      const trail = ctx.createLinearGradient(centerX - this.direction * 150, centerY, centerX, centerY);
+      trail.addColorStop(0, `rgba(${rgb}, 0)`);
+      trail.addColorStop(1, `rgba(${rgb}, 0.6)`);
+      ctx.fillStyle = trail;
+      ctx.fillRect(Math.min(centerX, centerX - this.direction * 150), centerY - 14, 150, 28);
+      ctx.shadowColor = `rgb(${rgb})`;
+      ctx.shadowBlur = 26;
+      ctx.fillStyle = `rgba(${rgb}, 0.9)`;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, this.width / 2 + Math.sin(time * 40) * 3, this.height / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(centerX + this.direction * 6, centerY, this.width / 4, this.height / 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      if (this.secret) {
+        // the secret shot: sparkling rings and a hint for the player
+        ctx.strokeStyle = `rgba(${rgb}, 0.6)`;
+        ctx.lineWidth = 3;
+        for (let ring = 0; ring < 2; ring += 1) {
+          ctx.beginPath();
+          ctx.ellipse(centerX, centerY, this.width / 2 + 10 + ring * 12 + Math.sin(time * 20 + ring) * 4, this.height / 2 + 8 + ring * 10, time * 3, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.font = '900 20px Courier New, monospace';
+        ctx.textAlign = 'center';
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#111';
+        ctx.fillStyle = this.reflected ? '#26c6da' : '#ffca28';
+        const hint = this.reflected ? `DEVUELTA! ${this.volleys}/${omegariusSecretVolleys}` : `DEVOLVELA CON EL ESCUDO (Q)!  ${this.volleys}/${omegariusSecretVolleys}`;
+        ctx.strokeText(hint, canvas.width / 2, 150);
+        ctx.fillText(hint, canvas.width / 2, 150);
+      }
+    } else if (this.kind === 'hammer') {
+      // the Juez de Bronce's thrown hammer, spinning
+      ctx.strokeStyle = 'rgba(255, 202, 40, 0.35)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 40, this.spin - 1.4 * Math.sign(this.direction || 1), this.spin);
+      ctx.stroke();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(this.spin);
+      drawOmegariusHammer(0, 40, 0, 0.8);
+    } else if (this.kind === 'discharge' && this.variant === 'gold') {
+      // a gold shockwave from the hammer slam, running along the floor
+      const crest = this.position.y - 8 + Math.sin(time * 30) * 3;
+      ctx.shadowColor = '#ffca28';
+      ctx.shadowBlur = 16;
+      ctx.fillStyle = 'rgba(255, 202, 40, 0.85)';
+      ctx.beginPath();
+      ctx.moveTo(this.position.x - 4, ground);
+      ctx.lineTo(centerX + this.direction * 8, crest);
+      ctx.lineTo(this.position.x + this.width + 4, ground);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#fff8e1';
+      ctx.beginPath();
+      ctx.moveTo(this.position.x + 8, ground);
+      ctx.lineTo(centerX + this.direction * 8, crest + 12);
+      ctx.lineTo(this.position.x + this.width - 8, ground);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#5d3a1a';
+      for (let chip = 0; chip < 3; chip += 1) ctx.fillRect(centerX - this.direction * (10 + chip * 12), ground - 10 - ((time * 90 + chip * 7) % 16), 4, 4);
+      ctx.strokeStyle = 'rgba(255, 202, 40, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(centerX, ground - 2);
+      ctx.lineTo(centerX - this.direction * 70, ground - 2);
+      ctx.stroke();
+    } else if (this.kind === 'discharge') {
       ctx.shadowColor = '#4fc3f7';
       ctx.shadowBlur = 16;
       ctx.fillStyle = 'rgba(179, 229, 252, 0.85)';
@@ -2078,6 +2251,101 @@ class RobotShot {
       ctx.fillStyle = '#263238';
       ctx.fillRect(-6, -2, 3, 3);
       ctx.fillRect(3, -2, 3, 3);
+    } else if (this.kind === 'laser') {
+      const firing = this.timer <= 24;
+      const goldBeam = this.variant === 'gold';
+      const beamRgb = goldBeam ? '255, 202, 40' : '255, 23, 68';
+      if (!firing) {
+        ctx.strokeStyle = Math.floor(this.timer / 4) % 2 === 0 ? `rgba(${beamRgb}, 0.8)` : `rgba(${beamRgb}, 0.25)`;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([12, 8]);
+        ctx.beginPath();
+        ctx.moveTo(this.position.x, centerY);
+        ctx.lineTo(this.position.x + this.width, centerY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      } else {
+        ctx.shadowColor = goldBeam ? '#ffca28' : '#ff1744';
+        ctx.shadowBlur = 24;
+        ctx.fillStyle = `rgba(${beamRgb}, 0.85)`;
+        ctx.fillRect(this.position.x, this.position.y - 4, this.width, this.height + 8);
+        ctx.fillStyle = goldBeam ? '#fff8e1' : '#ffebee';
+        ctx.fillRect(this.position.x, centerY - 3, this.width, 6);
+        ctx.shadowBlur = 0;
+      }
+    } else if (this.kind === 'drop') {
+      const big = this.variant === 'fist';
+      const hammerDrop = this.variant === 'hammer';
+      const dealDrop = this.variant === 'deal';
+      const radius = big ? 80 : hammerDrop ? 58 : dealDrop ? 52 : 48;
+      if (this.exploded > 0) {
+        const blast = radius * (1.3 - this.exploded / 30);
+        const glow = ctx.createRadialGradient(centerX, ground - 20, 0, centerX, ground - 20, blast);
+        glow.addColorStop(0, `rgba(255, 255, 255, ${this.exploded / 18})`);
+        glow.addColorStop(0.5, hammerDrop ? `rgba(255, 213, 79, ${this.exploded / 22})` : `rgba(255, 138, 101, ${this.exploded / 22})`);
+        glow.addColorStop(1, 'rgba(255, 87, 34, 0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(centerX - blast, ground - 20 - blast, blast * 2, blast * 2);
+      } else {
+        const warn = Math.min(1, 1 - this.timer / 60);
+        ctx.fillStyle = `rgba(0, 0, 0, ${0.2 + warn * 0.4})`;
+        ctx.beginPath();
+        ctx.ellipse(centerX, ground - 2, radius * (0.4 + warn * 0.6), 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = hammerDrop ? `rgba(255, 202, 40, ${0.4 + Math.random() * 0.4})` : `rgba(255, 23, 68, ${0.4 + Math.random() * 0.4})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(centerX, ground - 2, radius, 12, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        if (this.timer < 16) {
+          // the object falling from the ceiling
+          const fallY = ground - 20 - this.timer * 34;
+          if (hammerDrop) {
+            drawOmegariusHammer(centerX, fallY - 112, Math.PI, 1, 1.3);
+          } else if (dealDrop) {
+            // a little Scammer head, grinning, with its pink and yellow glasses
+            ctx.fillStyle = '#f2f2f2';
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 2;
+            ctx.fillRect(centerX - 14, fallY - 30, 28, 28);
+            ctx.strokeRect(centerX - 14, fallY - 30, 28, 28);
+            ctx.fillStyle = '#111';
+            ctx.fillRect(centerX - 14, fallY - 32, 28, 6);
+            ctx.fillStyle = '#ff4081';
+            ctx.fillRect(centerX - 13, fallY - 23, 11, 7);
+            ctx.fillStyle = '#fdd835';
+            ctx.fillRect(centerX + 2, fallY - 23, 11, 7);
+            ctx.fillStyle = '#111';
+            ctx.fillRect(centerX - 8, fallY - 11, 16, 5);
+            ctx.fillStyle = '#ff4081';
+            ctx.font = '900 10px Courier New, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('[[DEAL]]', centerX, fallY - 38);
+          } else if (big) {
+            ctx.fillStyle = '#455a64';
+            ctx.fillRect(centerX - 44, fallY - 70, 88, 70);
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(centerX - 44, fallY - 70, 88, 70);
+            ctx.fillStyle = '#263238';
+            for (let knuckle = 0; knuckle < 4; knuckle += 1) ctx.fillRect(centerX - 40 + knuckle * 21, fallY - 14, 18, 14);
+            ctx.fillStyle = '#7e57c2';
+            ctx.fillRect(centerX - 44, fallY - 78, 88, 10);
+          } else {
+            ctx.fillStyle = '#b0bec5';
+            ctx.fillRect(centerX - 6, fallY - 36, 12, 30);
+            ctx.fillStyle = '#ff1744';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 6, fallY - 6);
+            ctx.lineTo(centerX + 6, fallY - 6);
+            ctx.lineTo(centerX, fallY + 6);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 171, 64, 0.8)';
+            ctx.fillRect(centerX - 3, fallY - 56, 6, 20);
+          }
+        }
+      }
     } else if (this.kind === 'tickBomb') {
       if (this.exploded > 0) {
         const radius = 30 + (18 - this.exploded) * 5;
@@ -2121,7 +2389,56 @@ class RobotShot {
   update() {
     this.previousPosition = { ...this.position };
     this.life -= 1;
-    if (this.kind === 'discharge') {
+    if (this.kind === 'energy' || this.kind === 'bigShot') {
+      this.position.x += this.velocity.x;
+    } else if (this.kind === 'pipis') {
+      this.velocity.y += 0.38;
+      this.position.x += this.velocity.x;
+      this.position.y += this.velocity.y;
+      this.spin += 0.2;
+    } else if (this.kind === 'neoHead') {
+      if (this.variant === 'homing' && this.timer > 0) {
+        // chases the target for a while, then flies straight on
+        this.timer -= 1;
+        const targetX = this.target.position.x + this.target.width / 2 - this.width / 2;
+        const targetY = this.target.position.y + this.target.height / 2 - this.height / 2;
+        const distanceX = targetX - this.position.x;
+        const distanceY = targetY - this.position.y;
+        const distance = Math.hypot(distanceX, distanceY) || 1;
+        this.velocity.x += ((distanceX / distance) * 4.2 - this.velocity.x) * 0.06;
+        this.velocity.y += ((distanceY / distance) * 4.2 - this.velocity.y) * 0.06;
+      } else if (this.variant !== 'homing') {
+        this.velocity.y += 0.25;
+        this.spin += 0.3;
+      }
+      this.position.x += this.velocity.x;
+      this.position.y += this.velocity.y;
+      if (this.position.y > ground + 40 || this.position.y < -120) this.active = false;
+    } else if (this.kind === 'hammer') {
+      // flies out, then comes back to the hand that threw it
+      this.spin += 0.45 * (this.direction || 1);
+      if (!this.returning) {
+        this.position.x += this.velocity.x;
+        this.traveled = (this.traveled || 0) + Math.abs(this.velocity.x);
+        if (this.traveled > 560 || this.position.x < 0 || this.position.x + this.width > canvas.width) {
+          this.position.x = Math.max(0, Math.min(canvas.width - this.width, this.position.x));
+          this.returning = true;
+        }
+      } else {
+        const owner = this.attacker;
+        const homeX = owner.position.x + owner.width / 2 - this.width / 2;
+        const homeY = owner.position.y + 40;
+        const distanceX = homeX - this.position.x;
+        const distanceY = homeY - this.position.y;
+        const distance = Math.hypot(distanceX, distanceY);
+        if (distance < 18 || owner.health <= 0) {
+          this.active = false;
+        } else {
+          this.position.x += (distanceX / distance) * 14;
+          this.position.y += (distanceY / distance) * 14;
+        }
+      }
+    } else if (this.kind === 'discharge') {
       this.position.x += this.velocity.x;
       this.position.y = ground - this.height;
     } else if (this.kind === 'rivet') {
@@ -2132,13 +2449,16 @@ class RobotShot {
       this.position.y += this.velocity.y;
       this.spin += 0.3;
       if (this.position.y + this.height >= ground) this.active = false;
-    } else if (this.kind === 'tickBomb') {
+    } else if (this.kind === 'laser') {
+      this.timer -= 1;
+      if (this.timer <= 0) this.active = false;
+    } else if (this.kind === 'tickBomb' || this.kind === 'drop') {
       if (this.exploded > 0) {
         this.exploded -= 1;
         if (this.exploded <= 0) this.active = false;
       } else {
         this.timer -= 1;
-        if (this.timer % 15 === 0) playSound('robotTick');
+        if (this.kind === 'tickBomb' && this.timer % 15 === 0) playSound('robotTick');
       }
     }
     if (this.life <= 0 || this.position.x < -80 || this.position.x > canvas.width + 80) this.active = false;
