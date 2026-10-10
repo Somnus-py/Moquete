@@ -177,6 +177,8 @@ class Fighter {
   }
 
   draw() {
+    // (nothing left but dust)
+    if (this.dusted) return;
     if (blindMode) {
       this.drawBlindDetails();
       return;
@@ -227,6 +229,21 @@ class Fighter {
       return;
     }
 
+    if (this.secretVariant === 'angryCustomer') {
+      drawAngryCustomer(this);
+      return;
+    }
+
+    if (isPolice(this)) {
+      drawPolice(this);
+      return;
+    }
+
+    if (isFriendThing(this)) {
+      drawFriendThing(this);
+      return;
+    }
+
     const factoryRobot = hybridEnemyTypes[this.secretVariant] && hybridEnemyTypes[this.secretVariant].robot;
     if (this.characterType === 'tank') {
       this.drawTankDetails();
@@ -245,6 +262,7 @@ class Fighter {
 
     if (this.characterType === 'fireMaster') {
       this.drawFireMasterDetails();
+      if (this.frostFire) drawFrostFireDetails(this);
     }
 
     if (this.characterType === 'normal' && this.kaiokenTimer > 0) {
@@ -301,6 +319,10 @@ class Fighter {
 
     if (this === player1 && isShopExtraOn('plasticCrown')) {
       this.drawShopCrown();
+    }
+
+    if (this === player1 && isShopExtraOn('pumpkinHead')) {
+      this.drawShopPumpkin();
     }
 
     if (this.icedSlowTimer > 0 || this.icedVulnerableTimer > 0) {
@@ -1760,13 +1782,35 @@ class Fighter {
     ctx.arc(4, -30, 13, 0, Math.PI * 2);
     ctx.arc(16, -24, 10, 0, Math.PI * 2);
     ctx.fill();
-    for (let puff = 0; puff < 3; puff += 1) {
-      const rise = (time * 40 + puff * 14) % 42;
-      ctx.fillStyle = `rgba(236, 239, 241, ${0.7 - rise / 60})`;
-      ctx.beginPath();
-      ctx.arc(-14 + puff * 14 + Math.sin(time * 5 + puff) * 4, -40 - rise, 6 + rise / 7, 0, Math.PI * 2);
-      ctx.fill();
+    if (!this.chefCalm) {
+      for (let puff = 0; puff < 3; puff += 1) {
+        const rise = (time * 40 + puff * 14) % 42;
+        ctx.fillStyle = `rgba(236, 239, 241, ${0.7 - rise / 60})`;
+        ctx.beginPath();
+        ctx.arc(-14 + puff * 14 + Math.sin(time * 5 + puff) * 4, -40 - rise, 6 + rise / 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
+    if (this.chefCalm) {
+      // a calm chef: normal skin, relaxed brows, a big mustache and a little smile
+      ctx.fillStyle = '#ffcc99';
+      ctx.fillRect(-22, 2, 44, 34);
+      ctx.fillStyle = '#1b1b1b';
+      ctx.fillRect(3, 13, 4, 5);
+      ctx.fillRect(15, 13, 4, 5);
+      ctx.fillStyle = '#5d4037';
+      ctx.fillRect(1, 8, 8, 2);
+      ctx.fillRect(13, 8, 8, 2);
+      ctx.beginPath();
+      ctx.ellipse(5, 24, 8, 4, 0.3, 0, Math.PI * 2);
+      ctx.ellipse(17, 24, 8, 4, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#8d5b3e';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(11, 28, 5, 0.2 * Math.PI, 0.8 * Math.PI);
+      ctx.stroke();
+    } else {
     // a red, furious face
     ctx.fillStyle = '#ef9a9a';
     ctx.fillRect(-22, 2, 44, 34);
@@ -1795,6 +1839,7 @@ class Fighter {
       ctx.moveTo(tooth, 29);
       ctx.lineTo(tooth, 34);
       ctx.stroke();
+    }
     }
     // red scarf, dark trousers
     ctx.fillStyle = '#e53935';
@@ -2958,6 +3003,50 @@ class Fighter {
   }
 
   // the Corona de Rey from Scammer's shop (plastic, but golden)
+  // a carved jack-o'-lantern over the head, with a candle flickering inside
+  drawShopPumpkin() {
+    const centerX = this.position.x + this.width / 2;
+    const top = this.position.y - 6;
+    const time = performance.now() / 1000;
+    const flicker = 0.7 + Math.sin(time * 17) * 0.15 + Math.sin(time * 7) * 0.1;
+    ctx.save();
+    ctx.fillStyle = '#ef6c00';
+    ctx.strokeStyle = '#3e1a00';
+    ctx.lineWidth = 2;
+    [-16, 0, 16].forEach((offset, index) => {
+      ctx.beginPath();
+      ctx.ellipse(centerX + offset * 0.8, top + 18, index === 1 ? 16 : 14, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    });
+    ctx.fillStyle = '#4e342e';
+    ctx.fillRect(centerX - 3, top - 8, 6, 10);
+    ctx.fillStyle = '#558b2f';
+    ctx.beginPath();
+    ctx.ellipse(centerX + 9, top - 4, 7, 3, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    // the carved face, glowing
+    ctx.fillStyle = `rgba(255, 213, 79, ${flicker})`;
+    ctx.shadowColor = '#ffca28';
+    ctx.shadowBlur = 10;
+    [[-12, 10], [6, 10]].forEach(([eyeX, eyeY]) => {
+      ctx.beginPath();
+      ctx.moveTo(centerX + eyeX, top + eyeY + 8);
+      ctx.lineTo(centerX + eyeX + 3, top + eyeY);
+      ctx.lineTo(centerX + eyeX + 6, top + eyeY + 8);
+      ctx.closePath();
+      ctx.fill();
+    });
+    ctx.beginPath();
+    ctx.moveTo(centerX - 14, top + 25);
+    for (let tooth = 0; tooth <= 7; tooth += 1) ctx.lineTo(centerX - 14 + tooth * 4, top + 25 + (tooth % 2 ? 6 : 0));
+    ctx.lineTo(centerX + 14, top + 33);
+    ctx.quadraticCurveTo(centerX, top + 38, centerX - 14, top + 33);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
   drawShopCrown() {
     const centerX = this.position.x + this.width / 2;
     const base = this.position.y - 3;
@@ -3526,7 +3615,8 @@ class Fighter {
       return;
     }
     if (this.secretVariant === 'scammer') {
-      this.drawScammerDetails();
+      if (this.youngScammer) drawYoungScammerDetails(this);
+      else this.drawScammerDetails();
       return;
     }
     const x = this.position.x;
@@ -4768,7 +4858,19 @@ class Fighter {
 
   update() {
     if (gameOver) return;
-    this.draw();
+    if (this.flametombTilt) {
+      // (Flametomb: crooked in the air... or shaking afterwards)
+      const centerX = this.position.x + this.width / 2;
+      const centerY = this.position.y + this.height / 2;
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(this.flametombTilt);
+      ctx.translate(-centerX, -centerY);
+      this.draw();
+      ctx.restore();
+    } else {
+      this.draw();
+    }
     if (this.scriptedFlight) return;
 
     if (this.chronoTimeStopTimer > 0) {
@@ -5206,6 +5308,8 @@ class Fighter {
 
   attack(isStrong = false) {
     if (this.isAttacking || gameOver) return;
+    // after Flametomb in chapter 2 he can't fight anymore
+    if (this.flametombTrauma || this.routeBPanic) return;
     if (!canFighterAct(this)) return;
     if (this.gamblerStunTimer > 0) return;
     if (this.characterType === 'cowboy' && isDesertCowboyDuelPreparing()) return;
@@ -5584,6 +5688,18 @@ class Fighter {
       };
       this.color = '#37474f';
       this.attackColor = 'rgba(255, 23, 68, 0.5)';
+    } else if (originsVariants.includes(this.secretVariant)) {
+      [this.width, this.height] = originsSizes[this.secretVariant];
+      this.moveSpeed = playerMoveSpeed * originsSpeeds[this.secretVariant];
+      this.damageMultiplier = originsDamage[this.secretVariant];
+      this.attackDuration = 12;
+      this.attackBox = {
+        offset: { x: this.attacksToTheRight ? this.width : -80, y: 40 },
+        width: 80,
+        height: 32,
+      };
+      this.color = this.secretVariant === 'angryCustomer' ? '#6d4c41' : isFriendThing(this) ? '#050505' : '#1a237e';
+      this.attackColor = isFriendThing(this) ? 'rgba(206, 147, 216, 0.35)' : 'rgba(144, 202, 249, 0.5)';
     } else if (this.secretVariant === 'shaolinMaster') {
       this.width = 60;
       this.height = 120;

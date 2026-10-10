@@ -211,6 +211,10 @@ function animate() {
   drawSpiritOrbsFx();
   drawOmegaKickFx();
   drawShaolinFx();
+  drawPoliceFx();
+  drawYoungScammerFx();
+  drawFriendFx();
+  drawFlametombFx();
   drawHardcoreHud();
   if (jesterNeedsFinalAct(player2) && player2.health <= 0) player2.health = 1;
 
@@ -252,6 +256,7 @@ function getCharacterDisplayName(fighter) {
   if (fighter.secretVariant === 'chefBoss') return 'Chef Furioso';
   if (fighter.secretVariant === 'lanternGuard') return 'Guardia del Farol';
   if (fighter.secretVariant === 'shaolinMaster') return 'Shang Ting';
+  if (originsNames[fighter.secretVariant]) return originsNames[fighter.secretVariant];
   if (fighter.characterType === 'cowboy' && fighter.sheriffBadge) return 'Sheriff Cowboy';
   if (fighter.secretVariant === 'setoBoy') return 'Seto';
   if (fighter.secretVariant === 'darkKnightBoss') return 'Capitan Oscuro';
@@ -360,6 +365,7 @@ function getPlayerAbilityCooldowns(player) {
       r: { active: true, name: 'Guadana del bufon', remaining: player.jesterScytheCooldown, max: getDebugCooldown(jesterScytheCooldown, player) },
     };
   }
+  if (player.youngScammer) return getYoungScammerCooldowns(player);
   if (isScammer(player)) {
     return {
       q: { active: true, name: 'Oferta irresistible', remaining: player.scammerOfferCooldown, max: getScammerCooldown(scammerOfferCooldown, player) },
@@ -416,6 +422,8 @@ function getPlayerAbilityCooldowns(player) {
             isSuperFireMaster(player) ? getDebugCooldown(superFireKamehamehaChargeDuration + superFireKamehamehaDuration, player) : 0
           ),
         },
+        // the forbidden third spell, once it is learned
+        r: getFlametombCooldown(player),
       };
     case 'lightWarrior':
       return {
@@ -1355,6 +1363,8 @@ window.addEventListener('keydown', (event) => {
     return;
   }
   if (jesterFinal.active || omegariusFinal.active || scamFinal.active || dodgeRound.active || farolClimb.active) {
+    // route B: NEO's box has a shooting mode (Q)
+    if (scamFinal.active && scamFinal.routeB && (event.key === 'q' || event.key === 'Q') && !event.repeat) fireRouteBShot();
     const movementKeys = { a: 'a', A: 'a', d: 'd', D: 'd', w: 'w', W: 'w', s: 's', S: 's', ArrowLeft: 'ArrowLeft', ArrowRight: 'ArrowRight', ArrowUp: 'ArrowUp', ArrowDown: 'ArrowDown' };
     if (movementKeys[event.key]) {
       keys[movementKeys[event.key]] = true;
@@ -1384,11 +1394,14 @@ window.addEventListener('keydown', (event) => {
     case 'Q':
       if (keys.q) break;
       keys.q = true;
+      if (player1.flametombTrauma || player1.routeBPanic) break;
+      if (keys.r && handleMiniFlametomb(player1, player2)) break;
       if (handleNeoScammerKey(player1, player2, 0, [keys.q, keys.f, keys.r])) break;
       if (handleKnightKey(player1, player2, 0)) break;
       if (handleShaolinKey(player1, player2, 0, [keys.q, keys.f, keys.r])) break;
       if (handleMagicTownKey(player1, player2, 0)) break;
       if (handleFactoryRobotKey(player1, player2, 0, [keys.q, keys.f, keys.r])) break;
+      if (handleYoungScammerKey(player1, player2, 'q')) break;
       if (isScammer(player1)) {
         launchScamOffer(player1, player2);
         break;
@@ -1420,11 +1433,13 @@ window.addEventListener('keydown', (event) => {
     case 'F':
       if (keys.f) break;
       keys.f = true;
+      if (player1.flametombTrauma || player1.routeBPanic) break;
       if (handleNeoScammerKey(player1, player2, 1, [keys.q, keys.f, keys.r])) break;
       if (handleKnightKey(player1, player2, 1)) break;
       if (handleShaolinKey(player1, player2, 1, [keys.q, keys.f, keys.r])) break;
       if (handleMagicTownKey(player1, player2, 1)) break;
       if (handleFactoryRobotKey(player1, player2, 1, [keys.q, keys.f, keys.r])) break;
+      if (handleYoungScammerKey(player1, player2, 'f')) break;
       if (isScammer(player1)) {
         throwScamItems(player1, player2);
         break;
@@ -1460,6 +1475,8 @@ window.addEventListener('keydown', (event) => {
       }
       if (keys.r) break;
       keys.r = true;
+      if (keys.q && handleMiniFlametomb(player1, player2)) break;
+      if (handleFlametombKey(player1, player2)) break;
       if (isChronoRival(player1)) {
         castChronoTotalRewind(player1);
         break;
@@ -1469,6 +1486,7 @@ window.addEventListener('keydown', (event) => {
       if (handleShaolinKey(player1, player2, 2, [keys.q, keys.f, keys.r])) break;
       if (handleMagicTownKey(player1, player2, 2)) break;
       if (handleFactoryRobotKey(player1, player2, 2, [keys.q, keys.f, keys.r])) break;
+      if (handleYoungScammerKey(player1, player2, 'r')) break;
       if (isScammer(player1)) {
         dropScamSlotMachine(player1, player2);
         break;
@@ -1573,6 +1591,7 @@ window.addEventListener('keydown', (event) => {
     case 'Enter':
       if (keys.enter) break;
       keys.enter = true;
+      if (!botEnabled && handleFlametombKey(player2, player1)) break;
       if (!botEnabled && isChronoRival(player2)) {
         castChronoTotalRewind(player2);
         break;
@@ -2286,6 +2305,8 @@ function castJesterSuits(attacker, target) {
 
 function isJesterSecretUnlocked(attacker, secret) {
   if (!isShadowJester(attacker)) return false;
+  // (tired from opening a portal: no secret tricks)
+  if (attacker.jesterWeakened) return false;
   if (secret === 'final') return attacker.health <= jesterFinalUnlockHealth;
   return attacker.health <= (secret === 'storm' ? jesterStormUnlockHealth : jesterRingUnlockHealth);
 }
@@ -2332,6 +2353,7 @@ function handleJesterAbilityKey(attacker, target, slot, held) {
 }
 
 function updateJesterSecretUnlocks(fighter) {
+  if (fighter.jesterWeakened) return;
   const tier = fighter.health <= jesterStormUnlockHealth ? 2 : fighter.health <= jesterRingUnlockHealth ? 1 : 0;
   if (tier > fighter.jesterSecretTier && fighter.health > 0) {
     fighter.jesterSecretTier = tier;
@@ -3393,6 +3415,7 @@ function getArcadeBossVariantHealth(fighter) {
   if (fighter.secretVariant === 'mochiMouse') return mochiHealth;
   if (fighter.secretVariant === 'chefBoss') return chefBossHealth;
   if (fighter.secretVariant === 'lanternGuard') return lanternGuardHealth;
+  if (originsHealth[fighter.secretVariant]) return originsHealth[fighter.secretVariant];
   if (fighter.secretVariant === 'shaolinMaster') return shaolinChallenge.active && fighter === player2 ? shaolinHealth : playableShaolinHealth;
   if (fighter.secretVariant === 'setoBoy') return setoHealth;
   if (fighter.secretVariant === 'darkKnightBoss') return darkKnightBossHealth;
@@ -4285,6 +4308,9 @@ function updateFactoryRobots() {
     if (fighter.sheriffBadge) updateSheriffCowboy(fighter);
     if (fighter.secretVariant === 'lanternGuard') updateLanternGuard(fighter);
     if (fighter.secretVariant === 'shaolinMaster') updateShaolin(fighter);
+    if (isPolice(fighter)) updatePolice(fighter);
+    if (isFriendThing(fighter)) updateFriendThing(fighter);
+    if (fighter.youngScammer) updateYoungScammer(fighter);
   });
   // NEO SCAMMER's scenes during the fight: tired at 200, his ULTIMA OFERTA at 10
   if (scamChallenge.active && scamChallenge.stage === 'neo' && isNeoScammer(player2) && player2.health > 0 && !arcadeCutscene.active && !scamFinal.active) {
@@ -5536,6 +5562,11 @@ function castScamFinalAct(attacker, target) {
     whiteFrame: 0,
     finale: null,
     lastSounds: {},
+    // (route B extras never carry over into another NEO fight)
+    routeB: false,
+    rbItems: [],
+    rbShots: [],
+    shootOn: false,
   });
   recordSpecialUsed(attacker);
   resetKeys();
@@ -5637,6 +5668,11 @@ function spawnScamSpinner() {
 
 function spawnScamPattern(phase, t) {
   const final = scamFinal;
+  if (phase.pattern.startsWith('rb')) {
+    spawnRouteBPattern(phase, t);
+    return;
+  }
+  if (final.routeB) spawnRouteBRedExtras(phase, t);
   if (t < final.nextSpawn) return;
   const box = final.boxTarget;
   const randomX = () => box.x + 24 + Math.random() * (box.width - 48);
@@ -5717,6 +5753,11 @@ function getScamUltimateSafeSpot(item) {
 
 function updateScamFinale() {
   const final = scamFinal;
+  // route B: Fire Master resists... until the white flash
+  if (final.routeB) {
+    updateRouteBFinale(final);
+    return;
+  }
   const finale = final.finale;
   const caster = final.caster;
   finale.t += 1;
@@ -6302,10 +6343,16 @@ function drawScamFinalSoul() {
   const savedPosition = { ...target.position };
   const savedFacing = target.attacksToTheRight;
   ctx.save();
-  ctx.fillStyle = 'rgba(255, 64, 129, 0.16)';
+  // (route B: the soul is red)
+  ctx.fillStyle = final.routeB ? 'rgba(255, 23, 68, 0.35)' : 'rgba(255, 64, 129, 0.16)';
   ctx.beginPath();
   ctx.arc(center.x, center.y, 24, 0, Math.PI * 2);
   ctx.fill();
+  if (final.routeB) {
+    ctx.strokeStyle = '#ff1744';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
   ctx.translate(center.x, center.y);
   ctx.scale(0.3, 0.3);
   target.position = { x: -target.width / 2, y: -target.height / 2 };
@@ -6320,6 +6367,10 @@ function drawScamFinalSoul() {
 
 function finishScamFinalAct() {
   const final = scamFinal;
+  if (final.routeB) {
+    restoreRouteBScamPhases();
+    routeBEnding.pending = true;
+  }
   const target = final.target;
   const caster = final.caster;
   final.active = false;
@@ -6390,12 +6441,15 @@ function updateScamFinalAct() {
   });
   moveScamFinalSoul();
   updateScamFinalItems();
+  if (final.routeB) updateRouteBShooter();
 
   // ----- drawing -----
   const introProgress = Math.min(1, final.frame / 60);
   ctx.save();
   ctx.translate((Math.random() - 0.5) * final.shake, (Math.random() - 0.5) * final.shake);
-  drawScamShowroomStage();
+  // (route B: the edge of Ciudad Cobalto behind the box)
+  if (final.routeB) drawCobaltEdgeStage();
+  else drawScamShowroomStage();
   const finaleDark = final.finale && final.finale.step !== 'break' ? 0.14 : 0;
   ctx.fillStyle = `rgba(0, 0, 0, ${0.78 * introProgress + finaleDark})`;
   ctx.fillRect(-20, -20, canvas.width + 40, canvas.height + 40);
@@ -6422,6 +6476,7 @@ function updateScamFinalAct() {
   ctx.rect(box.x - 2, box.y - 2, box.width + 4, box.height + 4);
   ctx.clip();
   final.items.forEach(drawScamFinalItem);
+  if (final.routeB) drawRouteBShooter();
   ctx.restore();
   drawScamFinalSoul();
   if (final.finale) drawScamFinaleFront();
@@ -7383,6 +7438,12 @@ function spawnDodgePattern(pattern, t) {
   const round = dodgeRound;
   const box = round.boxTarget;
   const soul = getDodgeSoulCenter();
+  // a harder theme spawns each pattern twice, out of step (the giant cake half a cycle later)
+  if (round.config.doubleSpawn && !round.doubling) {
+    round.doubling = true;
+    spawnDodgePattern(pattern, t + (pattern === 'giantCake' ? 47 : 11));
+    round.doubling = false;
+  }
   // in the charged mode some attacks come BLUE: they can be parried with the dash
   const blueTypes = ['drop', 'side', 'aimed'];
   const push = (item) => {
@@ -7390,6 +7451,7 @@ function spawnDodgePattern(pattern, t) {
     round.items.push({ life: 400, warn: 0, ...item, blue });
   };
   if (spawnLightBoxPattern(pattern, t, push, box, soul)) return;
+  if (spawnFriendBoxPattern(pattern, t, push, box, soul)) return;
   if (spawnJesterFinalePattern(pattern, t, push, box, soul)) return;
   if (pattern === 'pastryRain') {
     if (t % 16 === 0) push({ type: 'drop', sprite: 'pastry', x: box.x + 20 + Math.random() * (box.width - 40), y: box.y - 20, vy: 4.2 + Math.random() * 1.5, r: 11, warn: 24 });
@@ -7816,7 +7878,7 @@ function drawDodgeItem(item) {
     ctx.fillStyle = glow;
     ctx.fillRect(item.x - (item.r || 10) - 12, item.y - (item.r || 10) - 12, ((item.r || 10) + 12) * 2, ((item.r || 10) + 12) * 2);
   }
-  if (drawLightBoxItem(item, box, spin)) {
+  if (drawFriendBoxItem(item, box) || drawLightBoxItem(item, box, spin)) {
     ctx.restore();
     return;
   }
@@ -8134,6 +8196,7 @@ function updateDodgeRound() {
     if (round.outroFrame >= 70) {
       finishDodgeRound();
       if (config.onEnd === 'riftClash') startRiftClash();
+      if (config.onEnd === 'friendBoxEnd') friendBoxEnd();
       return;
     }
   } else if (round.stage === 'finale') {
@@ -8745,6 +8808,7 @@ function drawLightBoxHelpers(round) {
         actor.setCharacterType('normal', helper.variant);
       }
       if (helper.powered) actor.mochiPowered = true;
+      if (helper.variant === 'chefBoss') actor.chefCalm = true;
       return { actor, helper };
     });
   }
@@ -8769,12 +8833,13 @@ function drawLightBoxHelpers(round) {
 function drawLightBoxTalk(round) {
   const line = round.config.talk[round.talkIndex];
   if (!line) return;
-  const names = { lightWarrior: 'LIGHT WARRIOR', knight: 'KNIGHT', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', cowboy: 'SHERIFF COWBOY' };
-  const accents = { lightWarrior: '#fff59d', knight: '#90caf9', celeste: '#4fc3f7', seto: '#66bb6a', mochi: '#ef5350', chef: '#ffcc80', cowboy: '#ff7043' };
+  const names = { lightWarrior: 'LIGHT WARRIOR', knight: 'KNIGHT', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', cowboy: 'SHERIFF COWBOY', friend: '? ? ?', scammer: 'SCAMMER' };
+  const accents = { lightWarrior: '#fff59d', knight: '#90caf9', celeste: '#4fc3f7', seto: '#66bb6a', mochi: '#ef5350', chef: '#ffcc80', cowboy: '#ff7043', friend: '#ff4fa3', scammer: '#fdd835' };
   const accent = accents[line.speaker] || '#ffffff';
   const shown = line.text.slice(0, Math.floor(round.talkFrame * 1.6));
   ctx.save();
-  const top = 100;
+  // (over the empty box: the health bars cover the top of the screen)
+  const top = 250;
   ctx.fillStyle = 'rgba(8, 6, 12, 0.94)';
   ctx.fillRect(112, top, 800, 92);
   ctx.strokeStyle = accent;
@@ -9035,10 +9100,8 @@ function hurtFarolClimbKnight(direction, ratio = farolClimbHitRatio) {
   if (knight.invuln > 0) return;
   player1.health = Math.max(1, player1.health - player1.maxHealth * ratio);
   knight.invuln = 50;
-  knight.kb = direction * 6;
-  knight.vy = -6;
-  knight.grounded = false;
-  knight.on = null;
+  // no knockback: a hit hurts, but it never throws Knight off his disc
+  knight.kb = 0;
   climb.hits += 1;
   playSound('judgeFinalHurt');
   updateHealthBars();
@@ -9353,8 +9416,8 @@ function drawFarolClimb() {
     ctx.lineWidth = 5;
     ctx.font = '900 22px Courier New, monospace';
     ctx.textAlign = 'center';
-    ctx.strokeText(climb.caption.text, canvas.width / 2, 150);
-    ctx.fillText(climb.caption.text, canvas.width / 2, 150);
+    ctx.strokeText(climb.caption.text, canvas.width / 2, 180);
+    ctx.fillText(climb.caption.text, canvas.width / 2, 180);
     ctx.restore();
   }
   if (climb.flash > 0) {
@@ -9734,12 +9797,12 @@ function drawOmegaKickFx() {
   if (fight.stage !== 'brawl' && fight.stage !== 'spiritsOut') {
     ctx.fillStyle = '#fff59d';
     ctx.font = '900 14px Courier New, monospace';
-    ctx.fillText(`PATADAS: ${fight.kick} / ${omegaKickTotal}`, canvas.width / 2, 98);
+    ctx.fillText(`PATADAS: ${fight.kick} / ${omegaKickTotal}`, canvas.width / 2, 160);
   }
   if (fight.stage === 'brawl') {
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 14px Courier New, monospace';
-    ctx.fillText(`VUELVE AL CIELO EN ${Math.ceil((omegaKickBreakFrames - fight.frame) / 60)}`, canvas.width / 2, 98);
+    ctx.fillText(`VUELVE AL CIELO EN ${Math.ceil((omegaKickBreakFrames - fight.frame) / 60)}`, canvas.width / 2, 160);
   }
   if (fight.caption && fight.caption.life > 0) {
     ctx.globalAlpha = Math.min(1, fight.caption.life / 20);
@@ -9747,8 +9810,8 @@ function drawOmegaKickFx() {
     ctx.strokeStyle = '#111';
     ctx.lineWidth = 5;
     ctx.font = '900 20px Courier New, monospace';
-    ctx.strokeText(fight.caption.text, canvas.width / 2, 130);
-    ctx.fillText(fight.caption.text, canvas.width / 2, 130);
+    ctx.strokeText(fight.caption.text, canvas.width / 2, 192);
+    ctx.fillText(fight.caption.text, canvas.width / 2, 192);
     ctx.globalAlpha = 1;
   }
   ctx.textAlign = 'left';
@@ -10986,6 +11049,7 @@ function unlockMagicTownCode() {
   magicTownCodeActive = true;
   magicTownCharacterButtons.forEach((button) => button.classList.remove('hidden'));
   magicTownMapButtons.forEach((button) => button.classList.remove('hidden'));
+  buildMagicTownPreviews();
   showCustomToast('MAGICTOWN ACTIVADO', 'Los habitantes de Robledal (y algunos que no son tan amables) ya se pueden elegir, junto con sus mapas. Q, F y R para sus habilidades.');
   playSound('achievement');
 }
@@ -11046,4 +11110,72 @@ function handleMagicTownKey(fighter, target, slot) {
     if (slot === 2 && !(fighter.guardFlashCooldown > 0)) castGuardFlash(fighter, target);
   }
   return true;
+}
+
+// the roster and map previews of MAGICTOWN are rendered from the real game drawings
+// (drawn on the game canvas for a moment, copied into small images, and the canvas is put back)
+let magicTownPreviewsBuilt = false;
+
+function buildMagicTownPreviews() {
+  if (magicTownPreviewsBuilt) return;
+  magicTownPreviewsBuilt = true;
+  const saved = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const savedMap = selectedMap;
+  const thumb = document.createElement('canvas');
+  const thumbCtx = thumb.getContext('2d');
+  // maps: the lower part of the stage, where the fight happens
+  thumb.width = 360;
+  thumb.height = 140;
+  magicTownMapButtons.forEach((button) => {
+    try {
+      selectedMap = button.dataset.map;
+      ctx.save();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawStage();
+      ctx.restore();
+      const sourceHeight = canvas.width * (thumb.height / thumb.width);
+      thumbCtx.clearRect(0, 0, thumb.width, thumb.height);
+      thumbCtx.drawImage(canvas, 0, canvas.height - sourceHeight - 10, canvas.width, sourceHeight, 0, 0, thumb.width, thumb.height);
+      const preview = button.querySelector('.map-preview');
+      preview.style.backgroundImage = `url(${thumb.toDataURL()})`;
+      preview.classList.add('rendered-preview');
+    } catch (error) {
+      // keep the simple preview
+    }
+  });
+  selectedMap = savedMap;
+  // fighters: each one drawn alone, facing right, on a transparent background
+  thumb.width = 140;
+  thumb.height = 168;
+  magicTownCharacterButtons.forEach((button) => {
+    try {
+      const variant = button.dataset.magicVariant;
+      const actor = new Fighter({ x: 0, y: 0, color: '#9e9e9e', attacksToTheRight: true });
+      actor.setCharacterType('normal', variant);
+      if (variant === 'celesteGirl' || variant === 'setoBoy') resetRobledalKid(actor);
+      if (variant === 'mochiMouse') resetMochi(actor);
+      if (variant === 'chefBoss') resetChefBoss(actor);
+      if (variant === 'lanternGuard') resetLanternGuard(actor);
+      if (variant === 'darkKnight' || variant === 'darkKnightBoss') resetKnightState(actor);
+      ctx.save();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      actor.position = { x: 400, y: 300 - actor.height };
+      actor.attacksToTheRight = true;
+      actor.isAttacking = false;
+      actor.draw();
+      ctx.restore();
+      // a box around the fighter, keeping its proportions
+      const boxHeight = Math.max(actor.height + 36, 110);
+      const boxWidth = boxHeight * (thumb.width / thumb.height);
+      const centerX = 400 + actor.width / 2;
+      thumbCtx.clearRect(0, 0, thumb.width, thumb.height);
+      thumbCtx.drawImage(canvas, centerX - boxWidth / 2, 304 - boxHeight, boxWidth, boxHeight, 0, 0, thumb.width, thumb.height);
+      const preview = button.querySelector('.character-preview');
+      preview.style.backgroundImage = `url(${thumb.toDataURL()})`;
+      preview.classList.add('rendered-preview');
+    } catch (error) {
+      // keep the simple preview
+    }
+  });
+  ctx.putImageData(saved, 0, 0);
 }

@@ -480,6 +480,8 @@ function getReflecterBattleTrackKey() {
   // versus against (or as) NEO SCAMMER plays BIG SHOT
   if (!normalArcadeActive && (player1.secretVariant === 'neoScammer' || player2.secretVariant === 'neoScammer')) return 'scamNeo';
   if (normalArcadeActive && arcadeChapter === 'knight' && player2.secretVariant === 'chefBoss') return 'furiousChef';
+  if (normalArcadeActive && arcadeChapter === 'origins') return getOriginsTrackKey();
+  if (normalArcadeActive && arcadeChapter === 'gamblerB' && isNeoScammer(player2)) return 'scamNeo';
   if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 8) return 'worldRoaring';
   if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 7) return 'lightFinal';
   if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 6) return 'lanternGuardian';
@@ -504,6 +506,11 @@ function stopReflecterBattleMusic() {
 // pausing (not restarting) through mid-fight cutscenes.
 function updateReflecterBattleMusic() {
   if (typeof Audio === 'undefined') return;
+  // (Flametomb: nothing but silence)
+  if (typeof isFlametombSilence === 'function' && isFlametombSilence()) {
+    stopReflecterBattleMusic();
+    return;
+  }
   const midFightScene = arcadeCutscene.active && (ch7MidFightScenes.includes(arcadeCutscene.scene) || arcadeCutscene.scene === 'knightFarolTop' || arcadeCutscene.scene === 'knightRiftAngry');
   const fighting = gameStarted && !gameOver && (!arcadeCutscene.active || midFightScene);
   // Light Warrior arrives in the Bosque Lumina with his own cheerful theme

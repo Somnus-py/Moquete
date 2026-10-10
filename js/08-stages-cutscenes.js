@@ -491,6 +491,8 @@ function getGamblerCityCorruption() {
     if (!gameOver) versusCityCorruption = Math.min(1, (performance.now() - fightStartedAt) / versusCityCorruptionMs);
     return versusCityCorruption;
   }
+  // chapter 3B: the city already bending around a Fire Master who shouldn't be there
+  if (normalArcadeActive && arcadeChapter === 'gamblerB') return Math.min(0.5, 0.12 + selectedNormalArcadeLevel * 0.1);
   if (!normalArcadeActive || arcadeChapter !== 'gambler') return 0;
   return Math.max(0, Math.min(1, (selectedNormalArcadeLevel - 1) / (gamblerArcadeLevelCount - 1)));
 }
@@ -891,6 +893,39 @@ function endArcadeCutscene() {
     startOmegaKickFight();
     return;
   }
+  if (arcadeCutscene.scene === 'originsOutro') {
+    // the end of the special chapter: the victory, from inside the dumpster
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+    player1.position = { x: 360, y: ground - player1.height };
+    player2.health = 0;
+    player2.position = { x: canvas.width + 400, y: ground - player2.height };
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGamblerAlleyStage(0, 0);
+    finishFight();
+    return;
+  }
+  if (arcadeCutscene.scene === 'knightApproach' && arcadeCutscene.stage === 'flee') {
+    // he left... Light Warrior "wins" without throwing a punch
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+    player2.fleeTaunt = true;
+    selectedMap = 'farolBridge';
+    player1.position = { x: -400, y: ground - player1.height };
+    player2.position = { x: 620, y: ground - player2.height };
+    player1.health = 0;
+    player2.health = player2.maxHealth;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawFarolBridgeStage();
+    player2.draw();
+    normalArcadeEnemiesRemaining = 0;
+    finishFight();
+    return;
+  }
   if (arcadeCutscene.scene === 'knightRiftAbduct') {
     // to be continued... (the level counts as done)
     if (animationId) {
@@ -1187,6 +1222,9 @@ function endArcadeCutscene() {
       player2.judgeSwing = 0;
     }
     if (arcadeCutscene.scene === 'scamFinalStart') castScamFinalAct(player2, player1);
+    // chapter 3B, level 4: Gambler is gone; now it's Fire Master's fight
+    if (arcadeCutscene.scene === 'routeB3Meet') finishRouteB3Meet();
+    if (arcadeCutscene.scene === 'routeB5Final') castRouteBScamFinal();
     [player1, player2].forEach((fighter) => {
       fighter.velocity.x = 0;
       fighter.velocity.y = 0;
@@ -2226,6 +2264,7 @@ function startCutsceneLine(index) {
   arcadeCutscene.lastBlip = 0;
   if (line.menace && isPlayerReflecterUpgrade()) playSound('judgeCore');
   if (line.cameo) startGamblerCameo(line.cameo);
+  if (line.laugh && typeof playFriendLaugh === 'function') playFriendLaugh(line.laugh);
   if (line.emote) {
     const emoteSounds = { '!': 'cutsceneSurprise', '?': 'cutsceneQuestion', '$': 'cutsceneCash', '#!': 'cutsceneAngry', 'JA!': 'jesterLaugh', '!!': 'jesterLaugh', '?!': 'cutsceneQuestion' };
     if (emoteSounds[line.emote.symbol]) playSound(emoteSounds[line.emote.symbol]);
@@ -2279,12 +2318,14 @@ function advanceArcadeCutscene() {
     if (cutscene.lineIndex + 1 < cutscene.lines.length) {
       startCutsceneLine(cutscene.lineIndex + 1);
       playSound('menuMove');
+    } else if (cutscene.scene === 'knightApproach' && cutscene.stage === 'flee') {
+      endArcadeCutscene();
     } else if (cutscene.scene === 'knightApproach' && cutscene.stage === 'warning') {
       // back to walking
       cutscene.phase = 'approach';
       cutscene.frame = 0;
       cutscene.emote = null;
-    } else if (cutscene.scene === 'knightRiftAbduct' || cutscene.scene === 'knightRiftAngry' || cutscene.scene === 'knightFarolEnd' || cutscene.scene === 'knightGuardFall' || cutscene.scene === 'knightSheriffStand' || cutscene.scene === 'knightSheriffEnd' || cutscene.scene === 'knightSpaVictory' || cutscene.scene === 'knightAlley' || cutscene.scene === 'knightOutro' || cutscene.scene === 'knightLight' || cutscene.scene === 'jesterTired' || cutscene.scene === 'jesterOutroCity' || cutscene.scene === 'jesterImpatient' || cutscene.scene === 'chronoAscent' || ch7MidFightScenes.includes(cutscene.scene)) {
+    } else if (cutscene.scene === 'originsOutro' || cutscene.scene === 'knightRiftAbduct' || cutscene.scene === 'knightRiftAngry' || cutscene.scene === 'knightFarolEnd' || cutscene.scene === 'knightGuardFall' || cutscene.scene === 'knightSheriffStand' || cutscene.scene === 'knightSheriffEnd' || cutscene.scene === 'knightSpaVictory' || cutscene.scene === 'knightAlley' || cutscene.scene === 'knightOutro' || cutscene.scene === 'knightLight' || cutscene.scene === 'jesterTired' || cutscene.scene === 'jesterOutroCity' || cutscene.scene === 'jesterImpatient' || cutscene.scene === 'chronoAscent' || ch7MidFightScenes.includes(cutscene.scene)) {
       endArcadeCutscene();
     } else if (cutscene.scene === 'jesterAngry') {
       cutscene.phase = 'screenThrow';
@@ -2560,6 +2601,13 @@ function drawCutsceneDialog() {
     darkKnightBoss: '#ff5252',
     lanternGuard: '#ffca28',
     shang: '#ffb300',
+    customer: '#a1887f',
+    police: '#64b5f6',
+    sergeant: '#42a5f5',
+    chief: '#e3f2fd',
+    origEyes: '#ff4fa3',
+    origNarrator: '#b0bec5',
+    friend: '#ff4fa3',
     darkWhisper: '#7e57c2',
     icedThug: '#80deea',
     iceMaster: '#4fc3f7',
@@ -2598,8 +2646,11 @@ function drawCutsceneDialog() {
     }
     ctx.restore();
   }
-  const speakerNames = { gambler: 'GAMBLER', scammer: 'SCAMMER', jester: 'SHADOW JESTER', reflecter: isPlayerReflecterUpgrade() ? 'REFLECTER 2.0' : 'REFLECTER', chrono: 'CHRONO', omegarius: 'OMEGARIUS', neoScammer: 'NEO SCAMMER', knight: 'KNIGHT', lightWarrior: 'LIGHT WARRIOR', divineGeneral: 'DIVINE GENERAL', tank: 'LIVING TANK', gangBoss: 'JEFE DE LA BANDA', mossBeast: 'BESTIA DEL MUSGO', darkKnight: 'CABALLERO OSCURO', lanternGuard: 'GUARDIA DEL FAROL', shang: 'SHANG TING', darkWhisper: 'VOZ OSCURA', lightNote: 'NOTA DE L.W.', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', darkKnightBoss: 'CAPITAN OSCURO', icedThug: 'MATON HELADO', iceMaster: 'ICE MASTER', assembler: 'ENSAMBLADORA', chronoBoost: 'CHRONO POTENCIADO', titan: 'PROYECTO TITAN', normal: 'NORMAL', fireMaster: 'FIRE MASTER', cowboy: 'COWBOY', switcher: 'SWITCHER', sorcerer: 'SORCERER', ghost: 'GHOST', monkey: 'MONKEI' };
+  const speakerNames = { gambler: 'GAMBLER', scammer: 'SCAMMER', jester: 'SHADOW JESTER', reflecter: isPlayerReflecterUpgrade() ? 'REFLECTER 2.0' : 'REFLECTER', chrono: 'CHRONO', omegarius: 'OMEGARIUS', neoScammer: 'NEO SCAMMER', knight: 'KNIGHT', lightWarrior: 'LIGHT WARRIOR', divineGeneral: 'DIVINE GENERAL', tank: 'LIVING TANK', gangBoss: 'JEFE DE LA BANDA', mossBeast: 'BESTIA DEL MUSGO', darkKnight: 'CABALLERO OSCURO', lanternGuard: 'GUARDIA DEL FAROL', shang: 'SHANG TING', customer: 'CLIENTE ENOJADO', police: 'POLICIA', sergeant: 'SARGENTO', chief: 'COMISARIO', origEyes: '???', origNarrator: 'MAS TARDE', friend: '???', darkWhisper: 'VOZ OSCURA', lightNote: 'NOTA DE L.W.', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', darkKnightBoss: 'CAPITAN OSCURO', icedThug: 'MATON HELADO', iceMaster: 'ICE MASTER', assembler: 'ENSAMBLADORA', chronoBoost: 'CHRONO POTENCIADO', titan: 'PROYECTO TITAN', normal: 'NORMAL', fireMaster: 'FIRE MASTER', cowboy: 'COWBOY', switcher: 'SWITCHER', sorcerer: 'SORCERER', ghost: 'GHOST', monkey: 'MONKEI' };
   ctx.save();
+  // in the last levels of chapter 5 the box goes lower, under the health bars
+  const dialogDrop = 0;
+  ctx.translate(0, dialogDrop);
   ctx.fillStyle = 'rgba(8, 6, 12, 0.92)';
   ctx.fillRect(56 + shake, 60, 912, 112);
   ctx.strokeStyle = accent;
@@ -2691,6 +2742,9 @@ function updateAndDrawArcadeCutscene() {
   if (cutscene.scene === 'knightGuardIntro' || cutscene.scene === 'knightGuardFall') updateKnightGuard(cutscene);
   if (cutscene.scene === 'knightApproach') updateKnightApproach(cutscene);
   if (cutscene.scene === 'knightFarolTop') updateKnightFarolTop(cutscene);
+  if (cutscene.scene === 'originsOutro') updateOriginsOutro(cutscene);
+  if (cutscene.scene === 'originsIntro') updateOriginsIntro(cutscene);
+  if (cutscene.scene === 'routeB3Meet') updateRouteB3Meet(cutscene);
   if (cutscene.scene === 'knightFarolEnd') updateKnightFarolEnd(cutscene);
   if (cutscene.scene === 'knightRiftIntro') updateKnightRiftIntro(cutscene);
   if (cutscene.scene === 'knightRiftAbduct') updateKnightRiftAbduct(cutscene);
@@ -2854,6 +2908,10 @@ function updateAndDrawArcadeCutscene() {
     drawChronoIntroWallHoles();
   } else if (cutscene.scene === 'knightJailIntro' || cutscene.scene === 'knightSheriffStand' || cutscene.scene === 'knightSheriffEnd') {
     drawRobledalJailStage(cutscene.posterFocus || 0);
+  } else if (cutscene.scene === 'originsOutro') {
+    drawOriginsOutroStage(cutscene);
+  } else if (cutscene.scene === 'originsIntro' || cutscene.scene === 'routeB3Meet' || cutscene.scene === 'routeB5Final') {
+    drawStage();
   } else if (cutscene.scene === 'shaolinIntro') {
     drawShaolinTempleStage();
     updateShaolinIntro(cutscene);
@@ -2943,7 +3001,7 @@ function updateAndDrawArcadeCutscene() {
       player1.draw();
       ctx.restore();
     }
-  } else if (cutscene.scene === 'jesterImpatient' || cutscene.scene === 'jesterAngry' || cutscene.scene === 'knightRiftAbduct') {
+  } else if (cutscene.scene === 'jesterImpatient' || cutscene.scene === 'jesterAngry' || cutscene.scene === 'knightRiftAbduct' || (cutscene.scene === 'originsOutro' && cutscene.hideHero)) {
     // Gambler is gone; only Jester is on stage
   } else if (cutscene.scene === 'jesterLoseBored' && cutscene.phase === 'dialog') {
     drawDownedFighter(player1);
@@ -2951,7 +3009,7 @@ function updateAndDrawArcadeCutscene() {
     if (cutscene.phase === 'arrive') player1.attacksToTheRight = Math.floor(cutscene.frame / 22) % 2 === 0;
     player1.draw();
   }
-  const scammerVisible = cutscene.phase !== 'walk' && cutscene.phase !== 'rattle' && cutscene.scene !== 'jesterOutroCity' && !(cutscene.scene === 'knightAlley' && !cutscene.darkOut) && !(cutscene.scene === 'knightRiftIntro' && !cutscene.jesterOut) && cutscene.scene !== 'knightRiftAbduct';
+  const scammerVisible = cutscene.phase !== 'walk' && cutscene.phase !== 'rattle' && cutscene.scene !== 'jesterOutroCity' && !(cutscene.scene === 'knightAlley' && !cutscene.darkOut) && !(cutscene.scene === 'knightRiftIntro' && !cutscene.jesterOut) && cutscene.scene !== 'knightRiftAbduct' && cutscene.scene !== 'originsOutro' && !(cutscene.scene === 'originsIntro' && cutscene.hideEnemy);
   if (scammerVisible) {
     const realRage = player2.scammerRage;
     const realColor = player2.color;
@@ -2993,6 +3051,9 @@ function updateAndDrawArcadeCutscene() {
   if (cutscene.scene === 'knightFarolEnd') drawKnightFarolEndFx(cutscene);
   if (cutscene.scene === 'knightRiftIntro') drawKnightRiftIntroFx(cutscene);
   if (cutscene.scene === 'knightRiftAbduct') drawKnightRiftAbductFx(cutscene);
+  if (cutscene.scene === 'originsOutro') drawOriginsOutroFx(cutscene);
+  if (cutscene.scene === 'originsIntro') drawOriginsIntroFx(cutscene);
+  if (cutscene.scene === 'routeB3Meet') drawRouteB3MeetFx(cutscene);
   if (cutscene.scene === 'shaolinIntro') drawShaolinIntroFx(cutscene);
 
   cutscene.particles.forEach((particle) => {
@@ -3085,9 +3146,9 @@ function updateAndDrawArcadeCutscene() {
     ctx.lineJoin = 'round';
     ctx.font = '900 38px Courier New, monospace';
     ctx.textAlign = 'center';
-    const ch6Names = { ch6Intro: 'ROBOTS DE LA PLANTA 7', ch6Chrono: 'CHRONO', ch6Giant: 'PROYECTO TITAN', ch7Intro: 'OMEGARIUS', scamIntro: 'SCAMMER', scamNeo: 'NEO SCAMMER', knightIntro: 'KNIGHT', knightForestIntro: 'BESTIA DEL MUSGO', knightVillageIntro: 'ORDEN SOMBRIA', knightPlazaIntro: 'CELESTE', knightSetoIntro: 'SETO', knightKidsTeam: 'CELESTE Y SETO', knightSpaIntro: 'MOCHI', knightMochiBarrage: 'MOCHI POTENCIADO', knightChefFury: 'CHEF FURIOSO', knightJailIntro: 'SHERIFF COWBOY', knightGuardIntro: 'GUARDIA DEL FAROL', knightApproach: 'LIGHT WARRIOR', knightFarolTop: 'OMEGA LIGHT WARRIOR', knightRiftIntro: 'SHADOW JESTER', shaolinIntro: 'SHANG TING' };
+    const ch6Names = { ch6Intro: 'ROBOTS DE LA PLANTA 7', ch6Chrono: 'CHRONO', ch6Giant: 'PROYECTO TITAN', ch7Intro: 'OMEGARIUS', scamIntro: 'SCAMMER', scamNeo: 'NEO SCAMMER', knightIntro: 'KNIGHT', knightForestIntro: 'BESTIA DEL MUSGO', knightVillageIntro: 'ORDEN SOMBRIA', knightPlazaIntro: 'CELESTE', knightSetoIntro: 'SETO', knightKidsTeam: 'CELESTE Y SETO', knightSpaIntro: 'MOCHI', knightMochiBarrage: 'MOCHI POTENCIADO', knightChefFury: 'CHEF FURIOSO', knightJailIntro: 'SHERIFF COWBOY', knightGuardIntro: 'GUARDIA DEL FAROL', knightApproach: 'LIGHT WARRIOR', knightFarolTop: 'OMEGA LIGHT WARRIOR', knightRiftIntro: 'SHADOW JESTER', shaolinIntro: 'SHANG TING', originsIntro: isFriendThing(player2) ? '? ? ?' : (getCharacterDisplayName(player2) || '').toUpperCase() };
     const versusName = ch6Names[cutscene.scene] || (cutscene.scene === 'chronoIntro' ? 'CHRONO' : cutscene.scene === 'jester' ? 'SHADOW JESTER' : cutscene.rageVisible ? 'SCAMMER FURIOSO' : 'SCAMMER');
-    const scamScene = cutscene.scene === 'scamIntro' || cutscene.scene === 'scamNeo' || cutscene.scene === 'knightIntro' || cutscene.scene === 'knightForestIntro' || cutscene.scene === 'knightVillageIntro' || cutscene.scene === 'knightPlazaIntro' || cutscene.scene === 'knightSetoIntro' || cutscene.scene === 'knightKidsTeam' || cutscene.scene === 'knightSpaIntro' || cutscene.scene === 'knightMochiBarrage' || cutscene.scene === 'knightChefFury' || cutscene.scene === 'knightJailIntro' || cutscene.scene === 'knightGuardIntro' || cutscene.scene === 'knightApproach' || cutscene.scene === 'knightFarolTop' || cutscene.scene === 'knightRiftIntro' || cutscene.scene === 'shaolinIntro';
+    const scamScene = cutscene.scene === 'scamIntro' || cutscene.scene === 'scamNeo' || cutscene.scene === 'knightIntro' || cutscene.scene === 'knightForestIntro' || cutscene.scene === 'knightVillageIntro' || cutscene.scene === 'knightPlazaIntro' || cutscene.scene === 'knightSetoIntro' || cutscene.scene === 'knightKidsTeam' || cutscene.scene === 'knightSpaIntro' || cutscene.scene === 'knightMochiBarrage' || cutscene.scene === 'knightChefFury' || cutscene.scene === 'knightJailIntro' || cutscene.scene === 'knightGuardIntro' || cutscene.scene === 'knightApproach' || cutscene.scene === 'knightFarolTop' || cutscene.scene === 'knightRiftIntro' || cutscene.scene === 'shaolinIntro' || cutscene.scene === 'originsIntro';
     const heroName = scamScene ? getCharacterDisplayName(player1).toUpperCase() : cutscene.scene === 'chronoIntro' || ch6Names[cutscene.scene] ? (isPlayerReflecterUpgrade() ? 'REFLECTER 2.0' : 'REFLECTER') : 'GAMBLER';
     ctx.strokeText(`${heroName}  VS  ${versusName}`, canvas.width / 2, 250);
     ctx.fillText(`${heroName}  VS  ${versusName}`, canvas.width / 2, 250);
@@ -6032,6 +6093,13 @@ function drawStage() {
     return;
   }
 
+  if (drawOriginsStage()) return;
+
+  if (selectedMap === 'farolBridge') {
+    drawFarolBridgeStage();
+    return;
+  }
+
   if (selectedMap === 'farolRift') {
     drawFarolRiftStage(1);
     return;
@@ -6897,12 +6965,20 @@ function updateFightAchievements(winnerPlayer, fightTime) {
 }
 
 function finishFight() {
+  // (the reset refills Light Warrior's health: keep who actually won)
+  const healthAtEnd = [player1.health, player2.health];
   resetLightWarriorOmegaState(player1);
   resetLightWarriorOmegaState(player2);
+  player1.health = Math.min(player1.maxHealth, healthAtEnd[0]);
+  player2.health = Math.min(player2.maxHealth, healthAtEnd[1]);
   stopOmegaBattleTrack();
   stopReflecterBattleMusic();
   if (scamChallenge.active && scamChallenge.stage === 'normal' && player1.health > 0 && player2.health <= 0) {
     startScamNeoCutscene();
+    return;
+  }
+  if (normalArcadeActive && arcadeChapter === 'origins' && (selectedNormalArcadeLevel === 5 || selectedNormalArcadeLevel === originsLevelCount || selectedNormalArcadeLevel === originsSecretLevel) && !originsOutroPlayed && player1.health > 0 && player2.health <= 0) {
+    startOriginsOutro();
     return;
   }
   if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 4 && !knightSpaOutroPlayed && player1.health > 0 && player2.health <= 0) {
@@ -6999,6 +7075,7 @@ function finishFight() {
       if (arcadeChapter === 'reflecter') unlockAchievement('reflecterArcadeCompleted');
     }
     if (arcadeChapter === 'gambler' && selectedNormalArcadeLevel === 5) unlockAchievement('scammerDefeated');
+    if (arcadeChapter === 'origins' && selectedNormalArcadeLevel === originsLevelCount) unlockAchievement('originsCompleted');
     if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === knightSecretLevel) {
       try {
         localStorage.setItem(knightSecretBeatenStorageKey, '1');
@@ -7132,6 +7209,30 @@ function returnToMenu() {
   player2.spiritCount = 0;
   player2.eyeLook = undefined;
   player1.riftResolve = false;
+  player1.youngScammer = false;
+  player1.originsFear = 0;
+  player1.youngGlasses = false;
+  player1.youngScar = false;
+  player1.frostFire = false;
+  // (leaving after Flametomb: the music comes back)
+  if (typeof setFlametombSilence === 'function') {
+    flametomb.active = false;
+    flametomb.aftermath = false;
+    flametomb.spirit = null;
+    flametomb.darkness = 0;
+    stopFlametombSound();
+    setFlametombSilence(false);
+    cleanupRouteBState();
+    // (the frozen Fire Master of 3B goes back to normal stats)
+    if (player1.frostFire) {
+      player1.setMaxHealth(100);
+      player1.damageMultiplier = 1;
+    }
+  }
+  player1.originsCrazy = false;
+  player1.originsDizzy = false;
+  player2.jesterWeakened = false;
+  player2.fleeTaunt = false;
   riftClash.active = false;
   omegaKickFight.active = false;
   player2.scriptedFlight = false;
@@ -10424,6 +10525,18 @@ function updateKnightApproach(cutscene) {
     player1.velocity.x = move * 3.2;
     player1.attacksToTheRight = move >= 0;
     if (move !== 0 && cutscene.frame % 16 === 0) playSound('cutsceneStep');
+    // walking back against the left edge: Knight leaves the fight
+    cutscene.backHold = move < 0 && cutscene.gamblerX <= 12 ? (cutscene.backHold || 0) + 1 : 0;
+    if (cutscene.backHold >= 40) {
+      player1.velocity.x = 0;
+      resetKeys();
+      cutscene.stage = 'flee';
+      cutscene.lines = knightApproachFleeLines;
+      cutscene.phase = 'dialog';
+      cutscene.frame = 0;
+      startCutsceneLine(0);
+      return;
+    }
     // Light Warrior steps back toward the farol, still facing Knight
     const retreatGoal = knightApproachRetreatX[cutscene.warnings];
     cutscene.scammerTargetX = retreatGoal;
@@ -10622,14 +10735,14 @@ function drawKnightApproachFx(cutscene) {
   // how to move, while walking
   if (cutscene.phase === 'approach') {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
-    ctx.fillRect(canvas.width / 2 - 220, 40, 440, 46);
+    ctx.fillRect(canvas.width / 2 - 300, 110, 600, 46);
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 16px Courier New, monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('A / D para caminar - no podes atacar', canvas.width / 2, 60);
+    ctx.fillText('A / D para caminar - no podes atacar - A contra el borde: irte', canvas.width / 2, 130);
     ctx.fillStyle = '#fff59d';
     ctx.font = '700 13px Courier New, monospace';
-    ctx.fillText(cutscene.warnings >= 3 ? 'Light Warrior ya no te va a advertir.' : `Advertencias: ${cutscene.warnings} / 3`, canvas.width / 2, 78);
+    ctx.fillText(cutscene.warnings >= 3 ? 'Light Warrior ya no te va a advertir.' : `Advertencias: ${cutscene.warnings} / 3`, canvas.width / 2, 148);
     ctx.textAlign = 'left';
   }
 }
@@ -10756,12 +10869,8 @@ function drawFarolBridgeStage() {
   [[bridgeEnd + 30, ground - 20, 50, 14], [bridgeEnd + 90, ground - 5, 70, 16], [bridgeEnd + 60, ground + 20, 60, 14], [bridgeEnd + 120, ground + 36, 50, 12]].forEach(([rockX, rockY, rockW, rockH]) => ctx.fillRect(rockX, rockY, rockW, rockH));
   ctx.fillStyle = '#3c6e47';
   [[bridgeEnd + 40, ground - 44, 30], [bridgeEnd + 110, ground - 47, 40], [width - 40, ground - 48, 36]].forEach(([mossX, mossY, mossW]) => ctx.fillRect(mossX, mossY, mossW, 4));
-  // a stone dais under the farol
-  ctx.fillStyle = '#7a7d99';
-  ctx.fillRect(width - 140, ground - 58, 130, 12);
-  ctx.fillStyle = '#5f6283';
-  ctx.fillRect(width - 128, ground - 70, 106, 12);
-  drawGreatLantern(width - 75, ground - 70, 1, ground + 30);
+  // the base of the Gran Farol: the same tall stone tower Knight will climb, rising out of sight
+  drawFarolTowerBase(width - 150, 130, ground - 44);
   // the bridge: back railing with balusters, lamp posts with little blue pennants
   ctx.fillStyle = '#4a4d6b';
   ctx.fillRect(0, ground - 44, bridgeEnd, 7);
@@ -11023,8 +11132,8 @@ function drawFarolTopStage(flare = 0) {
   }
   ctx.fillStyle = 'rgba(126, 87, 194, 0.9)';
   ctx.fillRect(0, ground - 70, width, 70);
-  // the giant lantern of the farol, right behind the fight
-  drawGreatLantern(width / 2, ground - 6, 1.35, ground + 220, flare);
+  // the lantern room on top of the tower: a stone pedestal, iron posts and the giant lantern
+  drawFarolLanternRoom(width / 2, flare);
   // the railing at the back of the balcony
   ctx.fillStyle = '#5a5d7d';
   ctx.fillRect(0, ground - 46, width, 7);
@@ -11064,6 +11173,83 @@ function drawFarolTopStage(flare = 0) {
     ctx.fillStyle = `rgba(255, 249, 196, ${flare * 0.25})`;
     ctx.fillRect(0, 0, width, canvas.height);
   }
+}
+
+// the tower of the Gran Farol seen from its foot (same stones, bands and windows as in the climb)
+function drawFarolTowerBase(x, towerWidth, baseY) {
+  const time = performance.now() / 1000;
+  const centerX = x + towerWidth / 2;
+  // the beam of the lantern, far above, sweeping over the night
+  const sweep = Math.sin(time * 0.6) * 0.5;
+  ctx.save();
+  ctx.translate(centerX, -10);
+  ctx.rotate(-Math.PI / 2 - 0.9 + sweep);
+  const beam = ctx.createLinearGradient(0, 0, 900, 0);
+  beam.addColorStop(0, 'rgba(255, 245, 157, 0.55)');
+  beam.addColorStop(1, 'rgba(255, 245, 157, 0)');
+  ctx.fillStyle = beam;
+  ctx.beginPath();
+  ctx.moveTo(0, -10);
+  ctx.lineTo(900, -120);
+  ctx.lineTo(900, 120);
+  ctx.lineTo(0, 10);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+  const glow = ctx.createRadialGradient(centerX, 0, 4, centerX, 0, 160);
+  glow.addColorStop(0, 'rgba(255, 241, 118, 0.55)');
+  glow.addColorStop(1, 'rgba(255, 241, 118, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(centerX - 160, -60, 320, 220);
+  // the tower body
+  ctx.fillStyle = '#4e5170';
+  ctx.fillRect(x, -10, towerWidth, baseY + 10);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+  ctx.fillRect(x + towerWidth - 22, -10, 22, baseY + 10);
+  for (let band = baseY - 110; band > -20; band -= 120) {
+    ctx.fillStyle = '#5f6283';
+    ctx.fillRect(x - 8, band, towerWidth + 16, 10);
+    ctx.fillStyle = `rgba(255, 213, 79, ${0.55 + Math.sin(time * 2 + band) * 0.2})`;
+    ctx.fillRect(centerX - 8, band - 60, 16, 26);
+  }
+  // the heavy door at its foot
+  ctx.fillStyle = '#3e2723';
+  ctx.beginPath();
+  ctx.moveTo(centerX - 26, baseY);
+  ctx.lineTo(centerX - 26, baseY - 60);
+  ctx.quadraticCurveTo(centerX, baseY - 84, centerX + 26, baseY - 60);
+  ctx.lineTo(centerX + 26, baseY);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#ffca28';
+  ctx.fillRect(centerX + 12, baseY - 32, 5, 5);
+  ctx.fillStyle = '#7a7d99';
+  ctx.fillRect(x - 14, baseY - 8, towerWidth + 28, 10);
+}
+
+// the top of the tower: the giant lantern on its stone pedestal, framed by iron posts
+function drawFarolLanternRoom(centerX, flare) {
+  const pedestalTop = ground - 120;
+  ctx.fillStyle = '#4e5170';
+  ctx.fillRect(centerX - 110, pedestalTop, 220, 120);
+  ctx.fillStyle = '#5f6283';
+  ctx.fillRect(centerX - 122, pedestalTop - 10, 244, 12);
+  ctx.fillRect(centerX - 122, pedestalTop + 50, 244, 8);
+  drawGreatLantern(centerX, pedestalTop - 4, 1.5, ground + 260, flare);
+  // the iron frame of the lantern room
+  ctx.strokeStyle = '#263238';
+  ctx.lineWidth = 6;
+  [-104, 104].forEach((offset) => {
+    ctx.beginPath();
+    ctx.moveTo(centerX + offset, pedestalTop - 10);
+    ctx.lineTo(centerX + offset * 0.75, pedestalTop - 250);
+    ctx.stroke();
+  });
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(centerX - 78, pedestalTop - 250);
+  ctx.quadraticCurveTo(centerX, pedestalTop - 290, centerX + 78, pedestalTop - 250);
+  ctx.stroke();
 }
 
 // the climb backdrop: the sky, the clouds sliding down, and the tower of the farol with its top
@@ -11116,7 +11302,11 @@ function drawFarolClimbBackdrop(climb) {
   }
   // the top: the balcony of the farol, and the giant lantern
   if (topScreen > -320 && topScreen < canvas.height + 40) {
-    drawGreatLantern(900, topScreen - 6, 0.9, 700);
+    ctx.fillStyle = '#4e5170';
+    ctx.fillRect(840, topScreen - 70, 120, 70);
+    ctx.fillStyle = '#5f6283';
+    ctx.fillRect(832, topScreen - 78, 136, 10);
+    drawGreatLantern(900, topScreen - 74, 0.9, 700);
     ctx.fillStyle = '#7a7d99';
     ctx.fillRect(690, topScreen, 320, 16);
     ctx.fillStyle = '#5a5d7d';
@@ -11188,6 +11378,7 @@ function updateKnightFarolTop(cutscene) {
         actor.setCharacterType('normal', friend.variant);
       }
       if (friend.powered) actor.mochiPowered = true;
+      if (friend.variant === 'chefBoss') actor.chefCalm = true;
       return { actor, start: 40 + index * 22 };
     });
     playSound('judgeFinalStart');
@@ -13649,6 +13840,10 @@ const versusTypeColors = {
 function getVersusColor(fighter) {
   if (!fighter) return '#7b1fa2';
   if (fighter.characterType === 'cowboy' && fighter.sheriffBadge) return '#c62828';
+  if (fighter.youngScammer) return '#c62828';
+  if (isPolice(fighter)) return '#1a237e';
+  if (isFriendThing(fighter)) return '#ff4fa3';
+  if (fighter.secretVariant === 'angryCustomer') return '#6d4c41';
   if (fighter.secretVariant && versusVariantColors[fighter.secretVariant]) return versusVariantColors[fighter.secretVariant];
   if (versusTypeColors[fighter.characterType]) return versusTypeColors[fighter.characterType];
   return fighter.color || '#7b1fa2';

@@ -907,7 +907,7 @@ let normalArcadeActive = false;
 let arcadeChapter = 'normal';
 let normalArcadeEnemiesRemaining = 0;
 let arcadeBossesUnlocked = false;
-const arcadeBossVariants = ['arcadeBoss', 'icedThug', 'iceMaster', 'scammer', 'shadowJester', 'neoScammer', 'knight', 'mossBeast', 'darkKnight', 'darkKnightBoss', 'celesteGirl', 'setoBoy', 'mochiMouse', 'chefBoss', 'lanternGuard', 'shaolinMaster'];
+const arcadeBossVariants = ['arcadeBoss', 'icedThug', 'iceMaster', 'scammer', 'shadowJester', 'neoScammer', 'knight', 'mossBeast', 'darkKnight', 'darkKnightBoss', 'celesteGirl', 'setoBoy', 'mochiMouse', 'chefBoss', 'lanternGuard', 'shaolinMaster', 'angryCustomer', 'policeOfficer', 'policeSergeant', 'policeChief'];
 // ---------------- Scammer's challenge: insisting on the Maquina Rara without the coins ----------------
 const scamChallenge = { active: false, stage: 'normal', hero: 'normal', pickedByScammer: false, prevBot: false, prevDifficulty: 'medium', timer: null, timeLeft: 0 };
 // any character except Light Warrior and Divine General
@@ -1150,6 +1150,8 @@ dodgeRoundThemes.lightBox2 = {
   blueChance: 0.3,
   phaseFrames: lightBoxPhaseFrames,
   helpers: [{ variant: 'chefBoss', color: '#ffffff', x: 100 }, { variant: 'mochiMouse', color: '#9e9e9e', x: 210, powered: true }],
+  // the chef and Mochi together: everything comes twice
+  doubleSpawn: true,
   talk: [
     { speaker: 'lightWarrior', text: 'BOX ATTACK numero dos! Vengan, ustedes dos!' },
     { speaker: 'mochi', text: 'Eh!? Estaba en medio de mi entrenamiento!' },
@@ -1340,6 +1342,7 @@ const achievementIds = [
   'omegariusDefeated',
   'knightUnlocked',
   'shaolinDefeated',
+  'originsCompleted',
 ];
 const achievementCoinRewards = {
   firstWin: 100,
@@ -1372,6 +1375,7 @@ const achievementCoinRewards = {
   omegariusDefeated: 5000,
   knightUnlocked: 3000,
   shaolinDefeated: 4000,
+  originsCompleted: 4000,
 };
 const divineGeneralTrialAchievements = [
   'perfectDuel',
@@ -1435,6 +1439,10 @@ const achievementDetailsByLanguage = {
     omegariusDefeated: {
       title: 'MARTILLO DE LA JUSTICIA',
       description: 'Derrota a Omegarius en el nivel secreto del capitulo de Reflecter en el modo Arcade. El veredicto: buen sparring, hermanito.',
+    },
+    originsCompleted: {
+      title: 'LOS COMIENZOS DE UN [[EMPRENDEDOR]]',
+      description: 'Completa el capitulo especial de Scammer. Asi empezo todo: con agua mojada y un contenedor muy acogedor.',
     },
     shaolinDefeated: {
       title: '谢谢指教 (GRACIAS POR LA LECCION)',
@@ -1973,6 +1981,15 @@ const knightApproachWarnings = [
   [{ speaker: 'lightWarrior', text: 'Caballero... Por favor, no sigas. Todavia estas a tiempo de irte.' }],
   [{ speaker: 'lightWarrior', text: 'Te lo pido de buena manera, amigo: date la vuelta. No quiero lastimarte.' }],
   [{ speaker: 'lightWarrior', text: 'Es la ultima vez que te lo digo. Si das un paso mas... no me vas a dejar otra opcion.' }],
+];
+// walking back to the left: Knight gives up... or tries to
+const knightApproachFleeLines = [
+  { speaker: 'knight', text: '...Tal vez tenga razon. No tengo por que hacer esto.' },
+  { speaker: 'lightWarrior', text: 'Eso! Buena decision, amigo. Volve tranquilo, el camino esta iluminado.' },
+  { speaker: 'knight', text: '(Pero si vuelvo con las manos vacias... la Orden... Valdoria...)', emote: { who: 'gambler', symbol: '...' } },
+  { speaker: 'lightWarrior', text: 'Ey... por que te quedaste quieto? No me digas que lo estas pensando de nuevo.' },
+  { speaker: 'knight', text: 'No... me voy. De verdad. Adios, Light Warrior.' },
+  { speaker: 'lightWarrior', text: '...Jeje. Ya me parecia.', emote: { who: 'scammer', symbol: '!' } },
 ];
 const knightApproachFinalLines = [
   { speaker: 'lightWarrior', text: '...Esta bien.' },

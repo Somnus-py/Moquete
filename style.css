@@ -4325,13 +4325,18 @@ body.menu-open .instructions {
 }
 
 .gamblerArcade-chapter-option .gamblerArcade-level-boss {
-  background: repeating-linear-gradient(45deg, #111 0 8px, #fdd835 8px 16px);
+  /* SCAMMER: spiky black hair, pink and yellow glasses, white face, black suit */
+  background:
+    radial-gradient(circle at 34% 30%, #ff4fa3 0 4px, #111 5px, transparent 6px),
+    radial-gradient(circle at 66% 30%, #ffd60a 0 4px, #111 5px, transparent 6px),
+    linear-gradient(90deg, transparent 0 46%, #f2f2f2 46% 54%, transparent 54%) 0 100% / 100% 52% no-repeat,
+    linear-gradient(180deg, #111 0 12%, #f2f2f2 12% 46%, #1b1b1b 46%);
   border-color: #111;
 }
 
 .gamblerArcade-chapter-option .gamblerArcade-level-boss::before {
-  color: #0d47a1;
-  content: '???';
+  color: #fdd835;
+  content: 'SCAMMER';
 }
 
 .arcade-level-option.coming-soon,
@@ -6284,13 +6289,19 @@ body.arcade-cutscene .health-panel {
 }
 
 .reflecterArcade-chapter-option .reflecterArcade-level-boss {
-  background: repeating-linear-gradient(45deg, #111 0 8px, #ffb300 8px 16px);
+  /* PROYECTO TITAN: a huge steel robot with a red eye and plated armor */
+  background:
+    radial-gradient(circle at 50% 22%, #ff1744 0 5px, rgba(255, 23, 68, 0.4) 6px 9px, transparent 10px),
+    repeating-linear-gradient(180deg, transparent 0 14px, rgba(0, 0, 0, 0.35) 14px 16px) 0 100% / 100% 60% no-repeat,
+    linear-gradient(90deg, #37474f 0 14%, transparent 14% 86%, #37474f 86%),
+    linear-gradient(180deg, #546e7a 0 38%, #78909c 38%);
   border-color: #111;
+  box-shadow: 0 0 12px rgba(255, 23, 68, 0.45);
 }
 
 .reflecterArcade-chapter-option .reflecterArcade-level-boss::before {
-  color: #37474f;
-  content: '???';
+  color: #ff8a80;
+  content: 'TITAN';
 }
 
 /* Chapter 4 completion achievement */
@@ -7747,3 +7758,1248 @@ body.shop-neon-logo #titleScreen h1 {
 .mtown-map-lightSkyPlatform .map-sky { background: linear-gradient(#060a2a, #7b3f8c); }
 .mtown-map-farolTop .map-sky { background: radial-gradient(circle at 50% 70%, #fff176 0 10px, transparent 26px), linear-gradient(#04061a, #4a2a6e); }
 .magic-town-map .map-platform { background: #6a6d8a; border-top: 3px solid #fff59d; }
+
+/* MAGICTOWN previews rendered from the game drawings */
+.map-preview.rendered-preview {
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.map-preview.rendered-preview > span {
+  display: none;
+}
+
+.character-preview.rendered-preview {
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+  height: 96px;
+  image-rendering: auto;
+  width: 84px;
+}
+
+.character-preview.rendered-preview > span {
+  display: none;
+}
+
+/* ---------- the spooky stock (Halloween) ---------- */
+.shop-spooky-banner {
+  background: repeating-linear-gradient(135deg, #1a0a26 0 14px, #2a0f3a 14px 28px);
+  border: 3px solid #ff6d00;
+  color: #ffab40;
+  font-family: 'Courier New', monospace;
+  font-weight: 900;
+  grid-column: 1 / -1;
+  letter-spacing: 1px;
+  padding: 8px 12px;
+  text-align: center;
+  text-shadow: 0 0 8px #ff6d00;
+}
+
+.shop-item.shop-spooky {
+  background: linear-gradient(160deg, #fff3e0 0 60%, #ffe0b2);
+  border-color: #6a1b9a;
+}
+
+.shop-icon.icon-hauntedTheme {
+  background:
+    radial-gradient(circle at 70% 30%, #fff59d 0 6px, transparent 7px),
+    linear-gradient(135deg, transparent 0 70%, #6a1b9a 70%),
+    #ff6d00;
+  border: 3px solid #111;
+}
+
+.shop-icon.icon-pumpkinHead {
+  background:
+    linear-gradient(#4e342e, #4e342e) 50% 2px / 6px 9px no-repeat,
+    radial-gradient(ellipse at 35% 40%, #ffd54f 0 3px, transparent 4px),
+    radial-gradient(ellipse at 65% 40%, #ffd54f 0 3px, transparent 4px),
+    radial-gradient(ellipse at 50% 68%, #ffd54f 0 7px, transparent 8px),
+    radial-gradient(ellipse at 50% 58%, #ef6c00 0 21px, transparent 22px);
+}
+
+.shop-icon.icon-vampireFangs {
+  background:
+    linear-gradient(170deg, transparent 0 40%, #fafafa 40% 60%, transparent 60%) 30% 60% / 10px 18px no-repeat,
+    linear-gradient(190deg, transparent 0 40%, #fafafa 40% 60%, transparent 60%) 70% 60% / 10px 18px no-repeat,
+    radial-gradient(ellipse at 50% 45%, #b71c1c 0 18px, transparent 19px);
+}
+
+.shop-icon.icon-hauntedDoll {
+  background:
+    radial-gradient(circle at 40% 30%, #111 0 2px, transparent 3px),
+    radial-gradient(circle at 60% 30%, #111 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 30%, #ffe0d0 0 11px, transparent 12px),
+    linear-gradient(#ad1457, #ad1457) 50% 100% / 22px 22px no-repeat;
+}
+
+.shop-icon.icon-plushBat {
+  background:
+    radial-gradient(circle at 44% 46%, #ff1744 0 2px, transparent 3px),
+    radial-gradient(circle at 56% 46%, #ff1744 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 50%, #311b92 0 10px, transparent 11px),
+    radial-gradient(ellipse at 22% 50%, #4527a0 0 12px, transparent 13px),
+    radial-gradient(ellipse at 78% 50%, #4527a0 0 12px, transparent 13px);
+}
+
+.shop-icon.icon-candyBag {
+  background:
+    radial-gradient(circle at 30% 20%, #e91e63 0 5px, transparent 6px),
+    radial-gradient(circle at 70% 18%, #76ff03 0 5px, transparent 6px),
+    linear-gradient(#ff6d00, #e65100) 50% 100% / 34px 30px no-repeat;
+  border-radius: 6px;
+}
+
+.menu-shop-badges .shop-badge.doll {
+  background:
+    radial-gradient(circle at 42% 30%, #111 0 1.5px, transparent 2px),
+    radial-gradient(circle at 58% 30%, #111 0 1.5px, transparent 2px),
+    radial-gradient(circle at 50% 30%, #ffe0d0 0 6px, transparent 7px),
+    linear-gradient(#ad1457, #ad1457) 50% 100% / 12px 10px no-repeat,
+    #111;
+  transform-origin: 50% 100%;
+}
+
+.menu-shop-badges .shop-badge.doll.creepy {
+  animation: doll-creepy 1.2s ease-in-out;
+}
+
+@keyframes doll-creepy {
+  20% { transform: rotate(-18deg); }
+  45% { transform: rotate(14deg) scale(1.15); }
+  70% { transform: rotate(-6deg); }
+}
+
+.menu-shop-badges .shop-badge.bat {
+  animation: bat-flap 0.5s ease-in-out infinite alternate;
+  background:
+    radial-gradient(circle at 46% 48%, #ff1744 0 1px, transparent 2px),
+    radial-gradient(circle at 54% 48%, #ff1744 0 1px, transparent 2px),
+    radial-gradient(circle at 50% 50%, #311b92 0 5px, transparent 6px),
+    radial-gradient(ellipse at 24% 50%, #4527a0 0 7px, transparent 8px),
+    radial-gradient(ellipse at 76% 50%, #4527a0 0 7px, transparent 8px),
+    #111;
+}
+
+@keyframes bat-flap {
+  from { transform: scaleX(1) translateY(0); }
+  to { transform: scaleX(0.7) translateY(-2px); }
+}
+
+/* Tema Noche de Brujas */
+body.shop-theme-halloween .main-menu {
+  background:
+    radial-gradient(circle at 82% 12%, rgba(255, 213, 79, 0.35) 0 40px, transparent 41px),
+    radial-gradient(circle at 50% 110%, rgba(255, 109, 0, 0.4), transparent 55%),
+    #12061c;
+}
+
+body.shop-theme-halloween .menu-screen {
+  background:
+    linear-gradient(135deg, rgba(255, 109, 0, 0.16), transparent 36%),
+    linear-gradient(315deg, rgba(106, 27, 154, 0.25), transparent 40%),
+    rgba(22, 8, 30, 0.96);
+  border-color: #ff6d00;
+}
+
+body.shop-theme-halloween .main-menu h1,
+body.shop-theme-halloween .main-menu h2 {
+  color: #ff9100;
+  text-shadow: 0 0 10px rgba(255, 109, 0, 0.7), 3px 3px 0 #4a148c;
+}
+
+/* cobwebs in the corners and a few bats crossing */
+body.shop-theme-halloween .main-menu::before,
+body.shop-theme-halloween .main-menu::after {
+  content: '';
+  height: 120px;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 120px;
+  z-index: 5;
+}
+
+body.shop-theme-halloween .main-menu::before {
+  background:
+    repeating-radial-gradient(circle at 0 0, transparent 0 18px, rgba(255, 255, 255, 0.35) 18px 19px),
+    conic-gradient(from 90deg at 0 0, transparent 0 8deg, rgba(255, 255, 255, 0.35) 8deg 9deg, transparent 9deg 30deg, rgba(255, 255, 255, 0.35) 30deg 31deg, transparent 31deg 52deg, rgba(255, 255, 255, 0.35) 52deg 53deg, transparent 53deg 74deg, rgba(255, 255, 255, 0.35) 74deg 75deg, transparent 75deg);
+  left: 0;
+  mask-image: radial-gradient(circle at 0 0, #000 0 110px, transparent 111px);
+}
+
+body.shop-theme-halloween .main-menu::after {
+  background:
+    repeating-radial-gradient(circle at 100% 0, transparent 0 18px, rgba(255, 255, 255, 0.35) 18px 19px),
+    conic-gradient(from 180deg at 100% 0, transparent 0 8deg, rgba(255, 255, 255, 0.35) 8deg 9deg, transparent 9deg 30deg, rgba(255, 255, 255, 0.35) 30deg 31deg, transparent 31deg 52deg, rgba(255, 255, 255, 0.35) 52deg 53deg, transparent 53deg 74deg, rgba(255, 255, 255, 0.35) 74deg 75deg, transparent 75deg);
+  mask-image: radial-gradient(circle at 100% 0, #000 0 110px, transparent 111px);
+  right: 0;
+}
+
+/* (the menu frame already uses these pseudo-elements: reset their position for the cobwebs) */
+body.shop-theme-halloween .main-menu::before {
+  border: 0;
+  bottom: auto;
+  box-shadow: none;
+  inset: 0 auto auto 0;
+}
+
+body.shop-theme-halloween .main-menu::after {
+  bottom: auto;
+  inset: 0 0 auto auto;
+  left: auto;
+}
+
+/* the special chapter card (before chapter 1) */
+.originsArcade-chapter-option {
+  border-color: #c62828;
+  box-shadow: 0 0 0 3px rgba(253, 216, 53, 0.35), 0 8px 0 #111;
+}
+
+.originsArcade-chapter-option .originsArcade-level-scene {
+  background:
+    linear-gradient(180deg, transparent 0 62%, #9e9e9e 62%),
+    repeating-linear-gradient(90deg, #ef9a9a 0 24px, #ffe082 24px 48px, #a5d6a7 48px 72px, #90caf9 72px 96px),
+    linear-gradient(180deg, #64b5f6, #e3f2fd);
+}
+
+.originsArcade-chapter-option .originsArcade-level-player {
+  background: radial-gradient(circle at 50% 30%, #ffd8b0 0 7px, transparent 8px), #c62828;
+  border: 2px solid #111;
+}
+
+.originsArcade-chapter-option .originsArcade-level-boss,
+.originsArcade-chapter-option .arcade-level-enemies span {
+  background: linear-gradient(#0d1442 0 18%, #f1c27d 18% 40%, #1a237e 40%);
+}
+
+.moquete-book-barcode[data-book-secret] {
+  cursor: pointer;
+}
+
+/* ---------- the spell book ---------- */
+.shop-icon.icon-spellBook {
+  background:
+    radial-gradient(circle at 60% 45%, #fdd835 0 5px, transparent 6px),
+    radial-gradient(circle at 60% 45%, transparent 0 8px, #b388ff 9px 10px, transparent 11px),
+    linear-gradient(90deg, #1a0b2e 0 6px, #4a148c 6px);
+  border: 3px solid #111;
+  border-radius: 2px 6px 6px 2px;
+}
+
+.menu-shop-badges .shop-badge.spellbook {
+  background:
+    radial-gradient(circle at 60% 50%, #fdd835 0 3px, transparent 4px),
+    linear-gradient(90deg, #1a0b2e 0 4px, #4a148c 4px) 50% 50% / 20px 18px no-repeat,
+    #111;
+}
+
+.spell-book {
+  max-width: 560px;
+  position: relative;
+}
+
+.spell-book.cover {
+  background: linear-gradient(90deg, #1a0b2e 0 18px, #311b92 18px);
+  color: #fdd835;
+}
+
+.spell-book.back {
+  background: linear-gradient(90deg, #311b92 calc(100% - 18px), #1a0b2e calc(100% - 18px));
+  color: #ede7f6;
+}
+
+.spell-book-page {
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+  padding-right: 6px;
+  position: relative;
+}
+
+.spell-cover-sigil {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin: 10px 0 16px;
+}
+
+.spell-cover-sigil span {
+  border-radius: 50%;
+  box-shadow: 0 0 14px currentColor;
+  height: 26px;
+  width: 26px;
+}
+
+.spell-cover-sigil span:nth-child(1) { background: #e53935; color: #e53935; }
+.spell-cover-sigil span:nth-child(2) { background: #1e88e5; color: #1e88e5; }
+.spell-cover-sigil span:nth-child(3) { background: #8e24aa; color: #8e24aa; }
+
+.spell-title {
+  font-size: 1.6rem;
+}
+
+.spell-intro {
+  font-style: italic;
+}
+
+.spell-list {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.spell-entry {
+  align-items: flex-start;
+  border-left: 4px solid var(--spell);
+  display: flex;
+  gap: 10px;
+  margin: 0 0 8px;
+  padding: 4px 8px;
+  position: relative;
+}
+
+.spell-sigil {
+  background: var(--spell);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--spell);
+  flex: 0 0 18px;
+  height: 18px;
+  margin-top: 3px;
+}
+
+.spell-text strong {
+  color: #1a0b2e;
+}
+
+.spell-text em {
+  background: #1a0b2e;
+  border-radius: 3px;
+  color: #fdd835;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 900;
+  padding: 1px 5px;
+}
+
+.spell-text span {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.spell-note {
+  color: #b71c1c;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 0.85rem;
+}
+
+/* Sorcerer: the three colors */
+.spell-book.spell-sorcerer {
+  background: linear-gradient(135deg, #fff1f1, #eef4ff 50%, #f6ecff);
+}
+
+/* Gambler: green felt and luck */
+.spell-book.spell-gambler {
+  background: radial-gradient(circle at 80% 15%, rgba(102, 187, 106, 0.35), transparent 40%), #f1f8e9;
+}
+
+/* Fire Master: a scorched page */
+.spell-book.spell-fireMaster {
+  background:
+    radial-gradient(circle at 100% 100%, rgba(62, 39, 35, 0.75) 0 40px, rgba(191, 54, 12, 0.4) 70px, transparent 110px),
+    radial-gradient(circle at 0 0, rgba(62, 39, 35, 0.5) 0 20px, transparent 60px),
+    #fff3e0;
+}
+
+/* Chrono: blueprints and gears */
+.spell-book.spell-chrono {
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 172, 193, 0.12) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(90deg, rgba(0, 172, 193, 0.12) 0 1px, transparent 1px 18px),
+    #e0f7fa;
+}
+
+.spell-book.spell-chrono .spell-text {
+  font-family: 'Courier New', monospace;
+}
+
+/* Divine General: the text won't stay still */
+.spell-book.spell-divineGeneral {
+  background: #fffde7;
+}
+
+.spell-book.spell-divineGeneral .spell-title,
+.spell-book.spell-divineGeneral .spell-intro,
+.spell-book.spell-divineGeneral .spell-text {
+  animation: spellGlitch 1.6s steps(2) infinite;
+  filter: blur(1.2px);
+}
+
+.spell-book.spell-divineGeneral .spell-entry:nth-child(2) .spell-text {
+  filter: blur(2.5px);
+}
+
+.spell-book.spell-divineGeneral .spell-entry:nth-child(3) .spell-text {
+  filter: blur(3.5px);
+}
+
+@keyframes spellGlitch {
+  0%, 100% { transform: translate(0, 0); text-shadow: none; }
+  25% { transform: translate(-2px, 1px); text-shadow: 2px 0 rgba(255, 193, 7, 0.7), -2px 0 rgba(0, 0, 0, 0.4); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, 0); text-shadow: -3px 0 rgba(255, 193, 7, 0.6); }
+}
+
+/* Light Warrior: closed with dark padlocks */
+.spell-book.spell-lightWarrior {
+  background: #fffde7;
+}
+
+.spell-book.spell-lightWarrior .spell-text span,
+.spell-book.spell-lightWarrior .spell-entry:nth-child(n + 4) .spell-text strong {
+  filter: blur(3px);
+}
+
+.spell-chains {
+  background:
+    repeating-linear-gradient(35deg, transparent 0 22px, rgba(20, 10, 30, 0.85) 22px 28px, transparent 28px 34px),
+    repeating-linear-gradient(-35deg, transparent 0 40px, rgba(20, 10, 30, 0.75) 40px 46px, transparent 46px 60px);
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.spell-lock {
+  background:
+    radial-gradient(circle at 50% 62%, #ff4fa3 0 3px, transparent 4px),
+    linear-gradient(#2a1838, #0d0612) 50% 100% / 30px 24px no-repeat;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(120, 0, 160, 0.8);
+  cursor: pointer;
+  height: 38px;
+  margin-left: auto;
+  position: relative;
+  width: 34px;
+  z-index: 1;
+}
+
+.spell-lock::before {
+  border: 5px solid #2a1838;
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  content: '';
+  height: 14px;
+  left: 7px;
+  position: absolute;
+  top: 0;
+  width: 10px;
+}
+
+.spell-lock.rattle {
+  animation: spellRattle 0.35s;
+}
+
+@keyframes spellRattle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(12deg); }
+}
+
+.spell-lock-hint {
+  color: #4a148c;
+  font-size: 0.8rem;
+  font-style: italic;
+  position: relative;
+  text-align: center;
+}
+
+/* ---------- the spell book, second half: Sorcerer's notes ---------- */
+.spell-book.spell-divider {
+  background: linear-gradient(90deg, #1a0b2e 0 18px, #4a148c 18px);
+  color: #ede7f6;
+}
+
+.spell-book.spell-divider .spell-note {
+  color: #ffab91;
+}
+
+.spell-tip-author {
+  color: #5e35b1;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.spell-book.spell-divider .spell-tip-author {
+  color: #d1c4e9;
+  text-align: center;
+}
+
+/* Sorcerer's handwriting, in purple ink */
+.spell-book.spell-tips .spell-text strong {
+  color: #4a148c;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+.spell-book.spell-tips .spell-text span {
+  color: #311b92;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+.spell-tip-number {
+  background: #7e57c2;
+  border-radius: 50%;
+  color: #fff;
+  flex: 0 0 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  font-weight: 900;
+  height: 20px;
+  line-height: 20px;
+  margin-top: 2px;
+  text-align: center;
+}
+
+/* FLAMETOMB: the page nobody should read */
+.spell-book.spell-fireMaster.spell-tips {
+  animation: flametombWarm 2.4s ease-in-out infinite;
+}
+
+@keyframes flametombWarm {
+  0%, 100% { box-shadow: -10px 0 0 #6d4c41 inset, 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 0 rgba(255, 61, 0, 0); }
+  50% { box-shadow: -10px 0 0 #6d4c41 inset, 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 34px rgba(255, 61, 0, 0.55); }
+}
+
+.flametomb {
+  background: radial-gradient(circle at 50% 120%, #4a0a00, #120302 70%);
+  border: 2px solid #bf360c;
+  border-radius: 6px;
+  box-shadow: 0 0 18px rgba(255, 61, 0, 0.5) inset;
+  color: #ffccbc;
+  margin-top: 10px;
+  overflow: hidden;
+  padding: 12px 14px;
+  position: relative;
+}
+
+.flametomb p {
+  font-size: 0.85rem;
+  position: relative;
+  z-index: 1;
+}
+
+.flametomb .moquete-book-kicker {
+  color: #ff8a65;
+  position: relative;
+  z-index: 1;
+}
+
+.flametomb-title {
+  animation: flametombFlicker 1.3s steps(3) infinite;
+  color: #ff3d00;
+  font-size: 1.9rem;
+  letter-spacing: 6px;
+  margin: 4px 0 8px;
+  position: relative;
+  text-shadow: 0 0 10px #ff3d00, 0 0 22px #b71c1c;
+  z-index: 1;
+}
+
+@keyframes flametombFlicker {
+  0%, 100% { opacity: 1; }
+  40% { opacity: 0.75; }
+  60% { opacity: 0.95; transform: translateX(1px); }
+}
+
+.flametomb-scratched {
+  color: #8d6e63;
+}
+
+.flametomb-stamp {
+  border: 3px solid rgba(255, 23, 68, 0.75);
+  color: rgba(255, 23, 68, 0.75);
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  padding: 2px 8px;
+  position: absolute;
+  right: 10px;
+  top: 12px;
+  transform: rotate(12deg);
+  z-index: 2;
+}
+
+.flametomb .spell-tip-author {
+  color: #ffab91;
+}
+
+.flametomb .spell-note {
+  color: #ff8a80;
+}
+
+.flametomb-embers i {
+  animation: flametombEmber 3s linear infinite;
+  background: #ff6d00;
+  border-radius: 50%;
+  bottom: -6px;
+  box-shadow: 0 0 6px #ff3d00;
+  height: 4px;
+  position: absolute;
+  width: 4px;
+}
+
+.flametomb-embers i:nth-child(1) { left: 8%; animation-delay: 0s; }
+.flametomb-embers i:nth-child(2) { left: 20%; animation-delay: 1.1s; }
+.flametomb-embers i:nth-child(3) { left: 33%; animation-delay: 0.5s; }
+.flametomb-embers i:nth-child(4) { left: 47%; animation-delay: 2.2s; }
+.flametomb-embers i:nth-child(5) { left: 60%; animation-delay: 1.6s; }
+.flametomb-embers i:nth-child(6) { left: 72%; animation-delay: 0.3s; }
+.flametomb-embers i:nth-child(7) { left: 84%; animation-delay: 2.6s; }
+.flametomb-embers i:nth-child(8) { left: 93%; animation-delay: 1.3s; }
+
+@keyframes flametombEmber {
+  0% { opacity: 0; transform: translateY(0); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-260px) translateX(12px); }
+}
+
+.flametomb-requirements {
+  border-top: 1px dashed #bf360c;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  padding-top: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.flametomb-requirements ul {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.flametomb-requirements li {
+  color: #a1887f;
+}
+
+.flametomb-requirements li.done {
+  color: #ffab40;
+}
+
+.flametomb-learned {
+  color: #ff6d00;
+  font-weight: 900;
+  position: relative;
+  text-shadow: 0 0 8px rgba(255, 61, 0, 0.6);
+  z-index: 1;
+}
+
+/* ---------- Arcade: route A / route B ---------- */
+.arcade-chapters-header {
+  position: relative;
+}
+
+.arcade-route-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.arcade-route-tabs.hidden {
+  display: none;
+}
+
+.arcade-route-tab {
+  background: #111820;
+  border: 3px solid #37474f;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 22px;
+  font-weight: 900;
+  height: 42px;
+  opacity: 0.55;
+  width: 42px;
+}
+
+.arcade-route-tab.route-a {
+  color: #42a5f5;
+}
+
+.arcade-route-tab.route-b {
+  color: #e53935;
+}
+
+.arcade-route-tab.active {
+  opacity: 1;
+}
+
+.arcade-route-tab.route-a.active {
+  border-color: #1e88e5;
+  box-shadow: 0 0 14px rgba(30, 136, 229, 0.75);
+}
+
+.arcade-route-tab.route-b.active {
+  border-color: #c62828;
+  box-shadow: 0 0 14px rgba(198, 40, 40, 0.85);
+}
+
+#arcadeChaptersScreen.route-b-view {
+  background: radial-gradient(circle at 50% 30%, rgba(80, 0, 0, 0.45), rgba(5, 0, 0, 0.9));
+}
+
+#arcadeChaptersScreen.route-b-view .arcade-chapters-header h2 {
+  color: #ef5350;
+  text-shadow: 0 0 12px rgba(198, 40, 40, 0.8);
+}
+
+.routeB-chapter-option {
+  border-color: #b71c1c;
+  box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.5), 0 8px 0 #111;
+  filter: saturate(0.6);
+}
+
+.routeB-chapter-option .arcade-chapter-number {
+  background: #7f0000;
+  color: #ffcdd2;
+}
+
+.routeB-level-scene {
+  position: relative;
+}
+
+.routeB-level-scene::after {
+  background: linear-gradient(180deg, rgba(40, 0, 0, 0.55), rgba(0, 0, 0, 0.75));
+  content: '';
+  inset: 0;
+  position: absolute;
+}
+
+.routeB-locked {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.routeB-locked .routeB-level-scene {
+  background: repeating-linear-gradient(45deg, #1a0505 0 12px, #260808 12px 24px);
+  min-height: 96px;
+}
+
+.routeB-badge {
+  background: #b71c1c;
+  color: #fff;
+}
+
+body.arcade-route-b #arcadeLevelsTitle {
+  color: #ef5350;
+}
+
+#arcadeChaptersScreen .arcade-route-tabs .arcade-route-tab {
+  background: #111820;
+  flex: 0 0 auto;
+  font-size: 22px;
+  height: 42px;
+  line-height: 1;
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  width: 42px;
+}
+
+#arcadeChaptersScreen .arcade-route-tabs .arcade-route-tab::before,
+#arcadeChaptersScreen .arcade-route-tabs .arcade-route-tab::after {
+  display: none;
+}
+
+/* ---------- story books and the bookshelf ---------- */
+.shop-icon.icon-fireBook {
+  background: linear-gradient(#ffd54f, #ffd54f) 60% 30% / 18px 4px no-repeat, linear-gradient(90deg, #4e342e 0 6px, #e65100 6px);
+  border: 3px solid #111;
+  border-radius: 2px 6px 6px 2px;
+}
+
+.shop-icon.icon-lightBook {
+  background: radial-gradient(circle at 60% 45%, #fff 0 5px, transparent 6px), linear-gradient(90deg, #8d6e63 0 6px, #fdd835 6px);
+  border: 3px solid #111;
+  border-radius: 2px 6px 6px 2px;
+}
+
+.shop-icon.icon-darkGuide {
+  background: radial-gradient(circle at 50% 45%, #ff4fa3 0 3px, transparent 4px), radial-gradient(circle at 70% 45%, #ffd60a 0 3px, transparent 4px), linear-gradient(90deg, #000 0 6px, #1a0b2e 6px);
+  border: 3px solid #111;
+  border-radius: 2px 6px 6px 2px;
+}
+
+.shop-icon.icon-bookshelf {
+  background:
+    linear-gradient(#5d4037, #5d4037) 50% 48% / 100% 4px no-repeat,
+    linear-gradient(90deg, #e65100 0 18%, transparent 18% 22%, #fdd835 22% 38%, transparent 38% 42%, #4a148c 42% 58%, transparent 58% 62%, #b71c1c 62% 78%, transparent 78%) 50% 22% / 80% 40% no-repeat,
+    #8d6e63;
+  border: 3px solid #111;
+}
+
+.menu-shop-badges .shop-badge.firebook { background: linear-gradient(90deg, #4e342e 0 4px, #e65100 4px) 50% 50% / 20px 18px no-repeat, #111; }
+.menu-shop-badges .shop-badge.lightbook { background: linear-gradient(90deg, #8d6e63 0 4px, #fdd835 4px) 50% 50% / 20px 18px no-repeat, #111; }
+.menu-shop-badges .shop-badge.darkguide { background: linear-gradient(90deg, #000 0 4px, #311b92 4px) 50% 50% / 20px 18px no-repeat, #111; }
+.menu-shop-badges .shop-badge.bookshelf { background: linear-gradient(90deg, #e65100 0 25%, #fdd835 25% 50%, #4a148c 50% 75%, #b71c1c 75%) 50% 40% / 20px 12px no-repeat, linear-gradient(#5d4037, #5d4037) 50% 80% / 22px 3px no-repeat, #111; }
+
+.story-book.story-fire.cover { background: linear-gradient(90deg, #3e2723 0 18px, #e65100 18px); color: #fff3e0; }
+.story-book.story-light.cover { background: linear-gradient(90deg, #8d6e63 0 18px, #fdd835 18px); color: #3e2723; }
+.story-book.story-dark.cover { background: linear-gradient(90deg, #000 0 18px, #1a0b2e 18px); color: #ea80fc; }
+.story-book.story-light { background: radial-gradient(circle at 80% 10%, rgba(255, 245, 157, 0.6), transparent 45%), #fffde7; }
+.story-book.story-dark { background: #ede7f6; }
+
+/* the fire book, altered */
+.story-book.story-fire-dark { background: #e8dcc8; filter: saturate(0.8); }
+.story-book.story-fire-dark.cover { background: linear-gradient(90deg, #000 0 18px, #3e0b05 18px); color: #ff8a65; }
+.story-book.story-page-dark { background: #14100e; color: #d7ccc8; }
+.story-book.story-page-dark p { font-family: 'Comic Sans MS', cursive; letter-spacing: 0.5px; transform: rotate(-0.6deg); }
+.story-book.story-page-dark h3 { color: #ff5252; }
+
+.story-scrawl {
+  color: #b71c1c;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 1.1rem;
+  font-weight: 900;
+  transform: rotate(-4deg);
+}
+
+.story-cover-scrawl {
+  color: #ff1744;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 1.4rem;
+  text-align: right;
+  transform: rotate(-8deg);
+}
+
+.story-scratched { filter: contrast(1.1); }
+
+.bookshelf {
+  background: #4e342e;
+  border: 4px solid #3e2723;
+  border-radius: 8px;
+  color: #fff8e1;
+  max-width: 560px;
+  padding: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.bookshelf-row {
+  align-items: flex-end;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  min-height: 150px;
+}
+
+.bookshelf-book {
+  background: var(--book);
+  border: 3px solid #111;
+  border-radius: 3px;
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 900;
+  height: 140px;
+  padding: 6px 2px;
+  width: 52px;
+}
+
+.bookshelf-book span {
+  display: block;
+  transform: rotate(180deg);
+  writing-mode: vertical-rl;
+}
+
+.bookshelf-book:hover {
+  transform: translateY(-8px);
+}
+
+.bookshelf-board {
+  background: #8d6e63;
+  border: 2px solid #3e2723;
+  height: 12px;
+  margin: 0 0 14px;
+}
+
+.bookshelf-empty {
+  font-style: italic;
+}
+
+.story-book-page {
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* Light Warrior's own handwriting at the end of his book */
+.story-book.story-page-light {
+  background: radial-gradient(circle at 20% 15%, rgba(255, 241, 118, 0.55), transparent 50%), #fffff0;
+}
+
+.story-book.story-page-light p {
+  color: #6d4c00;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+.story-book.story-page-light h3 {
+  color: #f9a825;
+}
+
+/* ---------- phones and tablets ---------- */
+body.touch-mode {
+  background: #000;
+  gap: 0;
+  height: 100vh;
+  overflow: hidden;
+  padding: 0;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body.touch-mode .game-shell {
+  left: 0;
+  position: fixed;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* no gray border and no gray shadow around the game */
+body.touch-mode #gameCanvas {
+  border: none;
+  box-shadow: none;
+}
+
+body.touch-mode .instructions {
+  display: none;
+}
+
+.touch-controls {
+  display: none;
+}
+
+body.touch-mode:not(.menu-open) .touch-controls {
+  display: block;
+}
+
+.touch-controls * {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+.touch-stick {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  height: 140px;
+  left: max(22px, env(safe-area-inset-left));
+  position: fixed;
+  width: 140px;
+  z-index: 200000;
+}
+
+.touch-stick-knob {
+  background: radial-gradient(circle at 40% 35%, #fff, #b0bec5);
+  border: 3px solid rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  height: 62px;
+  left: calc(50% - 31px);
+  opacity: 0.85;
+  position: absolute;
+  top: calc(50% - 31px);
+  width: 62px;
+}
+
+.touch-buttons {
+  bottom: max(14px, env(safe-area-inset-bottom));
+  height: 190px;
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  width: 250px;
+  z-index: 200000;
+}
+
+.touch-btn {
+  align-items: center;
+  background: rgba(20, 20, 30, 0.55);
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 900;
+  justify-content: center;
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  position: absolute;
+}
+
+.touch-btn::before,
+.touch-btn::after {
+  display: none;
+}
+
+.touch-btn.pressed {
+  background: rgba(255, 255, 255, 0.45);
+  transform: scale(0.92);
+}
+
+.touch-attack { background: rgba(198, 40, 40, 0.6); bottom: 6px; height: 74px; right: 84px; width: 74px; }
+.touch-strong { background: rgba(230, 81, 0, 0.6); bottom: 72px; height: 62px; right: 2px; width: 62px; }
+.touch-jump { background: rgba(21, 101, 192, 0.6); bottom: 2px; height: 62px; right: 2px; width: 62px; }
+.touch-skill { font-size: 20px; height: 52px; width: 52px; }
+.touch-q { background: rgba(106, 27, 154, 0.6); bottom: 92px; right: 168px; }
+.touch-f { background: rgba(0, 131, 143, 0.6); bottom: 132px; right: 104px; }
+.touch-r { background: rgba(249, 168, 37, 0.6); bottom: 140px; right: 30px; }
+
+.touch-top {
+  display: flex;
+  gap: 6px;
+  left: 50%;
+  position: fixed;
+  top: max(6px, env(safe-area-inset-top));
+  transform: translateX(-50%);
+  z-index: 200000;
+}
+
+.touch-top .touch-btn {
+  border-radius: 10px;
+  font-size: 11px;
+  height: 28px;
+  padding: 0 8px;
+  position: static;
+}
+
+.touch-controls.collapsed .touch-stick,
+.touch-controls.collapsed .touch-buttons,
+.touch-controls.collapsed .touch-top .touch-btn:not(.touch-hide) {
+  display: none;
+}
+
+/* the phone standing up: ask to turn it */
+.touch-rotate {
+  display: none;
+}
+
+@media (orientation: portrait) {
+  body.touch-mode .touch-rotate {
+    align-items: center;
+    background: #05060a;
+    color: #fff;
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    position: fixed;
+    text-align: center;
+    z-index: 300000;
+  }
+
+  body.touch-mode .touch-rotate span {
+    animation: touchRotate 1.6s ease-in-out infinite;
+    display: block;
+    font-size: 64px;
+  }
+
+  body.touch-mode .touch-rotate strong {
+    display: block;
+    font-family: 'Courier New', monospace;
+    font-size: 22px;
+    margin-top: 10px;
+  }
+}
+
+@keyframes touchRotate {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(90deg); }
+}
+
+/* (on phones the game keeps its real size and gets scaled as a whole) */
+body.touch-mode .game-shell {
+  min-width: 1024px;
+  width: 1024px;
+}
+
+body.touch-mode #gameCanvas {
+  height: 576px;
+  max-width: none;
+  width: 1024px;
+}
+
+/* ---------- chapter 6 (under construction): Chrono in the dark world ---------- */
+.chronoArcade-chapter-option {
+  background: linear-gradient(90deg, #1c1430, #2a1d45);
+  color: #e1d5ff;
+  cursor: default;
+}
+
+.chronoArcade-chapter-option:hover,
+.chronoArcade-chapter-option:focus-visible {
+  background: linear-gradient(90deg, #21183a, #31234f);
+}
+
+.chronoArcade-chapter-option .arcade-chapter-copy strong {
+  color: #fff;
+}
+
+.chronoArcade-chapter-option .arcade-chapter-copy span {
+  color: #cbbcf0;
+}
+
+.chronoArcade-chapter-option .chronoArcade-level-scene {
+  background:
+    radial-gradient(circle at 74% 26%, #b388ff 0 10px, rgba(179, 136, 255, 0.25) 11px 18px, transparent 19px),
+    linear-gradient(180deg, transparent 0 78%, #0d0716 78%),
+    linear-gradient(180deg, #05020a, #1a0b2e 60%, #3b1458);
+  border-color: #120a20;
+  overflow: hidden;
+  position: relative;
+}
+
+/* the castle of the dark world, behind */
+.chronoArcade-castle {
+  background:
+    linear-gradient(#2b1747, #2b1747) 10% 100% / 14% 70% no-repeat,
+    linear-gradient(#2b1747, #2b1747) 90% 100% / 14% 70% no-repeat,
+    linear-gradient(#24133d, #24133d) 50% 100% / 64% 46% no-repeat,
+    radial-gradient(circle at 36% 62%, #ea80fc 0 2px, transparent 3px),
+    radial-gradient(circle at 64% 62%, #ea80fc 0 2px, transparent 3px);
+  bottom: 22%;
+  height: 46%;
+  left: 30%;
+  position: absolute;
+  width: 46%;
+}
+
+.chronoArcade-chapter-option .chronoArcade-level-player {
+  background:
+    radial-gradient(circle at 50% 32%, #fff 0 22%, #26c6da 23% 30%, transparent 31%),
+    linear-gradient(180deg, #283593 0 100%);
+  border-color: #111;
+  border-radius: 50% 50% 8px 8px;
+  box-shadow: 0 0 14px rgba(38, 198, 218, 0.7);
+  left: 16%;
+}
+
+.chronoArcade-chapter-option .chronoArcade-level-player::before {
+  color: #80deea;
+  content: 'CHRONO';
+  text-shadow: 0 1px 0 #000;
+}
+
+/* a cracked clock floating in the sky */
+.chronoArcade-clock {
+  animation: chronoClockSpin 8s linear infinite;
+  border: 3px solid #80deea;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(128, 222, 234, 0.6);
+  height: 30px;
+  left: 44%;
+  position: absolute;
+  top: 18%;
+  width: 30px;
+}
+
+.chronoArcade-clock::before,
+.chronoArcade-clock::after {
+  background: #80deea;
+  content: '';
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform-origin: 0 0;
+  width: 2px;
+}
+
+.chronoArcade-clock::before { height: 10px; transform: rotate(180deg); }
+.chronoArcade-clock::after { height: 7px; transform: rotate(-90deg); }
+
+@keyframes chronoClockSpin {
+  to { transform: rotate(-360deg); }
+}
+
+.chronoArcade-chapter-option .chronoArcade-level-boss {
+  background:
+    linear-gradient(180deg, transparent 0 22%, #ff4fa3 22% 30%, transparent 30%),
+    #050505;
+  border-color: #b388ff;
+}
+
+.chronoArcade-chapter-option .chronoArcade-level-boss::before {
+  color: #b388ff;
+  content: '???';
+}
+
+.chronoArcade-requirements {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.chronoArcade-requirements em {
+  color: #ffd54f !important;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.chronoArcade-requirements [data-chrono-req] {
+  font-size: 12px;
+}
+
+.chronoArcade-requirements [data-chrono-req]::before {
+  color: #ef5350;
+  content: '\2717  ';
+  font-weight: 900;
+}
+
+.chronoArcade-requirements [data-chrono-req].done {
+  color: #a5d6a7 !important;
+}
+
+.chronoArcade-requirements [data-chrono-req].done::before {
+  color: #66bb6a;
+  content: '\2713  ';
+}
+
+.chronoArcade-badge {
+  background: #4a148c;
+  color: #fff;
+}
+
+/* the empty space around the touch buttons never blocks taps (only the buttons themselves) */
+.touch-buttons,
+.touch-top {
+  pointer-events: none;
+}
+
+.touch-buttons .touch-btn,
+.touch-top .touch-btn {
+  pointer-events: auto;
+}
+
+/* on the result screen: no stick, no attack buttons (its own buttons are reachable) */
+body.touch-over .touch-stick,
+body.touch-over .touch-buttons {
+  display: none;
+}
+
+.touch-top .touch-menu {
+  background: rgba(183, 28, 28, 0.6);
+}
+
+.touch-top .touch-menu.confirm {
+  background: #d50000;
+  border-color: #fff;
+}

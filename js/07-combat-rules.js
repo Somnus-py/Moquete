@@ -896,10 +896,20 @@ function applyDamage(attacker, target, damage, { isSpecial = false, ignoreDebug 
   const spiritPowerMultiplier = attacker && attacker.spiritCount > 3 ? omegaSpiritDamageBoost : 1;
   // level 8: Knight takes Shadow Jester's hits better
   const riftArmorMultiplier = target.riftResolve ? riftKnightArmor : 1;
-  const targetDamageMultiplier = icedThugArmorMultiplier * frostVulnerabilityMultiplier * scamMultiplier * omegariusArmorMultiplier * knightShieldMultiplier * spiritArmorMultiplier * spiritPowerMultiplier * riftArmorMultiplier;
+  // the big friend of the special chapter barely feels the hits
+  const bigFriendArmorMultiplier = target.secretVariant === 'bigFriend' ? bigFriendDamageTaken : 1;
+  const targetDamageMultiplier = icedThugArmorMultiplier * frostVulnerabilityMultiplier * scamMultiplier * omegariusArmorMultiplier * knightShieldMultiplier * spiritArmorMultiplier * spiritPowerMultiplier * riftArmorMultiplier * bigFriendArmorMultiplier;
   const adaptedDamage = getDivineAdaptedDamage(target, damage * targetDamageMultiplier, resolvedDamageType);
   const previousHealth = Math.max(0, target.health);
+  const healthBeforeHit = target.health;
   target.health = Math.max(0, target.health - (ignoreDebug ? adaptedDamage : getDebugDamage(adaptedDamage, attacker)));
+  originsDamageFloor(target);
+  routeBDamageFloor(target);
+  routeB3DamageFloor(target);
+  // Scammer's vampire fangs: player 1 drinks 10% of the damage dealt
+  if (attacker === player1 && target !== attacker && scammerShop.owned.vampireFangs && attacker.health > 0) {
+    attacker.health = Math.min(attacker.maxHealth, attacker.health + (healthBeforeHit - target.health) * 0.1);
+  }
   // chapter 5, level 7: Light Warrior holds on until his last BOX ATTACK is over
   if (target === player2 && typeof isLightBoxFight === 'function' && isLightBoxFight() && !target.lightFinaleDone) {
     target.health = Math.max(target.health, target.maxHealth * lightWarriorBoxFloorRatio);
@@ -1715,6 +1725,14 @@ function formatFightDuration(milliseconds) {
 }
 
 function getVictoryPhrase(fighter, opponent) {
+  if (fighter.fleeTaunt) return 'Creiste que iba a ser asi de facil?';
+  if (fighter.flametombTrauma) return '...Lo siento. Lo siento mucho.';
+  if (fighter.frostFire && (isNeoScammer(opponent) || opponent.scammerBurnt)) return '...Perdon, Scammer. No podia parar.';
+  if (fighter.frostFire) return ['...Ni siquiera se donde estoy.', 'Mis manos siguen frias.', 'Gambler... quien sea que seas... donde estas?'][Math.floor(Math.random() * 3)];
+  if (fighter.youngScammer) return pickOriginsWinPhrase(opponent);
+  if (isFriendThing(fighter)) return fighter.secretVariant === 'bigFriend' ? 'JE. JE. JE.' : 'Je je je... je.';
+  if (isPolice(fighter)) return originsPolicePhrases[Math.floor(Math.random() * originsPolicePhrases.length)];
+  if (fighter.secretVariant === 'angryCustomer') return 'Y AHORA QUIERO DOS REEMBOLSOS!';
   if (fighter.secretVariant === 'shaolinMaster') {
     const shaolinPhrases = ['你还需要练习。(Te falta practicar.)', '承让。(Fue un honor... para vos.)', '回去练功吧。(Volve a entrenar.)'];
     return shaolinPhrases[Math.floor(Math.random() * shaolinPhrases.length)];
@@ -1795,7 +1813,7 @@ function drawWrappedText(text, x, y, maxWidth, lineHeight) {
 }
 
 function drawVictoryCharacter(fighter, x, y, scale = 1) {
-  if (isShadowJester(fighter) || isKnight(fighter) || isMossBeast(fighter) || isDarkKnight(fighter) || isRobledalKid(fighter) || isMochi(fighter) || fighter.secretVariant === 'chefBoss' || fighter.secretVariant === 'lanternGuard' || fighter.secretVariant === 'shaolinMaster') {
+  if (isShadowJester(fighter) || isKnight(fighter) || isMossBeast(fighter) || isDarkKnight(fighter) || isRobledalKid(fighter) || isMochi(fighter) || fighter.secretVariant === 'chefBoss' || fighter.secretVariant === 'lanternGuard' || fighter.secretVariant === 'shaolinMaster' || originsVariants.includes(fighter.secretVariant) || fighter.youngScammer) {
     // Shadow Jester, Knight and the Bestia del Musgo use their real sprite on the result screen
     const savedPosition = { ...fighter.position };
     const savedFacing = fighter.attacksToTheRight;

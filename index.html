@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Moquete</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -881,6 +881,14 @@
               <input type="checkbox" data-shop-toggle="victoryConfetti" />
               <span>Confeti de victoria (jugador 1)</span>
             </label>
+            <label class="shop-extra-toggle hidden" data-shop-item="hauntedTheme">
+              <input type="checkbox" data-shop-toggle="hauntedTheme" />
+              <span>Tema Noche de Brujas</span>
+            </label>
+            <label class="shop-extra-toggle hidden" data-shop-item="pumpkinHead">
+              <input type="checkbox" data-shop-toggle="pumpkinHead" />
+              <span>Cabeza de Calabaza (jugador 1)</span>
+            </label>
           </div>
         </div>
         <button type="button" id="backButton" data-i18n="back">Volver</button>
@@ -906,10 +914,34 @@
       </div>
       <div class="menu-screen arcade-chapters-menu hidden" id="arcadeChaptersScreen">
         <div class="arcade-chapters-header">
-          <h2>Capitulos de Arcade</h2>
+          <div class="arcade-route-tabs hidden" id="arcadeRouteTabs" role="tablist" aria-label="Ruta del Arcade">
+            <button type="button" class="arcade-route-tab route-a active" data-route="A" title="Ruta A">A</button>
+            <button type="button" class="arcade-route-tab route-b" data-route="B" title="Ruta B (?)">B</button>
+          </div>
+          <h2 id="arcadeChaptersTitle">Capitulos de Arcade</h2>
           <span>Elegi una historia. Cada capitulo tiene su propio protagonista, mapa y jefes.</span>
         </div>
         <div class="guide-section arcade-chapters-panel">
+          <button type="button" class="arcade-chapter-option originsArcade-chapter-option hidden" id="originsArcadeChapterButton">
+            <span class="arcade-chapter-number">00</span>
+            <span class="arcade-level-scene originsArcade-level-scene" aria-hidden="true">
+              <span class="arcade-level-player originsArcade-level-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss originsArcade-level-boss"></span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong>Capitulo especial: los comienzos de Scammer</strong>
+              <span>Antes del contenedor y antes de los lentes: un joven de traje rojo, un negocio de agua mojada... y toda la policia de la ciudad detras.</span>
+            </span>
+            <span class="arcade-chapter-badge" data-chapter-badge="origins">NUEVO</span>
+            <span class="arcade-chapter-progress">
+              <span class="arcade-chapter-progress-bar"><span data-chapter-fill="origins"></span></span>
+              <span class="arcade-chapter-progress-text" data-chapter-progress="origins">0 niveles</span>
+            </span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+          </button>
           <button type="button" class="arcade-chapter-option" id="normalArcadeChapterButton">
             <span class="arcade-chapter-number">01</span>
             <span class="arcade-level-scene" aria-hidden="true">
@@ -998,11 +1030,10 @@
                 <span></span><span></span><span></span><span></span>
               </span>
               <span class="arcade-level-boss knightArcade-level-boss"></span>
-              <span class="knightArcade-tape">EN CONSTRUCCION</span>
             </span>
             <span class="arcade-chapter-copy">
               <strong>El juramento de Knight</strong>
-              <span>Capitulo 5. El guardian de Valdoria deja su castillo para cumplir un juramento: su primera mision lo lleva a un bosque magico. Todavia en construccion.</span>
+              <span>Capitulo 5. El guardian de Valdoria deja su castillo para cumplir un juramento: su primera mision lo lleva a un bosque magico.</span>
             </span>
             <span class="arcade-chapter-badge" data-chapter-badge="knight">NUEVO</span>
             <span class="arcade-chapter-progress">
@@ -1010,6 +1041,71 @@
               <span class="arcade-chapter-progress-text" data-chapter-progress="knight">0 niveles</span>
             </span>
             <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+          </button>
+          <button type="button" class="arcade-chapter-option chronoArcade-chapter-option" id="chronoArcadeChapterButton" aria-disabled="true">
+            <span class="arcade-chapter-number">06</span>
+            <span class="arcade-level-scene chronoArcade-level-scene" aria-hidden="true">
+              <span class="chronoArcade-castle"></span>
+              <span class="arcade-level-player chronoArcade-level-player"></span>
+              <span class="chronoArcade-clock"></span>
+              <span class="arcade-level-boss chronoArcade-level-boss"></span>
+              <span class="knightArcade-tape">EN CONSTRUCCION</span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong>La hora oscura de Chrono</strong>
+              <span>Capitulo 6. Chrono cruza al mundo oscuro siguiendo una grieta en el tiempo. Algo alla adentro se esta repitiendo... Todavia en construccion.</span>
+              <span class="chronoArcade-requirements">
+                <em>Para jugarlo cuando salga:</em>
+                <span data-chrono-req="machine">Tener la Maquina Rara</span>
+                <span data-chrono-req="secret">Superar el nivel secreto del capitulo 5</span>
+                <span data-chrono-req="flametomb">Aprender Flametomb</span>
+              </span>
+            </span>
+            <span class="arcade-chapter-badge chronoArcade-badge">PROXIMAMENTE</span>
+          </button>
+        </div>
+        <div class="guide-section arcade-chapters-panel arcade-routeB-panel hidden" id="arcadeRouteBPanel">
+          <button type="button" class="arcade-chapter-option fireArcade-chapter-option routeB-chapter-option" id="fireArcadeBChapterButton">
+            <span class="arcade-chapter-number">2B</span>
+            <span class="arcade-level-scene fireArcade-level-scene routeB-level-scene" aria-hidden="true">
+              <span class="arcade-level-player fireArcade-level-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss fireArcade-level-boss"></span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong>El despertar de Fire Master... otra vez</strong>
+              <span>Capitulo 2B. La misma montaña. El mismo hielo. Pero algo cambio... y esta vez no hay otra forma de ganar.</span>
+            </span>
+            <span class="arcade-chapter-badge routeB-badge">RUTA B</span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+          </button>
+          <button type="button" class="arcade-chapter-option gamblerArcade-chapter-option routeB-chapter-option" id="gamblerArcadeBChapterButton">
+            <span class="arcade-chapter-number">3B</span>
+            <span class="arcade-level-scene gamblerArcade-level-scene routeB-level-scene" aria-hidden="true">
+              <span class="arcade-level-player fireArcade-level-player routeB-frost-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss gamblerArcade-level-boss"></span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong data-routeb3-title>Ciudad Cobalto... sin Gambler</strong>
+              <span data-routeb3-copy>Capitulo 3B. Fire Master despierta en una ciudad azul que no conoce, llena de monstruos cosidos. Y sus manos estan frias.</span>
+            </span>
+            <span class="arcade-chapter-badge routeB-badge">RUTA B</span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
+          </button>
+          <button type="button" class="arcade-chapter-option routeB-chapter-option routeB-locked" disabled>
+            <span class="arcade-chapter-number">4B</span>
+            <span class="arcade-level-scene routeB-level-scene" aria-hidden="true"></span>
+            <span class="arcade-chapter-copy"><strong>???</strong><span>Todavia no.</span></span>
+          </button>
+          <button type="button" class="arcade-chapter-option routeB-chapter-option routeB-locked" disabled>
+            <span class="arcade-chapter-number">5B</span>
+            <span class="arcade-level-scene routeB-level-scene" aria-hidden="true"></span>
+            <span class="arcade-chapter-copy"><strong>???</strong><span>Todavia no.</span></span>
           </button>
         </div>
         <button type="button" id="arcadeChaptersBackButton" data-i18n="back">Volver</button>
@@ -1064,6 +1160,11 @@
             </button>
             <button type="button" class="arcade-level-option arcade-level-secret locked hidden" data-arcade-level="8" disabled>
               <span class="arcade-level-number">08</span>
+              <span class="arcade-level-copy"><strong>???</strong><span>Proximamente.</span></span>
+              <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+            <button type="button" class="arcade-level-option arcade-level-secret locked hidden" data-arcade-level="9" disabled>
+              <span class="arcade-level-number">09</span>
               <span class="arcade-level-copy"><strong>???</strong><span>Proximamente.</span></span>
               <span class="arcade-level-status">BLOQUEADO</span>
             </button>
@@ -1383,6 +1484,11 @@
             <strong>EL MUNDO GIRA Y GIRA!</strong>
             <span>Derrota a Shadow Jester y completa el capitulo de Gambler en el modo Arcade. El show termino... por ahora.</span>
           </div>
+          <div class="achievement-card" data-achievement="originsCompleted">
+            <span class="achievement-icon achievement-icon-bigshot" aria-hidden="true"></span>
+            <strong>LOS COMIENZOS DE UN [[EMPRENDEDOR]]</strong>
+            <span>Completa el capitulo especial de Scammer. Asi empezo todo: con agua mojada y un contenedor muy acogedor.</span>
+          </div>
           <div class="achievement-card" data-achievement="scammerDefeated">
             <span class="achievement-icon achievement-icon-bigshot" aria-hidden="true"></span>
             <strong>[[BIG SHOT]]</strong>
@@ -1618,6 +1724,62 @@
       </div>
       <div class="menu-screen info-menu hidden" id="infoScreen">
         <h2 data-i18n="information">Changelog</h2>
+        <div class="guide-section changelog-new">
+          <h3>Actualizacion 3.5</h3>
+          <div class="character-guide">
+            <span><strong>Un capitulo especial escondido, libros, magia prohibida, controles para celular</strong> y algunas cosas que es mejor descubrir solo.</span>
+            <span><em>Algo cambio en el Arcade. Si lo notaste... ya sabes de que hablamos.</em></span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Capitulo especial: ???</h3>
+          <div class="character-guide">
+            <span><strong>Antes del contenedor</strong> la historia de como alguien muy conocido empezo su "negocio". Dicen que la entrada esta escondida en un libro... en un lugar que nadie mira dos veces.</span>
+            <span><strong>Clientes, policias y...</strong> algo mas. Algo que se rie.</span>
+            <span><strong>???</strong> un nivel secreto para quien lo supere sin caer.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Arcade: Ruta ???</h3>
+          <div class="character-guide">
+            <span><strong>A y ...</strong> hay quien dice que la seleccion de capitulos tiene otra cara. Nadie sabe bien como se abre.</span>
+            <span><strong>Una pista</strong> algunas promesas no deberian romperse.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Capitulo 6: en construccion</h3>
+          <div class="character-guide">
+            <span><strong>La hora oscura de Chrono</strong> todavia no se puede jugar, pero ya se pueden ver sus requisitos en la seleccion de capitulos. Mejor ir preparandose.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Tienda de Scammer</h3>
+          <div class="character-guide">
+            <span><strong>Libro de Hechizos</strong> la magia de varios luchadores, pagina por pagina... y una segunda parte con ideas para improvisar. Algunas paginas estan borrosas. Otras, encadenadas. Y una esta caliente.</span>
+            <span><strong>Tres libros nuevos</strong> la historia de Fire Master, la de Light Warrior (con unas paginas escritas por el mismo) y una guia turistica muy poco recomendable. Los libros cambian... segun lo que hagas.</span>
+            <span><strong>Estante de Biblioteca</strong> para tener todos tus libros juntos en el menu.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Fire Master</h3>
+          <div class="character-guide">
+            <span><strong>???</strong> existe una tercera habilidad. Muy pocos saben como aprenderla, y quienes la usaron no quieren hablar de eso.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Celulares y tablets</h3>
+          <div class="character-guide">
+            <span><strong>Controles tactiles</strong> joystick para moverse y botones de golpe, golpe fuerte, salto y habilidades (Q, F y R; los combos se hacen apretando dos a la vez). Arriba: ENTER para los dialogos, ESC y MENU para salir de la pelea.</span>
+            <span><strong>Pantalla completa</strong> en el celular el juego ocupa toda la pantalla, sin bordes grises. Se juega con el celular acostado.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Otros cambios</h3>
+          <div class="character-guide">
+            <span><strong>Capitulos 3, 4 y 5</strong> nuevas portadas en la seleccion de capitulos.</span>
+            <span><strong>Correcciones</strong> varios errores arreglados en peleas, escenas y musica.</span>
+          </div>
+        </div>
         <div class="guide-section">
           <h3>Actualizacion 3.0</h3>
           <div class="character-guide">
@@ -1988,6 +2150,9 @@
   <script src="js/07-combat-rules.js"></script>
   <script src="js/08-stages-cutscenes.js"></script>
   <script src="js/09-game-loop-abilities.js"></script>
+  <script src="js/09b-scam-origins.js"></script>
+  <script src="js/09c-flametomb.js"></script>
   <script src="js/10-controls-bot-menus.js"></script>
+  <script src="js/11-touch-controls.js"></script>
 </body>
 </html>

@@ -835,6 +835,8 @@ function updateBotSpecials(profile, absDistance, threat) {
   if (player2.secretVariant === 'chefBoss') return updateChefBossBotSpecials(profile, absDistance);
   if (player2.secretVariant === 'lanternGuard') return updateLanternGuardBotSpecials(profile, absDistance);
   if (player2.secretVariant === 'shaolinMaster') return updateShaolinBotSpecials(profile, absDistance);
+  if (isPolice(player2)) return updatePoliceBotSpecials(profile, absDistance);
+  if (isFriendThing(player2)) return updateFriendBotSpecials(profile, absDistance);
   if (isMossBeast(player2)) return !(player2.mossRootCooldown > 0) && shouldBotUseSpecial(profile, 0.6) ? castMossRoots(player2, player1) : false;
 
   // factory robots only use their own robot abilities (never the base character's kit)
@@ -1675,6 +1677,14 @@ function configureNormalArcadeLevel() {
     configureKnightArcadeLevel();
     return;
   }
+  if (arcadeChapter === 'origins') {
+    configureOriginsLevel();
+    return;
+  }
+  if (arcadeChapter === 'gamblerB') {
+    configureRouteB3Level();
+    return;
+  }
   if (selectedNormalArcadeLevel === 5) {
     normalArcadeEnemiesRemaining = 0;
     normalArcadeEnemyIndex = 0;
@@ -1750,6 +1760,14 @@ function configureNormalArcadeEnemy() {
   }
   if (arcadeChapter === 'knight') {
     configureKnightArcadeEnemy();
+    return;
+  }
+  if (arcadeChapter === 'origins') {
+    configureOriginsEnemy();
+    return;
+  }
+  if (arcadeChapter === 'gamblerB') {
+    configureRouteB3Enemy();
     return;
   }
   player2.arcadeBossVariant = false;
@@ -2071,11 +2089,14 @@ function getArcadeChapterProgress(chapter) {
   if (chapter === 'fireMaster' && unlockedAchievements.fireArcadeCompleted) completedLevels = totalLevels;
   if (chapter === 'gambler' && unlockedAchievements.gamblerArcadeCompleted) completedLevels = totalLevels;
   if (chapter === 'reflecter' && unlockedAchievements.reflecterArcadeCompleted) completedLevels = totalLevels;
+  // the last level never moves the saved progress forward: a finished chapter counts all of its levels
+  if (isArcadeChapterDone(chapter)) completedLevels = Math.max(completedLevels, playableLevels);
   return { completedLevels, playableLevels, totalLevels };
 }
 
 function syncArcadeChapterProgress() {
-  ['normal', 'fireMaster', 'gambler', 'reflecter', 'knight'].forEach((chapter) => {
+  syncArcadeRouteTabs();
+  ['origins', 'normal', 'fireMaster', 'gambler', 'reflecter', 'knight'].forEach((chapter) => {
     const { completedLevels, playableLevels, totalLevels } = getArcadeChapterProgress(chapter);
     const fill = document.querySelector(`[data-chapter-fill="${chapter}"]`);
     const text = document.querySelector(`[data-chapter-progress="${chapter}"]`);
@@ -2256,7 +2277,7 @@ function useHybridAbility(attacker, target, forcedIndex = null) {
 }
 
 function getArcadeChapterHero() {
-  if (arcadeChapter === 'fireMaster') return 'fireMaster';
+  if (arcadeChapter === 'fireMaster' || arcadeChapter === 'gamblerB') return 'fireMaster';
   if (arcadeChapter === 'gambler') return 'gambler';
   if (arcadeChapter === 'reflecter') return 'reflecter';
   return 'normal';
@@ -2264,9 +2285,10 @@ function getArcadeChapterHero() {
 
 function getArcadeChapterMap() {
   if (arcadeChapter === 'fireMaster') return 'fireArcade';
-  if (arcadeChapter === 'gambler') return 'gamblerArcade';
+  if (arcadeChapter === 'gambler' || arcadeChapter === 'gamblerB') return 'gamblerArcade';
   if (arcadeChapter === 'reflecter') return 'robotFactory';
   if (arcadeChapter === 'knight') return 'enchantedForest';
+  if (arcadeChapter === 'origins') return 'originsMarket';
   return 'normalArcade';
 }
 
@@ -2274,14 +2296,19 @@ function getArcadeChapterLevelCount() {
   if (arcadeChapter === 'gambler') return gamblerArcadeLevelCount;
   if (arcadeChapter === 'reflecter') return reflecterArcadeLevelCount;
   if (arcadeChapter === 'knight') return knightArcadeLevelCount;
+  if (arcadeChapter === 'origins') return originsLevelCount;
+  if (arcadeChapter === 'gamblerB') return routeB3LevelCount;
   return 5;
 }
 
 function getArcadeProgressStorageKey() {
+  if (arcadeChapter === 'fireMaster' && arcadeRouteB) return fireArcadeRouteBProgressStorageKey;
   if (arcadeChapter === 'fireMaster') return fireArcadeProgressStorageKey;
+  if (arcadeChapter === 'gamblerB') return routeB3ProgressStorageKey;
   if (arcadeChapter === 'gambler') return gamblerArcadeProgressStorageKey;
   if (arcadeChapter === 'reflecter') return reflecterArcadeProgressStorageKey;
   if (arcadeChapter === 'knight') return knightArcadeProgressStorageKey;
+  if (arcadeChapter === 'origins') return originsArcadeProgressStorageKey;
   return normalArcadeProgressStorageKey;
 }
 
@@ -2355,6 +2382,7 @@ function isKnightSecretLevelUnlocked() {
 }
 
 function isArcadeLevelComingSoon(level) {
+  if (arcadeChapter === 'gamblerB') return level > routeB3PlayableLevels;
   if (arcadeChapter === 'knight' && level === knightSecretLevel) return isKnightSecretLevelUnlocked() && !knightSecretLevelReady;
   if (arcadeChapter === 'reflecter') return level > reflecterArcadePlayableLevels && level !== 7;
   if (arcadeChapter === 'knight') return level > knightArcadePlayableLevels;
@@ -2605,6 +2633,7 @@ function configureKnightArcadeLevel() {
     botEnabled = true;
     player1.knightPossessed = false;
     player1.spiritCount = 3;
+    player2.fleeTaunt = false;
     omegaKickFight.active = false;
     player2.scriptedFlight = false;
     lightClashMusicFade = 1;
@@ -2849,17 +2878,32 @@ function syncGamblerArcadeChapterUI() {
 }
 
 function syncArcadeChapterUI() {
-  if (arcadeLevelSixButton) arcadeLevelSixButton.classList.toggle('hidden', arcadeChapter !== 'gambler' && arcadeChapter !== 'reflecter' && arcadeChapter !== 'knight');
+  if (arcadeLevelSixButton) arcadeLevelSixButton.classList.toggle('hidden', arcadeChapter !== 'gambler' && arcadeChapter !== 'reflecter' && arcadeChapter !== 'knight' && arcadeChapter !== 'origins');
   const knightSecretButton = document.querySelector(`[data-arcade-level="${knightSecretLevel}"]`);
-  if (knightSecretButton) knightSecretButton.classList.toggle('hidden', arcadeChapter !== 'knight');
+  if (knightSecretButton) {
+    knightSecretButton.classList.toggle('hidden', arcadeChapter !== 'knight' && arcadeChapter !== 'origins');
+    // in the special chapter the 8th level is the last normal one
+    knightSecretButton.classList.toggle('arcade-level-secret', arcadeChapter !== 'origins');
+  }
+  // the 9th level only exists in the special chapter (its secret)
+  const originsSecretButton = document.querySelector(`[data-arcade-level="${originsSecretLevel}"]`);
+  if (originsSecretButton) originsSecretButton.classList.toggle('hidden', arcadeChapter !== 'origins');
   const secretLevelButton = document.querySelector('[data-arcade-level="7"]');
   if (secretLevelButton) {
-    secretLevelButton.classList.toggle('hidden', !(arcadeChapter === 'knight' || (arcadeChapter === 'reflecter' && isReflecterSecretLevelUnlocked())));
+    secretLevelButton.classList.toggle('hidden', !(arcadeChapter === 'knight' || arcadeChapter === 'origins' || (arcadeChapter === 'reflecter' && isReflecterSecretLevelUnlocked())));
     // in chapter 5 the 7th level is a normal one, not a secret
-    secretLevelButton.classList.toggle('arcade-level-secret', arcadeChapter !== 'knight');
+    secretLevelButton.classList.toggle('arcade-level-secret', arcadeChapter !== 'knight' && arcadeChapter !== 'origins');
   }
   if (arcadeChapter === 'knight') {
     syncKnightArcadeChapterUI();
+    return;
+  }
+  if (arcadeChapter === 'origins') {
+    syncOriginsChapterUI();
+    return;
+  }
+  if (arcadeChapter === 'gamblerB') {
+    syncRouteB3ChapterUI();
     return;
   }
   if (arcadeChapter === 'gambler') {
@@ -2905,13 +2949,19 @@ function syncArcadeChapterUI() {
     : 'Ahora debe atravesar su primer escondite y demostrar que una buena pelea puede ser el principio de una gran historia.';
 }
 
-function openArcadeChapter(chapter = 'normal') {
+function openArcadeChapter(chapter = 'normal', routeB = false) {
   arcadeChapter = chapter;
+  arcadeRouteB = routeB;
   arcadeChaptersScreen.classList.add('hidden');
   arcadeLevelsScreen.classList.remove('hidden');
   syncArcadeChapterUI();
+  if (arcadeRouteB) syncRouteBChapterUI();
   syncNormalArcadeLevels();
   syncHardcorePanel();
+  // (route B has no hardcore)
+  const hardcorePanel = document.getElementById('hardcorePanel');
+  if (hardcorePanel) hardcorePanel.classList.toggle('hidden', arcadeRouteB);
+  document.body.classList.toggle('arcade-route-b', arcadeRouteB);
 }
 
 function closeArcadeChapters() {
@@ -2940,14 +2990,18 @@ function syncNormalArcadeLevels() {
     const level = Number(levelButton.dataset.arcadeLevel);
     const comingSoon = isArcadeLevelComingSoon(level);
     // the secret level 7 of chapter 4 has its own unlock (a clean run of level 6), not the normal progress
-    const secretLevel = (arcadeChapter === 'reflecter' && level === 7) || (arcadeChapter === 'knight' && level === knightSecretLevel);
+    const originsSecret = arcadeChapter === 'origins' && level === originsSecretLevel;
+    const secretLevel = (arcadeChapter === 'reflecter' && level === 7) || (arcadeChapter === 'knight' && level === knightSecretLevel) || originsSecret;
     const knightSecret = arcadeChapter === 'knight' && level === knightSecretLevel;
     const unlocked = knightSecret
       ? isKnightSecretLevelUnlocked() && knightSecretLevelReady
-      : secretLevel
+      : originsSecret
+        ? isOriginsSecretUnlocked()
+        : secretLevel
         ? isReflecterSecretLevelUnlocked()
         : level <= highestLevel && !comingSoon;
-    const completed = knightSecret ? isKnightSecretLevelBeaten() : secretLevel ? isReflecterSecretLevelBeaten() : !comingSoon && level < highestLevel;
+    const finalLevelDone = level === getChapterFinalLevel(arcadeChapter) && isArcadeChapterDone(arcadeChapter);
+    const completed = knightSecret ? isKnightSecretLevelBeaten() : originsSecret ? isOriginsSecretBeaten() : secretLevel ? isReflecterSecretLevelBeaten() : !comingSoon && (level < highestLevel || finalLevelDone);
     levelButton.disabled = !unlocked;
     levelButton.classList.toggle('locked', !unlocked);
     levelButton.classList.toggle('coming-soon', comingSoon);
@@ -3474,6 +3528,7 @@ gamblerArcadeChapterButton.addEventListener('click', () => openArcadeChapter('ga
 reflecterArcadeChapterButton.addEventListener('click', () => openArcadeChapter('reflecter'));
 // chapter 5 is still under construction
 knightArcadeChapterButton.addEventListener('click', () => openArcadeChapter('knight'));
+if (originsChapterButton) originsChapterButton.addEventListener('click', () => openArcadeChapter('origins'));
 normalArcadeLevelButtons.forEach((levelButton) => {
   levelButton.addEventListener('click', () => {
     if (levelButton.disabled) return;
@@ -3490,6 +3545,9 @@ function startArcadeLevel(level) {
     if (isArcadeLevelComingSoon(selectedNormalArcadeLevel)) return;
     player1.setCharacterType(getArcadeChapterHero());
     if (arcadeChapter === 'knight') player1.setCharacterType('normal', 'knight');
+    if (arcadeChapter === 'origins') makeYoungScammer(player1);
+    player1.frostFire = false;
+    if (arcadeChapter === 'gamblerB') makeFrostFireMaster(player1);
     player2.setCharacterType('normal');
     selectedMap = getArcadeChapterMap();
     normalArcadeLevelButtons.forEach((button) => button.classList.remove('selected'));
@@ -3510,6 +3568,8 @@ function startArcadeLevel(level) {
     if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === 6) startKnightGuardIntro();
     if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === 7) startKnightApproach();
     if (arcadeChapter === 'knight' && selectedNormalArcadeLevel === knightSecretLevel) startKnightRiftIntro();
+    if (arcadeChapter === 'origins') startOriginsIntro();
+    if (arcadeChapter === 'gamblerB') startRouteB3Intro();
 }
 guideButton.addEventListener('click', openGuide);
 achievementsButton.addEventListener('click', openAchievements);
@@ -3668,10 +3728,14 @@ function getChapterFinalLevel(chapter) {
   if (chapter === 'gambler') return gamblerArcadePlayableLevels;
   if (chapter === 'reflecter') return reflecterArcadePlayableLevels;
   if (chapter === 'knight') return knightArcadePlayableLevels;
+  if (chapter === 'origins') return originsLevelCount;
+  if (chapter === 'gamblerB') return routeB3PlayableLevels;
   return 5;
 }
 
 function isArcadeChapterDone(chapter) {
+  const chapterAchievements = { normal: 'normalArcadeCompleted', fireMaster: 'fireArcadeCompleted', gambler: 'gamblerArcadeCompleted', reflecter: 'reflecterArcadeCompleted', origins: 'originsCompleted' };
+  if (chapterAchievements[chapter] && unlockedAchievements[chapterAchievements[chapter]]) return true;
   try {
     if (localStorage.getItem(`moqueteChapterDone_${chapter}`) === '1') return true;
   } catch (error) {
