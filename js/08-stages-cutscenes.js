@@ -2616,6 +2616,7 @@ function drawCutsceneDialog() {
     titan: '#78909c',
     normal: '#90a4ae',
     fireMaster: '#ff7043',
+    fireMasterB: '#ff8a65',
     cowboy: '#bcaaa4',
     switcher: '#66bb6a',
     sorcerer: '#b388ff',
@@ -2646,7 +2647,7 @@ function drawCutsceneDialog() {
     }
     ctx.restore();
   }
-  const speakerNames = { gambler: 'GAMBLER', scammer: 'SCAMMER', jester: 'SHADOW JESTER', reflecter: isPlayerReflecterUpgrade() ? 'REFLECTER 2.0' : 'REFLECTER', chrono: 'CHRONO', omegarius: 'OMEGARIUS', neoScammer: 'NEO SCAMMER', knight: 'KNIGHT', lightWarrior: 'LIGHT WARRIOR', divineGeneral: 'DIVINE GENERAL', tank: 'LIVING TANK', gangBoss: 'JEFE DE LA BANDA', mossBeast: 'BESTIA DEL MUSGO', darkKnight: 'CABALLERO OSCURO', lanternGuard: 'GUARDIA DEL FAROL', shang: 'SHANG TING', customer: 'CLIENTE ENOJADO', police: 'POLICIA', sergeant: 'SARGENTO', chief: 'COMISARIO', origEyes: '???', origNarrator: 'MAS TARDE', friend: '???', darkWhisper: 'VOZ OSCURA', lightNote: 'NOTA DE L.W.', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', darkKnightBoss: 'CAPITAN OSCURO', icedThug: 'MATON HELADO', iceMaster: 'ICE MASTER', assembler: 'ENSAMBLADORA', chronoBoost: 'CHRONO POTENCIADO', titan: 'PROYECTO TITAN', normal: 'NORMAL', fireMaster: 'FIRE MASTER', cowboy: 'COWBOY', switcher: 'SWITCHER', sorcerer: 'SORCERER', ghost: 'GHOST', monkey: 'MONKEI' };
+  const speakerNames = { gambler: 'GAMBLER', scammer: 'SCAMMER', jester: 'SHADOW JESTER', reflecter: isPlayerReflecterUpgrade() ? 'REFLECTER 2.0' : 'REFLECTER', chrono: 'CHRONO', omegarius: 'OMEGARIUS', neoScammer: 'NEO SCAMMER', knight: 'KNIGHT', lightWarrior: 'LIGHT WARRIOR', divineGeneral: 'DIVINE GENERAL', tank: 'LIVING TANK', gangBoss: 'JEFE DE LA BANDA', mossBeast: 'BESTIA DEL MUSGO', darkKnight: 'CABALLERO OSCURO', lanternGuard: 'GUARDIA DEL FAROL', shang: 'SHANG TING', fireMasterB: 'FIRE MASTER', customer: 'CLIENTE ENOJADO', police: 'POLICIA', sergeant: 'SARGENTO', chief: 'COMISARIO', origEyes: '???', origNarrator: 'MAS TARDE', friend: '???', darkWhisper: 'VOZ OSCURA', lightNote: 'NOTA DE L.W.', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', darkKnightBoss: 'CAPITAN OSCURO', icedThug: 'MATON HELADO', iceMaster: 'ICE MASTER', assembler: 'ENSAMBLADORA', chronoBoost: 'CHRONO POTENCIADO', titan: 'PROYECTO TITAN', normal: 'NORMAL', fireMaster: 'FIRE MASTER', cowboy: 'COWBOY', switcher: 'SWITCHER', sorcerer: 'SORCERER', ghost: 'GHOST', monkey: 'MONKEI' };
   ctx.save();
   // in the last levels of chapter 5 the box goes lower, under the health bars
   const dialogDrop = 0;
@@ -7165,6 +7166,11 @@ function resetFight() {
     prepareMagicTownFighter(player1);
     prepareMagicTownFighter(player2);
   }
+  // the codes of the special chapter (911, FRIEND, SALESMAN)
+  prepareOriginsCodeFighter(player1);
+  prepareOriginsCodeFighter(player2);
+  prepareFrostFireFighter(player1);
+  prepareFrostFireFighter(player2);
   // HARDERCORE: the health from the last level comes along
   if (hardcoreRun.active && hardcoreRun.mode === 'harder' && normalArcadeActive && hardcoreRun.carry !== null) {
     player1.health = Math.max(1, Math.min(player1.maxHealth, hardcoreRun.carry));
@@ -7509,6 +7515,14 @@ function configureNeoScammer() {
 function startScamChallengeIntro() {
   let lines = scamChallenge.hero === 'gambler' ? scamIntroGamblerLines : scamHeroIntroLines[scamChallenge.hero] || [...scamIntroLines];
   if (scamChallenge.pickedByScammer) lines = [scamPickedLine, ...lines];
+  if (scamChallenge.relaxed) {
+    lines = [
+      { speaker: 'scammer', text: 'Bueno, kid. Esto no es personal. Es... educativo.' },
+      { speaker: 'scammer', text: 'Rebobinar ventas con un reloj volador. Ni a mi se me habia ocurrido. Casi te admiro.', emote: { who: 'scammer', symbol: '$' } },
+      { speaker: 'scammer', text: 'Asi que vamos a hacerlo rapido y sin rencores. Yo te pego un poquito, vos me pegas un poquito... y quedamos a mano.' },
+      { speaker: 'scammer', text: 'EN GUARDIA, CLIENTE VIP!' },
+    ];
+  }
   ch6CutsceneBase('scamIntro', lines, 'dialog', { gamblerX: 240, gamblerTargetX: 240, scammerX: 680, scammerTargetX: 680, scammerY: 0 });
   startCutsceneLine(0);
 }
@@ -7889,6 +7903,7 @@ const knightIntroBossHeroes = ['arcadeBoss', 'icedThug', 'iceMaster', 'scammer',
 
 function getKnightIntroHero() {
   if (isKnight(player1)) return 'knight';
+  if (player1.secretVariant === 'frostFire') return 'fireMasterB';
   if (knightIntroBossHeroes.includes(player1.secretVariant)) return player1.secretVariant;
   if (player1.secretVariant && (isArcadeBossFighter(player1) || isFactoryRobot(player1))) return null;
   return player1.characterType;
@@ -13632,7 +13647,7 @@ function configureShaolinChallenge() {
 }
 
 function startShaolinIntro() {
-  const hero = isScammer(player1) ? 'scammer' : player1.characterType;
+  const hero = isScammer(player1) ? 'scammer' : player1.secretVariant === 'frostFire' ? 'fireMasterB' : player1.characterType;
   const lines = (shaolinIntroLines[hero] || shaolinIntroLines.generic).map((line) => ({ ...line, speaker: line.speaker === 'hero' ? getShaolinHeroSpeaker() : line.speaker }));
   // he is meditating when you arrive, stands up on his first words, and takes his stance at the end
   lines.unshift({ speaker: 'shang', text: '......嗡......(Ommm......)', meditate: true });

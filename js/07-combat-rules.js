@@ -581,6 +581,7 @@ function lockDarkRoomMap() {
 }
 
 function clearActiveCodes() {
+  if (typeof lockOriginsCodes === 'function') lockOriginsCodes();
   Object.keys(characterSecretModes).forEach((secretKey) => {
     characterSecretModes[secretKey] = false;
   });
@@ -1727,6 +1728,7 @@ function formatFightDuration(milliseconds) {
 function getVictoryPhrase(fighter, opponent) {
   if (fighter.fleeTaunt) return 'Creiste que iba a ser asi de facil?';
   if (fighter.flametombTrauma) return '...Lo siento. Lo siento mucho.';
+  if (fighter.secretVariant === 'frostFire') return getFrostFireVictoryPhrase(opponent);
   if (fighter.frostFire && (isNeoScammer(opponent) || opponent.scammerBurnt)) return '...Perdon, Scammer. No podia parar.';
   if (fighter.frostFire) return ['...Ni siquiera se donde estoy.', 'Mis manos siguen frias.', 'Gambler... quien sea que seas... donde estas?'][Math.floor(Math.random() * 3)];
   if (fighter.youngScammer) return pickOriginsWinPhrase(opponent);

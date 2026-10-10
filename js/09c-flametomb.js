@@ -677,6 +677,7 @@ function routeBDamageFloor(target) {
 // the whole chapter is silent and tense: a drone, a heartbeat, his thoughts
 function updateRouteBMood() {
   updateRouteB3Thoughts();
+  updateFrostFireThoughts();
   if (!isRouteBFight()) {
     // (back to normal once out of 2B, unless Flametomb is on)
     if (!flametomb.active && !flametomb.aftermath && flametombMusicMuted && !arcadeRouteB) setFlametombSilence(false);
@@ -2340,7 +2341,7 @@ function cleanupRouteBState() {
     fighter.dusted = false;
     fighter.flametombTilt = 0;
     fighter.scriptedFlight = false;
-    if (!(normalArcadeActive && arcadeChapter === 'gamblerB')) {
+    if (!(normalArcadeActive && arcadeChapter === 'gamblerB') && fighter.secretVariant !== 'frostFire') {
       fighter.miniFlametomb = false;
       fighter.miniFlametombCooldown = 0;
     }
@@ -2369,4 +2370,163 @@ if (chronoArcadeChapterButton) {
     showCustomToast('CAPITULO 6: EN CONSTRUCCION', 'La hora oscura de Chrono todavia no esta lista. Cumpli los requisitos para estar preparado cuando salga.');
     playSound('menuMove');
   });
+}
+
+// ================= code FIREMASTERB / WEIRDFIRE: the Fire Master of route B, playable =================
+let frostFireCodeActive = false;
+characterDisplayNames.fireMasterB = 'Fire Master B';
+const frostFireThoughts = [
+  '(Otra pelea. Otro lugar. Sigo sin poder parar.)',
+  '(Frio en las manos. Fuego en el pecho.)',
+  '(No uses el fuego negro. No lo uses.)',
+  '(...Hermano, si estas ahi adentro, perdoname.)',
+];
+
+// his own lines in the special fights: Scammer / NEO, Knight's castle, Shang Ting's temple
+scamHeroIntroLines.fireMasterB = [
+  { speaker: 'scammer', text: 'F-FIRE MASTER? ...Ese simbolo... mitad hielo. No. No, no, no. VOS no deberias estar aca, kid.', emote: { who: 'scammer', symbol: '!' } },
+  { speaker: 'fireMasterB', text: 'Vos sos el vendedor de los lentes. El del borde de la ciudad. ...Te acordas de mi?' },
+  { speaker: 'scammer', text: 'Yo? Nunca te vi en mi vida! Primera vez! Cliente nuevo! ...(por favor que no se acuerde de la armadura)', emote: { who: 'gambler', symbol: '...' } },
+  { speaker: 'fireMasterB', text: 'Mis pies me trajeron hasta tu tienda. No se por que. Solo se que no puedo parar.' },
+  { speaker: 'scammer', text: '...Bueno. Si vas a pelear, peleemos. Pero NADA de fuego negro en mi sala, eh. Esta alfombra es importada.' },
+  scamClosingLine,
+];
+scamHeroNeoReactions.fireMasterB = '...Esa armadura. La conozco. Ya la vi romperse una vez.';
+knightIntroHeroLines.fireMasterB = [
+  { speaker: 'fireMasterB', text: 'Un castillo... Hace un momento estaba en una ciudad azul. Antes, en una montaña. Ya no se donde voy a abrir los ojos.' },
+  knightHalt,
+  { speaker: 'fireMasterB', text: 'Un caballero. ...Por favor, no te acerques mucho. A veces el fuego sale solo.' },
+  { speaker: 'knight', text: 'Tu llama es extraña, viajero. Mitad fuego, mitad escarcha. Que te ha ocurrido?', emote: { who: 'scammer', symbol: '?' } },
+  { speaker: 'fireMasterB', text: 'Rompi una promesa. Dos veces.' },
+  { speaker: 'knight', text: '...Entonces pelea por algo mejor esta vez. Que el acero te devuelva el honor.' },
+  knightEnGuard,
+];
+shaolinIntroLines.fireMasterB = [
+  { speaker: 'shang', text: '...你的气... 一半是火，一半是冰。(...Tu chi... mitad fuego, mitad hielo.)' },
+  { speaker: 'hero', text: 'Usted lo ve? ...Usted sabe lo que me pasa?', emote: { who: 'gambler', symbol: '?' } },
+  { speaker: 'shang', text: '你的心里有一个不属于你的灵魂。(Dentro tuyo hay un alma que no es tuya.)' },
+  { speaker: 'hero', text: '...Mi hermano. Lo llevo conmigo. No se como soltarlo... ni si quiero.' },
+  { speaker: 'shang', text: '痛苦也是老师。(El dolor tambien es un maestro.) 战斗吧，让我看看你还剩下什么。(Pelea. Mostrame lo que te queda.)' },
+  { speaker: 'hero', text: '...Esta bien. Pero no me haga usar el fuego negro.' },
+  { speaker: 'shang', text: '来吧！(Ven!)', emote: { who: 'scammer', symbol: '!' } },
+];
+
+// his button in character select, right after Fire Master
+const frostFireButton = document.createElement('button');
+frostFireButton.type = 'button';
+frostFireButton.className = 'character-option fire-master-option frost-fire-option hidden';
+frostFireButton.innerHTML = '<span>Fire Master B</span><span class="character-preview frost-fire-preview" aria-hidden="true"></span>';
+frostFireButton.addEventListener('click', () => selectCharacter('fireMaster', 'frostFire'));
+if (fireMasterCharacterButton) fireMasterCharacterButton.insertAdjacentElement('afterend', frostFireButton);
+
+// his card shows the real drawing
+let frostFirePreview = null;
+function renderFrostFirePreview() {
+  if (frostFirePreview) return frostFirePreview;
+  try {
+    const saved = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const actor = new Fighter({ x: 0, y: 0, color: '#ff9800', attacksToTheRight: true });
+    actor.setCharacterType('fireMaster', 'frostFire');
+    actor.frostFire = true;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    actor.position = { x: 400, y: 300 - actor.height };
+    actor.isAttacking = false;
+    actor.draw();
+    const thumb = document.createElement('canvas');
+    thumb.width = 140;
+    thumb.height = 168;
+    const box = { x: 360, y: 300 - actor.height - 30, width: actor.width + 80, height: actor.height + 40 };
+    const scale = Math.min(thumb.width / box.width, thumb.height / box.height);
+    thumb.getContext('2d').drawImage(canvas, box.x, box.y, box.width, box.height, (thumb.width - box.width * scale) / 2, thumb.height - box.height * scale, box.width * scale, box.height * scale);
+    ctx.putImageData(saved, 0, 0);
+    frostFirePreview = thumb.toDataURL();
+  } catch (error) {
+    frostFirePreview = '';
+  }
+  return frostFirePreview;
+}
+
+function applyFrostFirePreview(element) {
+  const image = renderFrostFirePreview();
+  if (!image || !element) return;
+  element.style.backgroundImage = `url(${image})`;
+  element.style.backgroundSize = 'contain';
+  element.style.backgroundRepeat = 'no-repeat';
+  element.style.backgroundPosition = 'center bottom';
+}
+
+function unlockFrostFireCode() {
+  frostFireCodeActive = true;
+  frostFireButton.classList.remove('hidden');
+  applyFrostFirePreview(frostFireButton.querySelector('.frost-fire-preview'));
+  showCustomToast('...FIRE MASTER B', 'El de la ruta B. Mitad fuego, mitad hielo. 125 de vida, mas daño, y Q+R: Mini Flametomb. Tiene sus propios dialogos con Scammer, Knight y Shang Ting.');
+  playFlametombRouteSting();
+}
+
+function lockFrostFireCode() {
+  frostFireCodeActive = false;
+  frostFireButton.classList.add('hidden');
+}
+
+// the Scammer challenge: one more fighter to pick
+function addFrostFireScamPick() {
+  if (!frostFireCodeActive) return;
+  const pick = document.createElement('button');
+  pick.type = 'button';
+  pick.className = 'scam-challenge-pick';
+  pick.dataset.character = 'fireMasterB';
+  const preview = document.createElement('span');
+  preview.className = 'character-preview frost-fire-preview';
+  applyFrostFirePreview(preview);
+  const name = document.createElement('span');
+  name.innerText = 'Fire Master B';
+  pick.append(preview, name);
+  pick.addEventListener('click', () => chooseScamChallengeHero('fireMasterB', false));
+  scamChallengeGrid.appendChild(pick);
+}
+
+// every fight outside the arcade: his stats and his little black flame
+function prepareFrostFireFighter(fighter) {
+  if (normalArcadeActive) return;
+  const frost = fighter.characterType === 'fireMaster' && fighter.secretVariant === 'frostFire';
+  fighter.frostFire = frost;
+  if (!frost) return;
+  fighter.miniFlametomb = true;
+  fighter.miniFlametombCooldown = 0;
+  fighter.setMaxHealth(125);
+  fighter.health = fighter.maxHealth;
+  fighter.damageMultiplier = 1.2;
+  updateHealthBars();
+}
+
+// now and then, what he thinks in a fight
+function updateFrostFireThoughts() {
+  if (normalArcadeActive || !player1.frostFire || !gameStarted || gameOver || arcadeCutscene.active) return;
+  flametomb.frostThought = (flametomb.frostThought || 600) - 1;
+  if (flametomb.frostThought <= 0) {
+    flametomb.frostThought = 1200 + Math.floor(Math.random() * 600);
+    showFlametombThought(player1, frostFireThoughts[Math.floor(Math.random() * frostFireThoughts.length)]);
+  }
+}
+
+// the victory lines of Fire Master B
+function getFrostFireVictoryPhrase(opponent) {
+  const pick = (list) => list[Math.floor(Math.random() * list.length)];
+  if (!opponent) return '...';
+  if (isNeoScammer(opponent) || isScammer(opponent)) return pick(['...Perdon, Scammer. Otra vez.', 'Te dije que no podia parar.', 'Tus lentes... ya no me dan miedo. Me dan pena.']);
+  if (isIceMaster(opponent)) return pick(['...Hermano?', 'No. No otra vez. Por favor, levantate.', 'Ya no se si estoy peleando con vos... o conmigo.']);
+  if (opponent.characterType === 'fireMaster') return pick(['Asi era yo. Antes de la pagina.', 'Tu fuego todavia es calido. El mio ya no.']);
+  if (isKnight(opponent)) return pick(['Tu honor sigue entero, caballero. El mio no.', 'Gracias por no tenerme miedo.']);
+  if (opponent.secretVariant === 'shaolinMaster') return pick(['El dolor es un maestro... pero no me enseña a parar.', 'Gracias, maestro. Creo.']);
+  if (opponent.characterType === 'sorcerer') return pick(['Sorcerer... por fin. Decime como apagarlo.', 'Vos escribiste esa pagina. Vos sabes.']);
+  if (opponent.characterType === 'lightWarrior') return pick(['Tu luz no quema. Como lo haces?', 'Ojala pudiera contener lo mio como vos.']);
+  if (opponent.characterType === 'chrono') return pick(['Podes rebobinar esto? Por favor. Hasta antes de la montaña.']);
+  if (opponent.characterType === 'gambler') return pick(['Gambler... me dijeron que no me metiera con vos. Perdon.']);
+  if (isFriendThing(opponent)) return pick(['Ustedes tambien se rien del fuego?', 'No me miren asi. Ya tengo suficiente adentro.']);
+  return pick([
+    '...Otra pelea. Otro lugar. Sigo sin poder parar.',
+    'No use el fuego negro. Esta vez no.',
+    'Frio en las manos. Fuego en el pecho. Y gane igual.',
+    'Lo siento. Siempre lo siento.',
+  ]);
 }

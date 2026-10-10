@@ -1868,7 +1868,7 @@ function getVisibleStatisticsCharacterTypes() {
 function selectCharacter(characterType, secretVariant = null) {
   if (secretVariant === 'superFireMaster' && !isSuperFireMasterUnlocked()) return;
   if (secretVariant === 'scammer' && !isScammerUnlocked()) return;
-  if (arcadeBossVariants.includes(secretVariant) && secretVariant !== 'scammer' && secretVariant !== 'neoScammer' && secretVariant !== 'knight' && secretVariant !== 'shaolinMaster' && !(magicTownCodeActive && magicTownVariants.includes(secretVariant)) && !arcadeBossesUnlocked) return;
+  if (arcadeBossVariants.includes(secretVariant) && secretVariant !== 'scammer' && secretVariant !== 'neoScammer' && secretVariant !== 'knight' && secretVariant !== 'shaolinMaster' && !(magicTownCodeActive && magicTownVariants.includes(secretVariant)) && !isOriginsCodeVariantActive(secretVariant) && !arcadeBossesUnlocked) return;
   if (secretVariant === 'knight' && !isKnightUnlocked()) return;
   if (secretVariant === 'shaolinMaster' && !isShaolinUnlocked()) return;
   if (magicTownVariants.includes(secretVariant) && !magicTownCodeActive && !arcadeBossesUnlocked) return;
@@ -3780,7 +3780,7 @@ function syncHardcorePanel() {
 
 function startHardcoreRun(mode) {
   if (!isArcadeChapterDone(arcadeChapter)) return;
-  Object.assign(hardcoreRun, { active: true, mode, chapter: arcadeChapter, lives: mode === 'harder' ? 1 : 3, carry: null, pending: null });
+  Object.assign(hardcoreRun, { active: true, mode, chapter: arcadeChapter, lives: mode === 'harder' ? 1 : 3, carry: null, pending: null, tempusSandUsed: false });
   playSound('judgeFinalStart');
   startArcadeLevel(1);
 }
@@ -3822,6 +3822,8 @@ function hardcoreAfterFight(won) {
     return;
   }
   run.lives -= 1;
+  // (the Sand of Time from the Tempus market: one more life, once per run)
+  if (run.lives <= 0 && typeof useTempusSand === 'function') useTempusSand(run);
   if (run.lives > 0) {
     run.pending = 'retry';
     restartButton.innerText = `Reintentar nivel (${run.lives} ${run.lives === 1 ? 'vida' : 'vidas'})`;

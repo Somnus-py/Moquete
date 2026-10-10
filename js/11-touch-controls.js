@@ -59,7 +59,11 @@ function buildTouchControls() {
     const key = button.dataset.key;
     const press = (event) => {
       event.preventDefault();
-      button.setPointerCapture && button.setPointerCapture(event.pointerId);
+      try {
+        button.setPointerCapture(event.pointerId);
+      } catch (error) {
+        // (some browsers refuse; the button still works)
+      }
       button.classList.add('pressed');
       touchKey(key, true);
     };
@@ -126,7 +130,11 @@ function buildTouchControls() {
   stick.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     activeId = event.pointerId;
-    stick.setPointerCapture && stick.setPointerCapture(event.pointerId);
+    try {
+        stick.setPointerCapture(event.pointerId);
+      } catch (error) {
+        // (some browsers refuse; the button still works)
+      }
     moveStick(event);
   });
   stick.addEventListener('pointermove', (event) => {
@@ -178,3 +186,182 @@ function initTouchControls() {
 }
 
 initTouchControls();
+
+// ---------- secret codes without a keyboard: tap the MOQUETE title ----------
+function openCodeEntry() {
+  let overlay = document.querySelector('.code-entry-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'moquete-book-overlay code-entry-overlay hidden';
+    overlay.innerHTML = `
+      <form class="code-entry" autocomplete="off">
+        <h3>Escribir un codigo</h3>
+        <input type="text" maxlength="32" placeholder="codigo secreto..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <p class="code-entry-result"></p>
+        <div class="code-entry-actions">
+          <button type="submit">USAR</button>
+          <button type="button" data-code-close="1">CERRAR</button>
+        </div>
+      </form>`;
+    const form = overlay.querySelector('form');
+    const input = overlay.querySelector('input');
+    const result = overlay.querySelector('.code-entry-result');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const code = input.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!code) return;
+      // the code goes through the same reader as the keyboard, letter by letter
+      menuSecretBuffer = '';
+      const fake = { target: document.body };
+      code.split('').forEach((letter) => handleMenuSecretInput({ ...fake, key: letter }));
+      const worked = menuSecretBuffer === '';
+      menuSecretBuffer = '';
+      result.textContent = worked ? 'Codigo aceptado.' : 'No paso nada... (o todavia no podes usar ese codigo)';
+      result.classList.toggle('ok', worked);
+      input.value = '';
+      if (worked) setTimeout(() => overlay.classList.add('hidden'), 900);
+    });
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay || (event.target.dataset && event.target.dataset.codeClose)) overlay.classList.add('hidden');
+    });
+    document.body.appendChild(overlay);
+  }
+  overlay.querySelector('.code-entry-result').textContent = '';
+  overlay.classList.remove('hidden');
+  setTimeout(() => overlay.querySelector('input').focus(), 50);
+}
+
+document.querySelectorAll('#mainMenu h1').forEach((title) => {
+  title.classList.add('code-entry-title');
+  title.title = 'Tocar para escribir un codigo';
+  title.addEventListener('click', openCodeEntry);
+});
+
+// ---------- secret abilities: one button per key combination of the current character ----------
+function getTouchSecretCombos(fighter) {
+  if (!fighter) return [];
+  const type = fighter.characterType;
+  const variant = fighter.secretVariant;
+  if (variant === 'neoScammer') return [{ keys: ['q', 'f', 'r'], name: 'Ultima oferta' }];
+  if (variant === 'shadowJester') return [
+    { keys: ['q', 'f'], name: 'Anillo de cartas' },
+    { keys: ['q', 'r'], name: 'Tormenta' },
+    { keys: ['f', 'r'], name: 'Acto final' },
+  ];
+  if (variant === 'shaolinMaster') return [{ keys: ['q', 'f'], name: 'Puños' }];
+  if (typeof isOmegarius === 'function' && isOmegarius(fighter)) return [
+    { keys: ['f', 'r'], name: 'Disparo secreto' },
+    { keys: ['q', 'f'], name: 'Acto final' },
+  ];
+  if (type === 'lightWarrior') {
+    const combos = [{ keys: ['q', 'f'], name: 'Rayo' }, { keys: ['f', 'r'], name: 'Puño radiante', hold: true }];
+    if (variant === 'omega') combos.push({ keys: ['q', 'f', 'r'], name: 'Omega' });
+    return combos;
+  }
+  if (type === 'fireMaster' && fighter.frostFire && fighter.miniFlametomb) return [{ keys: ['q', 'r'], name: 'Mini Flametomb' }];
+  if (type === 'fireMaster' && variant !== 'iceMaster') return [{ keys: ['q', 'f'], name: 'Fuego secreto' }];
+  if (type === 'sorcerer') return [{ keys: ['q', 'f'], name: 'Esfera azul' }];
+  if (type === 'divineGeneral') return [{ keys: ['q', 'f'], name: 'Corte del mundo' }];
+  if (type === 'chrono' && variant !== 'chronoRival') return [{ keys: ['q', 'f'], name: 'Parar el tiempo' }];
+  if (type === 'gambler' && !variant) return [{ keys: ['q', 'f'], name: 'Dados cargados' }];
+  return [];
+}
+
+let touchSecretSignature = '';
+
+function syncTouchSecretButtons() {
+  if (!touchControls.enabled) return;
+  const root = document.querySelector('.touch-controls');
+  if (!root) return;
+  let box = root.querySelector('.touch-secrets');
+  if (!box) {
+    box = document.createElement('div');
+    box.className = 'touch-secrets';
+    root.appendChild(box);
+  }
+  const combos = typeof player1 !== 'undefined' ? getTouchSecretCombos(player1) : [];
+  const signature = combos.map((combo) => combo.keys.join('') + combo.name).join('|');
+  if (signature === touchSecretSignature) return;
+  touchSecretSignature = signature;
+  box.innerHTML = combos.map((combo, index) => `
+    <button type="button" class="touch-btn touch-secret" data-secret="${index}">
+      <b>${combo.keys.map((key) => key.toUpperCase()).join('+')}</b><span>${combo.name}</span>
+    </button>`).join('');
+  box.querySelectorAll('[data-secret]').forEach((button) => {
+    const combo = combos[Number(button.dataset.secret)];
+    const press = (event) => {
+      event.preventDefault();
+      try {
+        button.setPointerCapture(event.pointerId);
+      } catch (error) {
+        // (some browsers refuse; the button still works)
+      }
+      button.classList.add('pressed');
+      // the keys go down one after the other, like pressing them together
+      combo.keys.forEach((key) => touchKey(key, false));
+      combo.keys.forEach((key) => touchKey(key, true));
+      if (!combo.hold) setTimeout(() => combo.keys.forEach((key) => touchKey(key, false)), 120);
+    };
+    const release = (event) => {
+      event.preventDefault();
+      button.classList.remove('pressed');
+      if (combo.hold) combo.keys.forEach((key) => touchKey(key, false));
+    };
+    button.addEventListener('pointerdown', press);
+    button.addEventListener('pointerup', release);
+    button.addEventListener('pointercancel', release);
+    button.addEventListener('contextmenu', (event) => event.preventDefault());
+  });
+}
+
+setInterval(syncTouchSecretButtons, 300);
+
+// ---------- Super Fire Master without a right click ----------
+// on phones: hold Fire Master's card for half a second, or tap the little SUPER tab
+function setupTouchSuperFireMaster() {
+  if (typeof fireMasterCharacterButton === 'undefined' || !fireMasterCharacterButton) return;
+  const button = fireMasterCharacterButton;
+  let holdTimer = null;
+  let longPressed = false;
+  const pickSuper = () => {
+    if (!isSuperFireMasterUnlocked()) {
+      showCustomToast('SUPER FIRE MASTER', 'Todavia bloqueado: gana Mana Meltdown con Fire Master en menos de 45 segundos y con 80+ de vida.');
+      return;
+    }
+    selectCharacter('fireMaster', 'superFireMaster');
+  };
+  button.addEventListener('pointerdown', (event) => {
+    if (event.pointerType === 'mouse') return;
+    longPressed = false;
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => {
+      longPressed = true;
+      if (navigator.vibrate) navigator.vibrate(30);
+      pickSuper();
+    }, 550);
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach((name) => button.addEventListener(name, () => clearTimeout(holdTimer)));
+  // (after a long press, the normal tap that follows does not pick the normal Fire Master)
+  button.addEventListener('click', (event) => {
+    if (!longPressed) return;
+    longPressed = false;
+    event.stopImmediatePropagation();
+    event.preventDefault();
+  }, true);
+  // the SUPER tab on the card (only on touch screens, only once unlocked)
+  const tab = document.createElement('span');
+  tab.className = 'touch-super-tab';
+  tab.textContent = 'SUPER';
+  tab.setAttribute('role', 'button');
+  tab.addEventListener('click', (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    pickSuper();
+  });
+  button.appendChild(tab);
+  const sync = () => tab.classList.toggle('hidden', !touchControls.enabled || !isSuperFireMasterUnlocked());
+  sync();
+  setInterval(sync, 1500);
+}
+
+setupTouchSuperFireMaster();

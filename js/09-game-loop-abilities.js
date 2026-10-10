@@ -215,6 +215,7 @@ function animate() {
   drawYoungScammerFx();
   drawFriendFx();
   drawFlametombFx();
+  if (typeof drawTempusFightTimer === 'function') drawTempusFightTimer();
   drawHardcoreHud();
   if (jesterNeedsFinalAct(player2) && player2.health <= 0) player2.health = 1;
 
@@ -256,6 +257,7 @@ function getCharacterDisplayName(fighter) {
   if (fighter.secretVariant === 'chefBoss') return 'Chef Furioso';
   if (fighter.secretVariant === 'lanternGuard') return 'Guardia del Farol';
   if (fighter.secretVariant === 'shaolinMaster') return 'Shang Ting';
+  if (fighter.secretVariant === 'frostFire') return 'Fire Master B';
   if (originsNames[fighter.secretVariant]) return originsNames[fighter.secretVariant];
   if (fighter.characterType === 'cowboy' && fighter.sheriffBadge) return 'Sheriff Cowboy';
   if (fighter.secretVariant === 'setoBoy') return 'Seto';
@@ -366,6 +368,7 @@ function getPlayerAbilityCooldowns(player) {
     };
   }
   if (player.youngScammer) return getYoungScammerCooldowns(player);
+  if (isPolice(player) || isFriendThing(player)) return getOriginsCodeCooldowns(player);
   if (isScammer(player)) {
     return {
       q: { active: true, name: 'Oferta irresistible', remaining: player.scammerOfferCooldown, max: getScammerCooldown(scammerOfferCooldown, player) },
@@ -1305,6 +1308,22 @@ function handleMenuSecretInput(event) {
   } else if (normalizedSecretBuffer.endsWith('lightsout')) {
     menuSecretBuffer = '';
     unlockDarkRoomMap();
+  } else if (normalizedSecretBuffer.endsWith('firemasterb') || normalizedSecretBuffer.endsWith('weirdfire')) {
+    menuSecretBuffer = '';
+    unlockAchievement('codeBreaker');
+    unlockFrostFireCode();
+  } else if (normalizedSecretBuffer.endsWith('911')) {
+    menuSecretBuffer = '';
+    unlockAchievement('codeBreaker');
+    unlockOriginsCode('police');
+  } else if (normalizedSecretBuffer.endsWith('friend')) {
+    menuSecretBuffer = '';
+    unlockAchievement('codeBreaker');
+    unlockOriginsCode('friend');
+  } else if (normalizedSecretBuffer.endsWith('salesman')) {
+    menuSecretBuffer = '';
+    unlockAchievement('codeBreaker');
+    unlockOriginsCode('salesman');
   } else if (normalizedSecretBuffer.endsWith('clear')) {
     menuSecretBuffer = '';
     clearActiveCodes();
@@ -1399,6 +1418,7 @@ window.addEventListener('keydown', (event) => {
       if (handleNeoScammerKey(player1, player2, 0, [keys.q, keys.f, keys.r])) break;
       if (handleKnightKey(player1, player2, 0)) break;
       if (handleShaolinKey(player1, player2, 0, [keys.q, keys.f, keys.r])) break;
+      if (handleOriginsCodeKey(player1, player2, 0)) break;
       if (handleMagicTownKey(player1, player2, 0)) break;
       if (handleFactoryRobotKey(player1, player2, 0, [keys.q, keys.f, keys.r])) break;
       if (handleYoungScammerKey(player1, player2, 'q')) break;
@@ -1437,6 +1457,7 @@ window.addEventListener('keydown', (event) => {
       if (handleNeoScammerKey(player1, player2, 1, [keys.q, keys.f, keys.r])) break;
       if (handleKnightKey(player1, player2, 1)) break;
       if (handleShaolinKey(player1, player2, 1, [keys.q, keys.f, keys.r])) break;
+      if (handleOriginsCodeKey(player1, player2, 1)) break;
       if (handleMagicTownKey(player1, player2, 1)) break;
       if (handleFactoryRobotKey(player1, player2, 1, [keys.q, keys.f, keys.r])) break;
       if (handleYoungScammerKey(player1, player2, 'f')) break;
@@ -1484,6 +1505,7 @@ window.addEventListener('keydown', (event) => {
       if (handleNeoScammerKey(player1, player2, 2, [keys.q, keys.f, keys.r])) break;
       if (handleKnightKey(player1, player2, 2)) break;
       if (handleShaolinKey(player1, player2, 2, [keys.q, keys.f, keys.r])) break;
+      if (handleOriginsCodeKey(player1, player2, 2)) break;
       if (handleMagicTownKey(player1, player2, 2)) break;
       if (handleFactoryRobotKey(player1, player2, 2, [keys.q, keys.f, keys.r])) break;
       if (handleYoungScammerKey(player1, player2, 'r')) break;
@@ -1521,6 +1543,7 @@ window.addEventListener('keydown', (event) => {
       if (!botEnabled && handleNeoScammerKey(player2, player1, 0, [keys.slash, keys.period, keys.enter])) break;
       if (!botEnabled && handleKnightKey(player2, player1, 0)) break;
       if (!botEnabled && handleShaolinKey(player2, player1, 0, [keys.slash, keys.period, keys.enter])) break;
+      if (!botEnabled && handleOriginsCodeKey(player2, player1, 0)) break;
       if (!botEnabled && handleMagicTownKey(player2, player1, 0)) break;
       if (!botEnabled && handleFactoryRobotKey(player2, player1, 0, [keys.slash, keys.period, keys.enter])) break;
       if (!botEnabled && isScammer(player2)) {
@@ -1558,6 +1581,7 @@ window.addEventListener('keydown', (event) => {
       if (!botEnabled && handleNeoScammerKey(player2, player1, 1, [keys.slash, keys.period, keys.enter])) break;
       if (!botEnabled && handleKnightKey(player2, player1, 1)) break;
       if (!botEnabled && handleShaolinKey(player2, player1, 1, [keys.slash, keys.period, keys.enter])) break;
+      if (!botEnabled && handleOriginsCodeKey(player2, player1, 1)) break;
       if (!botEnabled && handleMagicTownKey(player2, player1, 1)) break;
       if (!botEnabled && handleFactoryRobotKey(player2, player1, 1, [keys.slash, keys.period, keys.enter])) break;
       if (!botEnabled && isScammer(player2)) {
@@ -1599,6 +1623,7 @@ window.addEventListener('keydown', (event) => {
       if (!botEnabled && handleNeoScammerKey(player2, player1, 2, [keys.slash, keys.period, keys.enter])) break;
       if (!botEnabled && handleKnightKey(player2, player1, 2)) break;
       if (!botEnabled && handleShaolinKey(player2, player1, 2, [keys.slash, keys.period, keys.enter])) break;
+      if (!botEnabled && handleOriginsCodeKey(player2, player1, 2)) break;
       if (!botEnabled && handleMagicTownKey(player2, player1, 2)) break;
       if (!botEnabled && handleFactoryRobotKey(player2, player1, 2, [keys.slash, keys.period, keys.enter])) break;
       if (!botEnabled && isScammer(player2)) {

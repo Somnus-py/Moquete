@@ -4006,3 +4006,172 @@ function drawOriginsVision(cutscene) {
   }
   ctx.restore();
 }
+
+// ================= codes of the special chapter: 911, FRIEND, SALESMAN =================
+const originsCodes = { police: false, friend: false, salesman: false };
+const originsCodeRoster = [
+  { variant: 'policeOfficer', name: 'Policia', code: 'police' },
+  { variant: 'policeSergeant', name: 'Sargento', code: 'police' },
+  { variant: 'policeChief', name: 'Comisario', code: 'police' },
+  { variant: 'friendThing', name: 'Amigo', code: 'friend' },
+  { variant: 'bigFriend', name: 'Amigo Grande', code: 'friend' },
+];
+
+function isOriginsCodeVariantActive(variant) {
+  const entry = originsCodeRoster.find((item) => item.variant === variant);
+  return Boolean(entry && originsCodes[entry.code]);
+}
+
+// the buttons in character select (built once, after the MAGICTOWN ones)
+const originsCodeButtons = [];
+(function buildOriginsCodeButtons() {
+  const anchor = document.querySelector('[data-magic-variant="lanternGuard"]');
+  if (!anchor) return;
+  let after = anchor;
+  originsCodeRoster.forEach((entry) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'character-option magic-town-option origins-code-option hidden';
+    button.dataset.originsVariant = entry.variant;
+    button.dataset.originsCode = entry.code;
+    button.innerHTML = `<span>${entry.name}</span><span class="character-preview mtown-preview" aria-hidden="true"><span class="preview-body"></span></span>`;
+    button.addEventListener('click', () => selectCharacter('normal', entry.variant));
+    after.insertAdjacentElement('afterend', button);
+    after = button;
+    originsCodeButtons.push(button);
+  });
+})();
+
+let originsCodePreviewsBuilt = false;
+
+// previews from the real drawings (like MAGICTOWN)
+function buildOriginsCodePreviews() {
+  if (originsCodePreviewsBuilt) return;
+  originsCodePreviewsBuilt = true;
+  const saved = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const thumb = document.createElement('canvas');
+  const thumbCtx = thumb.getContext('2d');
+  thumb.width = 140;
+  thumb.height = 168;
+  originsCodeButtons.forEach((button) => {
+    try {
+      const actor = new Fighter({ x: 0, y: 0, color: '#9e9e9e', attacksToTheRight: true });
+      actor.setCharacterType('normal', button.dataset.originsVariant);
+      resetPolice(actor);
+      resetFriendThing(actor);
+      ctx.save();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      actor.position = { x: 400, y: 300 - actor.height };
+      actor.attacksToTheRight = true;
+      actor.isAttacking = false;
+      actor.draw();
+      ctx.restore();
+      const box = { x: 330, y: 300 - actor.height - 60, width: actor.width + 140, height: actor.height + 80 };
+      const scale = Math.min(thumb.width / box.width, thumb.height / box.height);
+      thumbCtx.clearRect(0, 0, thumb.width, thumb.height);
+      thumbCtx.drawImage(canvas, box.x, box.y, box.width, box.height, (thumb.width - box.width * scale) / 2, thumb.height - box.height * scale, box.width * scale, box.height * scale);
+      const preview = button.querySelector('.character-preview');
+      preview.style.backgroundImage = `url(${thumb.toDataURL()})`;
+      preview.style.backgroundSize = 'contain';
+      preview.style.backgroundRepeat = 'no-repeat';
+      preview.style.backgroundPosition = 'center bottom';
+      preview.querySelector('.preview-body').style.display = 'none';
+    } catch (error) {
+      // keep the simple preview
+    }
+  });
+  ctx.putImageData(saved, 0, 0);
+}
+
+function syncOriginsCodeButtons() {
+  originsCodeButtons.forEach((button) => button.classList.toggle('hidden', !originsCodes[button.dataset.originsCode]));
+}
+
+function unlockOriginsCode(code) {
+  originsCodes[code] = true;
+  syncOriginsCodeButtons();
+  if (code !== 'salesman') buildOriginsCodePreviews();
+  if (code === 'police') showCustomToast('911 ACTIVADO', 'La policia de la ciudad ya se puede elegir: Policia, Sargento y Comisario. Q porra, F esposas, R silbato (el Comisario llama al patrullero).');
+  if (code === 'friend') {
+    showCustomToast('FRIEND ACTIVADO', '...je. El Amigo y el Amigo Grande ya se pueden elegir. Q, F y R para sus... trucos.');
+    if (typeof playFriendLaugh === 'function') playFriendLaugh('soft');
+  }
+  if (code === 'salesman') showCustomToast('SALESMAN ACTIVADO', 'Scammer vuelve a sus comienzos: traje rojo, sin lentes y con sus trucos de agua mojada, oferta 2x1 y carrito del mercado.');
+  playSound('achievement');
+}
+
+function lockOriginsCodes() {
+  if (typeof lockFrostFireCode === 'function') lockFrostFireCode();
+  Object.keys(originsCodes).forEach((code) => {
+    originsCodes[code] = false;
+  });
+  syncOriginsCodeButtons();
+}
+
+// every fight: their state ready (and the young Scammer only with SALESMAN)
+function prepareOriginsCodeFighter(fighter) {
+  if (isPolice(fighter)) resetPolice(fighter);
+  if (isFriendThing(fighter)) resetFriendThing(fighter);
+  if (normalArcadeActive && arcadeChapter === 'origins') return;
+  // a person playing them starts with everything ready
+  if ((isPolice(fighter) || isFriendThing(fighter)) && !(fighter === player2 && botEnabled)) {
+    ['policeBatonCooldown', 'policeCuffsCooldown', 'policeWhistleCooldown', 'policeSirenCooldown', 'friendBlinkCooldown', 'friendHandsCooldown', 'friendEyesCooldown', 'friendWaveCooldown'].forEach((key) => {
+      fighter[key] = 0;
+    });
+  }
+  const young = !normalArcadeActive && originsCodes.salesman && fighter.secretVariant === 'scammer';
+  if (young) {
+    fighter.youngScammer = true;
+    fighter.originsFear = 0;
+    fighter.youngGlasses = false;
+    fighter.youngScar = false;
+    fighter.originsCrazy = false;
+    fighter.color = '#c62828';
+    fighter.setMaxHealth(150);
+    fighter.health = fighter.maxHealth;
+    resetYoungScammer(fighter);
+  } else if (fighter.youngScammer) {
+    fighter.youngScammer = false;
+  }
+}
+
+// when a person plays them
+function handleOriginsCodeKey(fighter, target, slot) {
+  if (fighter.youngScammer && fighter === player2) return handleYoungScammerKey(fighter, target, ['q', 'f', 'r'][slot]);
+  if (!isPolice(fighter) && !isFriendThing(fighter)) return false;
+  if (!canFighterAct(fighter) || gameOver) return true;
+  if (isPolice(fighter)) {
+    if (!fighter.policeShots) resetPolice(fighter);
+    if (slot === 0) castPoliceBaton(fighter);
+    else if (slot === 1) castPoliceCuffs(fighter, target);
+    else if (fighter.secretVariant === 'policeChief') castPoliceSiren(fighter, target);
+    else if (fighter.secretVariant === 'policeSergeant') castPoliceWhistle(fighter);
+    else castPoliceCuffs(fighter, target);
+    return true;
+  }
+  if (!fighter.friendHands) resetFriendThing(fighter);
+  const big = fighter.secretVariant === 'bigFriend';
+  if (slot === 0) (big ? castFriendEyes(fighter, target) : castFriendBlink(fighter));
+  else if (slot === 1) castFriendHands(fighter, target);
+  else (big ? castFriendWave(fighter) : castFriendEyes(fighter, target));
+  return true;
+}
+
+function getOriginsCodeCooldowns(player) {
+  const cooldown = (name, remaining, max) => ({ active: true, name, remaining: remaining || 0, max });
+  if (isPolice(player)) {
+    const chief = player.secretVariant === 'policeChief';
+    const sergeant = player.secretVariant === 'policeSergeant';
+    return {
+      q: cooldown('Porra', player.policeBatonCooldown, chief ? 90 : 130),
+      f: cooldown('Esposas', player.policeCuffsCooldown, chief ? 110 : 160),
+      r: chief ? cooldown('Patrullero', player.policeSirenCooldown, 320) : sergeant ? cooldown('Silbato', player.policeWhistleCooldown, 220) : cooldown('Esposas', player.policeCuffsCooldown, 160),
+    };
+  }
+  const big = player.secretVariant === 'bigFriend';
+  return {
+    q: big ? cooldown('Ojos', player.friendEyesCooldown, 200) : cooldown('Desaparecer', player.friendBlinkCooldown, 220),
+    f: cooldown('Manos de sombra', player.friendHandsCooldown, 230),
+    r: big ? cooldown('Ola de sombra', player.friendWaveCooldown, 300) : cooldown('Ojos', player.friendEyesCooldown, 200),
+  };
+}

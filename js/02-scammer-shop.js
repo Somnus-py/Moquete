@@ -637,6 +637,14 @@ function buyScammerShopItem(item) {
   }
   coinWallet.balance -= price;
   saveCoinWallet();
+  if (item.id === 'rareMachine' && typeof tempusMarket !== 'undefined' && tempusMarket.rewinds > 0) {
+    scammerShop.owned.rareMachine = 1;
+    saveScammerShop();
+    hideScammerQuestions();
+    syncCoinWalletUI();
+    startRareMachineSuspicion();
+    return;
+  }
   if (item.id === 'apologyGift') {
     // he cries, forgives you and forgets everything
     scammerShop.grudge = false;
@@ -1011,6 +1019,7 @@ function insistOnRareMachine() {
 
 // the fight again, whenever you want (you already won the machine)
 function startScamRematch() {
+  scamChallenge.relaxed = false;
   hideScammerQuestions();
   scammerShopSay('OTRA VEZ, KID?! QUERES LA [[REVANCHA]]? ES GRATIS! ...LA DERROTA TAMBIEN!', 'furious');
   scammerShopScreen.classList.remove('shop-shake');
@@ -1057,6 +1066,7 @@ function startScamChallengeSelect() {
     pick.addEventListener('click', () => chooseScamChallengeHero(characterType, false));
     scamChallengeGrid.appendChild(pick);
   });
+  if (typeof addFrostFireScamPick === 'function') addFrostFireScamPick();
   scamChallenge.timeLeft = scamChallengeSeconds * 10;
   updateScamChallengeTimer();
   sayScamChallenge('ELEGI A TU LUCHADOR, KID! CUALQUIERA! (MENOS ESOS DOS QUE BRILLAN MUCHO) TENES 10 SEGUNDOS!');
@@ -1108,7 +1118,8 @@ function startScamChallengeFight(characterType, byScammer) {
   normalArcadeActive = false;
   botEnabled = true;
   botDifficulty = 'hard';
-  player1.setCharacterType(characterType);
+  if (characterType === 'fireMasterB') player1.setCharacterType('fireMaster', 'frostFire');
+  else player1.setCharacterType(characterType);
   player2.setCharacterType('gambler', 'scammer');
   selectedMap = 'scamShowroom';
   startGame();
@@ -1117,6 +1128,16 @@ function startScamChallengeFight(characterType, byScammer) {
 
 // winning against NEO SCAMMER: the Maquina Rara is yours
 function rewardScamChallenge() {
+  if (scamChallenge.relaxed) {
+    // the fight for the rewind: no grudge, just pride
+    scamChallenge.relaxed = false;
+    awardCoins(25000);
+    setTimeout(() => {
+      showCustomToast('SCAMMER: "BIEN JUGADO, KID"', '"Ya esta, sin rencores. La maquina es tuya... y saludame al relojito ese." +25.000 monedas.');
+      playSound('achievement');
+    }, 4000);
+    return;
+  }
   const firstTime = !scammerShop.owned.rareMachine;
   scammerShop.owned.rareMachine = 1;
   scammerShop.grudge = true;
@@ -2153,4 +2174,41 @@ function openBookshelf() {
     </div>`;
   overlay.classList.remove('hidden');
   playNoise({ duration: 0.1, volume: 0.04, filterFrequency: 900 });
+}
+
+// ---------------- the machine, bought with coins rewound by Chrono ----------------
+const rareMachineSuspicionLines = [
+  ['...', 'talking'],
+  ['ESPERA. PAGASTE? 9.999.999 MONEDAS?! DE VERDAD?! ...SOS EL CLIENTE MAS RICO QUE TUVE EN MI VIDA, KID!', 'hyped'],
+  ['...Pero... un momento. Nadie junta tanta plata asi nomas. Ni yo. Y yo vendo AGUA MOJADA.', 'talking'],
+  ['*sniff* *sniff* ...Ese olor. Engranajes. Aceite de reloj. Arena de... TEMPUS.', 'talking'],
+  ['USASTE AL RELOJITO ESE PARA REBOBINAR MIS VENTAS?! DEVOLVIAS MIS PRODUCTOS Y TE QUEDABAS CON LA PLATA?! ...Eso es trampa. TRAMPA DE LA BUENA... ¡pero trampa igual!', 'furious'],
+  ['Un trato es un trato: la maquina es tuya. Pero antes... UNA PELEA. Por el orgullo, kid. Y porque me lo debes.', 'furious'],
+];
+
+function startRareMachineSuspicion() {
+  shopItemsContainer.classList.add('shop-locked');
+  let delay = 0;
+  rareMachineSuspicionLines.forEach(([text, mood], index) => {
+    setTimeout(() => {
+      scammerShopSay(text, mood);
+      if (index === 1) playSound('cutsceneCash');
+      if (index === 3) playSound('cutsceneQuestion');
+      if (index === 4) {
+        playSound('cutsceneAngry');
+        scammerShopScreen.classList.remove('shop-shake');
+        void scammerShopScreen.offsetWidth;
+        scammerShopScreen.classList.add('shop-shake');
+      }
+    }, delay);
+    delay += index === 0 ? 1400 : Math.max(2400, text.length * 32);
+  });
+  setTimeout(() => {
+    shopItemsContainer.classList.remove('shop-locked');
+    renderScammerShop();
+    syncShopBadges();
+    scamChallenge.relaxed = true;
+    startScamChallengeSelect();
+    sayScamChallenge('ELEGI A TU LUCHADOR, KID. Y NADA DE RELOJES ESTA VEZ, EH. TENES 10 SEGUNDOS!');
+  }, delay);
 }

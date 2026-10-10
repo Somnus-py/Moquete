@@ -9003,3 +9003,486 @@ body.touch-over .touch-buttons {
   background: #d50000;
   border-color: #fff;
 }
+
+/* ---------- secret codes from the title (for phones) ---------- */
+.code-entry-title {
+  cursor: pointer;
+}
+
+.code-entry {
+  background: #111820;
+  border: 4px solid #fdd835;
+  border-radius: 8px;
+  color: #fff;
+  max-width: 420px;
+  padding: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.code-entry input {
+  background: #000;
+  border: 2px solid #555;
+  color: #fdd835;
+  font-family: 'Courier New', monospace;
+  font-size: 22px;
+  letter-spacing: 3px;
+  margin: 10px 0;
+  padding: 8px;
+  text-align: center;
+  width: 100%;
+}
+
+.code-entry-result {
+  color: #ef9a9a;
+  font-size: 13px;
+  min-height: 18px;
+}
+
+.code-entry-result.ok {
+  color: #a5d6a7;
+}
+
+.code-entry-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* ---------- the Tempus market (Chrono) ---------- */
+.tempus-watch-button {
+  animation: tempusWatchSwing 2.4s ease-in-out infinite;
+  background:
+    radial-gradient(circle at 50% 56%, #e0f7fa 0 11px, #26c6da 12px 14px, transparent 15px),
+    linear-gradient(#b0bec5, #b0bec5) 50% 4px / 6px 7px no-repeat;
+  border: none;
+  bottom: 14px;
+  cursor: pointer;
+  height: 40px;
+  left: 14px;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  position: absolute;
+  width: 34px;
+  z-index: 5;
+}
+
+.tempus-watch-button::before,
+.tempus-watch-button::after {
+  display: none;
+}
+
+.tempus-watch-button.hidden {
+  display: none;
+}
+
+@keyframes tempusWatchSwing {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
+}
+
+.tempus-menu-decor {
+  bottom: 14px;
+  display: flex;
+  gap: 8px;
+  left: 56px;
+  position: absolute;
+  z-index: 5;
+}
+
+.tempus-gear {
+  animation: tempusSpin 6s linear infinite;
+  background: radial-gradient(circle, #3e2723 0 5px, #ffca28 6px 12px, transparent 13px), repeating-conic-gradient(#ffca28 0 15deg, transparent 15deg 30deg);
+  border-radius: 50%;
+  display: block;
+  height: 32px;
+  width: 32px;
+}
+
+@keyframes tempusSpin {
+  to { transform: rotate(360deg); }
+}
+
+.tempus-backward-clock {
+  background: #eceff1;
+  border: 3px solid #455a64;
+  border-radius: 50%;
+  cursor: pointer;
+  height: 34px;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  position: relative;
+  width: 34px;
+}
+
+.tempus-backward-clock::before,
+.tempus-backward-clock::after {
+  display: none;
+}
+
+.tempus-backward-clock i {
+  background: #263238;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform-origin: 50% 0;
+  width: 2px;
+}
+
+.tempus-backward-clock i:first-child {
+  animation: tempusSpin 4s linear infinite reverse;
+  height: 12px;
+}
+
+.tempus-backward-clock i:last-child {
+  animation: tempusSpin 30s linear infinite reverse;
+  height: 8px;
+}
+
+.tempus-market {
+  background:
+    repeating-linear-gradient(0deg, rgba(38, 198, 218, 0.07) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(90deg, rgba(38, 198, 218, 0.07) 0 1px, transparent 1px 24px),
+    linear-gradient(180deg, #0b1630, #050a18);
+  border: 4px solid #26c6da;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(38, 198, 218, 0.35);
+  color: #e0f7fa;
+  display: grid;
+  gap: 12px;
+  max-height: calc(100vh - 40px);
+  max-width: 860px;
+  overflow: hidden;
+  padding: 16px;
+  width: 100%;
+}
+
+.tempus-header {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto 1fr auto;
+}
+
+.tempus-chrono {
+  background: radial-gradient(circle at 50% 40%, #3949ab, #1a237e);
+  border: 3px solid #111;
+  border-radius: 50% 50% 12px 12px;
+  box-shadow: 0 0 16px rgba(38, 198, 218, 0.6);
+  height: 90px;
+  position: relative;
+  width: 76px;
+}
+
+.tempus-chrono-face {
+  background: #fff;
+  border: 4px solid #26c6da;
+  border-radius: 50%;
+  height: 46px;
+  left: calc(50% - 23px);
+  position: absolute;
+  top: 10px;
+  width: 46px;
+}
+
+.tempus-hand {
+  background: #111;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform-origin: 50% 0;
+  width: 3px;
+}
+
+.tempus-hand-long {
+  animation: tempusSpin 3s linear infinite;
+  height: 17px;
+}
+
+.tempus-hand-short {
+  animation: tempusSpin 36s linear infinite;
+  height: 11px;
+}
+
+.tempus-talk {
+  background: rgba(0, 0, 0, 0.45);
+  border: 2px solid #26c6da;
+  border-radius: 8px;
+  min-height: 72px;
+  padding: 8px 12px;
+}
+
+.tempus-kicker {
+  color: #80deea;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.tempus-line {
+  font-family: 'Courier New', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 4px 0 0;
+}
+
+.tempus-wallet {
+  align-items: center;
+  border: 2px solid #fdd835;
+  color: #fdd835;
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+}
+
+.tempus-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tempus-tabs button {
+  background: #0d2a3a;
+  border: 2px solid #26c6da;
+  color: #80deea;
+  font-family: 'Courier New', monospace;
+  font-weight: 900;
+}
+
+.tempus-tabs button.active {
+  background: #26c6da;
+  color: #04121c;
+}
+
+.tempus-items {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  max-height: 46vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.tempus-items.hidden {
+  display: none;
+}
+
+.tempus-item {
+  background: rgba(13, 42, 58, 0.85);
+  border: 2px solid #1e88a8;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+}
+
+.tempus-item strong {
+  color: #fff;
+}
+
+.tempus-item p {
+  color: #b2ebf2;
+  font-size: 12px;
+  margin: 0;
+}
+
+.tempus-item.owned {
+  opacity: 0.6;
+}
+
+.tempus-price {
+  color: #fdd835;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.tempus-item button {
+  background: #26c6da;
+  border: none;
+  color: #04121c;
+  font-weight: 900;
+}
+
+.tempus-item button.confirm {
+  background: #ef5350;
+  color: #fff;
+}
+
+.tempus-icon {
+  border: 3px solid #111;
+  border-radius: 6px;
+  display: block;
+  height: 44px;
+  width: 44px;
+}
+
+.tempus-icon-timeSand { background: linear-gradient(135deg, transparent 0 46%, #ffcc80 46% 54%, transparent 54%), linear-gradient(180deg, #8d6e63 0 12%, #e1f5fe 12% 46%, #ffcc80 46% 88%, #8d6e63 88%); }
+.tempus-icon-fightTimer { background: radial-gradient(circle at 50% 56%, #fff 0 13px, #26c6da 14px 17px, transparent 18px), #0d2a3a; }
+.tempus-icon-goldenGear { background: radial-gradient(circle, #3e2723 0 5px, #ffca28 6px 14px, transparent 15px), repeating-conic-gradient(#ffca28 0 15deg, #0d2a3a 15deg 30deg); }
+.tempus-icon-backwardClock { background: radial-gradient(circle, #eceff1 0 15px, #455a64 16px 18px, transparent 19px), #0d2a3a; }
+
+.tempus-rewind-item .shop-icon {
+  height: 44px;
+  width: 44px;
+}
+
+.tempus-empty {
+  color: #80deea;
+  font-style: italic;
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.tempus-footer {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.tempus-footer span {
+  color: #4dd0e1;
+  font-size: 11px;
+}
+
+/* (inside the menu the generic button style must not touch the watch and the clock) */
+#mainMenu .tempus-watch-button,
+#mainMenu .tempus-backward-clock {
+  border-radius: 50%;
+  box-shadow: none;
+  color: transparent;
+  font-size: 0;
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  text-shadow: none;
+}
+
+#mainMenu .tempus-watch-button {
+  background:
+    radial-gradient(circle at 50% 56%, #e0f7fa 0 11px, #26c6da 12px 14px, transparent 15px),
+    linear-gradient(#b0bec5, #b0bec5) 50% 4px / 6px 7px no-repeat;
+  border: none;
+  bottom: auto;
+  height: 40px;
+  left: 26px;
+  top: 118px;
+  width: 34px;
+}
+
+#mainMenu .tempus-menu-decor {
+  bottom: auto;
+  flex-direction: column;
+  left: 26px;
+  top: 166px;
+}
+
+#mainMenu .tempus-backward-clock {
+  background: #eceff1;
+  border: 3px solid #455a64;
+  height: 34px;
+  width: 34px;
+}
+
+/* the secret-ability buttons (only for characters that have them) */
+.touch-secrets {
+  bottom: max(204px, calc(env(safe-area-inset-bottom) + 190px));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 200000;
+}
+
+.touch-controls .touch-btn.touch-secret {
+  background: linear-gradient(135deg, rgba(255, 64, 129, 0.65), rgba(124, 77, 255, 0.65));
+  border-color: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 42px;
+  line-height: 1.05;
+  pointer-events: auto;
+  position: static;
+  width: 108px;
+}
+
+.touch-secret b {
+  font-size: 13px;
+}
+
+.touch-secret span {
+  font-size: 9px;
+  opacity: 0.9;
+}
+
+body.touch-over .touch-secrets,
+.touch-controls.collapsed .touch-secrets {
+  display: none;
+}
+
+/* (secret buttons: a compact column to the left of the attack buttons) */
+.touch-secrets {
+  bottom: max(16px, env(safe-area-inset-bottom));
+  right: calc(max(16px, env(safe-area-inset-right)) + 262px);
+}
+
+.touch-controls .touch-btn.touch-secret {
+  height: 38px;
+  width: 98px;
+}
+
+/* the SUPER tab on Fire Master's card (phones) */
+.touch-super-tab {
+  background: linear-gradient(135deg, #ff6d00, #ffd600);
+  border: 2px solid #111;
+  border-radius: 6px;
+  color: #111;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 2px 6px;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  z-index: 3;
+}
+
+.touch-super-tab.hidden {
+  display: none;
+}
+
+#fireMasterCharacterButton {
+  position: relative;
+}
+
+#fireMasterCharacterButton .touch-super-tab {
+  font-size: 15px;
+  padding: 5px 10px;
+  right: 6px;
+  top: 6px;
+}
+
+.tempus-chrono-canvas {
+  background: radial-gradient(circle at 50% 55%, rgba(38, 198, 218, 0.35), rgba(5, 10, 24, 0) 70%);
+  border: 2px solid #26c6da;
+  border-radius: 10px;
+  height: 120px;
+  width: 96px;
+}
+
+.tempus-chrono-canvas {
+  background: radial-gradient(circle at 50% 50%, #e0f7fa 0 35%, #4dd0e1 75%, #00838f);
+}
+
+.tempus-item button.refused {
+  background: #424242;
+  color: #ef9a9a;
+}
