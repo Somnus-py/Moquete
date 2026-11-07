@@ -743,8 +743,9 @@ function syncShopBadges() {
     ['fireBook', 'shop-badge icon firebook', 'Fuego en las Manos (tocalo para leer)'],
     ['lightBook', 'shop-badge icon lightbook', 'La Luz que se Contiene (tocalo para leer)'],
     ['darkGuide', 'shop-badge icon darkguide', 'Guia Turistica del Mundo Oscuro (tocalo para leer)'],
+    ['monkeiBook', 'shop-badge icon monkeibook', 'Mi Bida, por Monkei (tocalo para leer)'],
   ];
-  const shelfBooks = ['moqueteBook', 'spellBook', 'fireBook', 'lightBook', 'darkGuide'];
+  const shelfBooks = ['moqueteBook', 'spellBook', 'fireBook', 'lightBook', 'darkGuide', 'monkeiBook'];
   badges.forEach(([id, className, title]) => {
     if (!scammerShop.owned[id]) return;
     // (once there is a bookshelf, every book goes on it)
@@ -1053,6 +1054,7 @@ function startScamChallengeSelect() {
   scamChallengePortrait.appendChild(shopScammer.querySelector('.character-preview').cloneNode(true));
   scamChallengeGrid.innerHTML = '';
   scamChallengeRoster.forEach((characterType) => {
+    if (typeof isRiftLostCharacter === 'function' && isRiftLostCharacter(characterType)) return;
     const source = characterButtons.find((entry) => entry.characterType === characterType);
     const pick = document.createElement('button');
     pick.type = 'button';
@@ -1067,6 +1069,7 @@ function startScamChallengeSelect() {
     scamChallengeGrid.appendChild(pick);
   });
   if (typeof addFrostFireScamPick === 'function') addFrostFireScamPick();
+  if (typeof addObsidianScamPick === 'function') addObsidianScamPick();
   scamChallenge.timeLeft = scamChallengeSeconds * 10;
   updateScamChallengeTimer();
   sayScamChallenge('ELEGI A TU LUCHADOR, KID! CUALQUIERA! (MENOS ESOS DOS QUE BRILLAN MUCHO) TENES 10 SEGUNDOS!');
@@ -1090,7 +1093,7 @@ function tickScamChallenge() {
   if (scamChallenge.timeLeft === 30) sayScamChallenge('3... 2... 1... NO ME HAGAS ELEGIR POR VOS!');
   if (scamChallenge.timeLeft <= 0) {
     // he picks for you, and he really wants Gambler
-    const others = scamChallengeRoster.filter((type) => type !== 'gambler');
+    const others = scamChallengeRoster.filter((type) => type !== 'gambler' && !(typeof isRiftLostCharacter === 'function' && isRiftLostCharacter(type)));
     const pick = Math.random() < 0.5 ? 'gambler' : others[Math.floor(Math.random() * others.length)];
     chooseScamChallengeHero(pick, true);
   }
@@ -1119,6 +1122,7 @@ function startScamChallengeFight(characterType, byScammer) {
   botEnabled = true;
   botDifficulty = 'hard';
   if (characterType === 'fireMasterB') player1.setCharacterType('fireMaster', 'frostFire');
+  else if (characterType === 'obsidian') player1.setCharacterType('fireMaster', 'obsidian');
   else player1.setCharacterType(characterType);
   player2.setCharacterType('gambler', 'scammer');
   selectedMap = 'scamShowroom';
@@ -1880,7 +1884,7 @@ function getFlametombLastVictim() {
 function isFireBookDark() {
   const learned = typeof isFlametombUnlocked === 'function' && isFlametombUnlocked();
   const victim = getFlametombLastVictim();
-  return learned && (victim === 'iceMaster' || victim === 'neoScammer');
+  return learned && (victim === 'iceMaster' || victim === 'neoScammer' || victim === 'sorcerer');
 }
 
 const storyBooks = {
@@ -1950,7 +1954,7 @@ const storyBooks = {
         'a veces escucho su voz diciendo "respira". respiro. no sirve.',
         'mama siempre decia que eramos uno de fuego y uno de hielo y que juntos haciamos agua tibia. ya no hay agua tibia.',
       ], dark: true });
-      if (victim === 'neoScammer') {
+      if (victim === 'neoScammer' || victim === 'sorcerer') {
         pages.push({ kicker: 'CAPITULO 10', title: 'Una ciudad azul', text: [
           'cerre los ojos en la montaña y los abri en una ciudad azul. no se como. no puedo parar de caminar. mis pies no son mios.',
           'monstruos cosidos con pedazos de otros. yo tambien estoy cosido ahora. mitad fuego. mitad el.',
@@ -1962,11 +1966,34 @@ const storyBooks = {
           'el vendedor sobrevivio. creo. no me quede a mirar. no puedo mirar mas.',
           'lo hice otra vez. lo hice otra vez. lo hice otra vez.',
         ], dark: true });
-        pages.push({ kicker: '???', title: 'Sorcerer', text: [
-          'tengo que encontrar a Sorcerer. el sabe de magia. el escribio sobre la pagina del fuego negro. el tiene que saber como apagarlo.',
-          'si no se puede apagar... que alguien me apague a mi.',
-          'si alguien lee esto: no busquen la piedra. y si ven a un tipo de fuego caminando solo... no le tengan miedo. el tiene mas miedo que ustedes.',
-        ], dark: true });
+        if (victim === 'sorcerer') {
+          // the third time: the worst one
+          pages.push({ kicker: 'CAPITULO 12', title: 'La biblioteca', text: [
+            'lo encontre. a Sorcerer. me hizo te. con miel. me dijo "si no existe la forma, la escribimos nosotros".',
+            'hizo un ritual. salio mal. algo se desperto adentro mio. algo que piensa.',
+            'despues escribio un sello. a medias. con la poca tinta que le quedaba. me dijo que no iba a durar para siempre.',
+            'duro una hora.',
+          ], drawing: 'frost', dark: true });
+          pages.push({ kicker: 'CAPITULO 13', title: 'Ceniza', text: [
+            'no me acuerdo de la pelea. me acuerdo de abrir los ojos y que todo era gris.',
+            'sus tres esferas estaban a mis pies. grises. frias. su sombrero estaba tibio.',
+            'lo ultimo que me dijo fue que no era mi culpa. no lo escuche. EL no me dejo escucharlo.',
+            'le pedi a Chrono que rebobinara el tiempo. se fue. todos se van.',
+          ], drawing: 'tower', dark: true, scrawl: 'NO FUE MI CULPA NO FUE MI CULPA NO FUE' });
+          pages.push({ kicker: '...', title: 'Otra letra', text: [
+            'ESTA PAGINA LA ESCRIBO YO.',
+            'EL KID DUERME. NO VA A LEER ESTO. VOS SI.',
+            'ESCRITOR. HIELO. VENDEDOR. RELOJ. TODOS SON PAPEL.',
+            'Y EL PAPEL',
+            'ARDE.',
+          ], dark: true, scrawl: '- O.' });
+        } else {
+          pages.push({ kicker: '???', title: 'Sorcerer', text: [
+            'tengo que encontrar a Sorcerer. el sabe de magia. el escribio sobre la pagina del fuego negro. el tiene que saber como apagarlo.',
+            'si no se puede apagar... que alguien me apague a mi.',
+            'si alguien lee esto: no busquen la piedra. y si ven a un tipo de fuego caminando solo... no le tengan miedo. el tiene mas miedo que ustedes.',
+          ], dark: true });
+        }
       } else {
         pages.push({ kicker: '???', title: '...', text: [
           'perdoname',
@@ -1976,7 +2003,11 @@ const storyBooks = {
         ], dark: true });
       }
       // what Scammer wrote at the end, when he read it back
-      pages.push({ kicker: 'NOTA DEL AUTOR', title: '...', text: [
+      pages.push(victim === 'sorcerer' ? { kicker: 'NOTA DEL AUTOR', title: '...', text: [
+        'Sorcerer me vendio el papel de este libro. Me hacia descuento porque "los cuentos merecen buen papel".',
+        'Ya no voy a vender este libro. Lo voy a guardar en el fondo de la tienda. Bien al fondo.',
+        'Y si esa cosa de fuego negro pasa por la puerta... la tienda esta cerrada. Para siempre.',
+      ], note: '- Scammer' } : { kicker: 'NOTA DEL AUTOR', title: '...', text: [
         'Yo no escribi las ultimas paginas. Cuando lo compre ya estaban asi. O aparecieron despues. No se.',
         'Iba a hacer un chiste aca. No me sale ninguno.',
         'Si alguien lo ve... digale que no esta solo. Aunque sea eso. Gratis.',
@@ -2122,19 +2153,27 @@ function renderStoryBook() {
   storyBook.element.querySelector('[data-story="next"]').disabled = storyBook.page >= storyBook.pages.length - 1;
   if (!entry) {
     page.innerHTML = `
-      <span class="moquete-book-kicker">${darkFire ? 'EDICION... ALTERADA' : 'EDICION DE BOLSILLO'}</span>
+      <span class="moquete-book-kicker">${darkFire ? 'EDICION... ALTERADA' : data.coverKicker || 'EDICION DE BOLSILLO'}</span>
       <h2>${data.title}</h2>
       <p class="moquete-book-subtitle">${data.subtitle}</p>
       ${darkFire ? '<p class="story-cover-scrawl">no lo leas</p>' : ''}`;
     return;
   }
   const paragraphs = entry.text.map((text) => `<p>${text}</p>`).join('');
+  // (spec sheets with bars, and a stamp across the page)
+  const specs = entry.specs ? `<div class="story-specs">${entry.specs.map(([label, value, max]) => {
+    const known = typeof value === 'number';
+    return `<span class="story-spec-label">${label}</span><span class="story-spec-bar${known ? '' : ' unknown'}"><i style="width: ${known ? Math.min(100, Math.round((value / max) * 100)) : 100}%"></i></span><b>${value}</b>`;
+  }).join('')}</div>` : '';
   page.innerHTML = `
+    ${entry.stamp ? `<span class="story-stamp">${entry.stamp}</span>` : ''}
     <span class="moquete-book-kicker">${entry.kicker}</span>
     <h3>${entry.title}</h3>
+    ${specs}
     ${paragraphs}
     ${entry.drawing ? storyDrawings[entry.drawing] : ''}
     ${entry.scrawl ? `<p class="story-scrawl">${entry.scrawl}</p>` : ''}
+    ${entry.margin ? `<div class="story-margin">${entry.margin.map((note) => `<p class="story-margin-note story-margin-${note.who}">${note.text}</p>`).join('')}</div>` : ''}
     ${entry.note ? `<p class="moquete-book-signature">${entry.note}</p>` : ''}`;
 }
 
@@ -2146,6 +2185,9 @@ function openBookshelf() {
     ['fireBook', 'Fuego en las Manos', '#e65100'],
     ['lightBook', 'La Luz que se Contiene', '#f9a825'],
     ['darkGuide', 'Guia del Mundo Oscuro', '#1a0b2e'],
+    ['monkeiBook', 'Mi Bida (Monkei)', '#6d4c41'],
+    ['darkGuide2', 'Mundo Oscuro: Parte 2', '#311b92'],
+    ['robotBook', 'Engranajes y Espejos', '#0d47a1'],
   ];
   let overlay = document.querySelector('.bookshelf-overlay');
   if (!overlay) {
@@ -2162,7 +2204,8 @@ function openBookshelf() {
     });
     document.body.appendChild(overlay);
   }
-  const owned = books.filter(([id]) => scammerShop.owned[id]);
+  // (the Tempus books go on the same shelf)
+  const owned = books.filter(([id]) => scammerShop.owned[id] || (typeof hasTempusItem === 'function' && hasTempusItem(id)));
   overlay.innerHTML = `
     <div class="bookshelf">
       <h3>Tu biblioteca</h3>

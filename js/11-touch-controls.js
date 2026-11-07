@@ -172,6 +172,7 @@ function initTouchControls() {
     viewport.setAttribute('content', 'width=1100, user-scalable=no, viewport-fit=cover');
   }
   buildTouchControls();
+  buildFullscreenButton();
   fitTouchShell();
   window.addEventListener('resize', fitTouchShell);
   window.addEventListener('orientationchange', () => setTimeout(fitTouchShell, 200));
@@ -183,6 +184,67 @@ function initTouchControls() {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) Object.keys(touchControls.held).forEach((key) => touchKey(key, false));
   });
+}
+
+// ---------- full screen (on phones) ----------
+function isFullscreenNow() {
+  return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function enterFullscreen() {
+  const root = document.documentElement;
+  const request = root.requestFullscreen || root.webkitRequestFullscreen;
+  if (!request) {
+    // iPhone: Safari doesn't let pages go full screen by themselves
+    if (typeof showCustomToast === 'function') showCustomToast('PANTALLA COMPLETA', 'En iPhone: toca Compartir y despues "Agregar a pantalla de inicio". Abriendo Moquete desde ahi se juega en pantalla completa.');
+    return;
+  }
+  try {
+    const result = request.call(root, { navigationUI: 'hide' });
+    if (result && result.then) {
+      result.then(() => {
+        // and lying down, if the phone lets us
+        if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+      }).catch(() => {});
+    }
+  } catch (error) {
+    // (nothing to do)
+  }
+}
+
+function exitFullscreen() {
+  const exit = document.exitFullscreen || document.webkitExitFullscreen;
+  if (exit) {
+    try {
+      const result = exit.call(document);
+      if (result && result.catch) result.catch(() => {});
+    } catch (error) {
+      // (nothing to do)
+    }
+  }
+}
+
+function syncFullscreenButton() {
+  const button = document.querySelector('.touch-fullscreen');
+  const full = isFullscreenNow();
+  document.body.classList.toggle('is-fullscreen', full);
+  if (button) button.innerHTML = full ? '&#10006;<span class="fs-label"> SALIR</span>' : '&#9974;<span class="fs-label"> PANTALLA COMPLETA</span>';
+  setTimeout(fitTouchShell, 120);
+}
+
+function buildFullscreenButton() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'touch-fullscreen';
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (isFullscreenNow()) exitFullscreen();
+    else enterFullscreen();
+  });
+  document.body.appendChild(button);
+  document.addEventListener('fullscreenchange', syncFullscreenButton);
+  document.addEventListener('webkitfullscreenchange', syncFullscreenButton);
+  syncFullscreenButton();
 }
 
 initTouchControls();

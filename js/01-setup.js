@@ -1,3 +1,57 @@
+// ---------- phones (and some browsers) block music until the player taps the screen:
+// any song that couldn't start is remembered and started again with the next tap / key ----------
+const pendingMediaPlays = new Map();
+const nativeMediaPlay = HTMLMediaElement.prototype.play;
+const nativeMediaPause = HTMLMediaElement.prototype.pause;
+HTMLMediaElement.prototype.play = function playOrWaitForTap() {
+  const media = this;
+  let result;
+  try {
+    result = nativeMediaPlay.call(media);
+  } catch (error) {
+    pendingMediaPlays.set(media, performance.now());
+    return Promise.resolve();
+  }
+  if (result && typeof result.then === 'function') {
+    return result.then(
+      () => {
+        pendingMediaPlays.delete(media);
+      },
+      (error) => {
+        if (!error || error.name !== 'AbortError') pendingMediaPlays.set(media, performance.now());
+      },
+    );
+  }
+  return result;
+};
+HTMLMediaElement.prototype.pause = function pauseAndForget() {
+  pendingMediaPlays.delete(this);
+  return nativeMediaPause.call(this);
+};
+
+function retryPendingMediaPlays() {
+  if (typeof audioContext !== 'undefined' && audioContext && audioContext.state === 'suspended') {
+    const resumed = audioContext.resume();
+    if (resumed && resumed.catch) resumed.catch(() => {});
+  }
+  pendingMediaPlays.forEach((failedAt, media) => {
+    // (looping music always comes back; a one-shot sound only if it failed a moment ago)
+    if (!media.loop && performance.now() - failedAt > 2500) {
+      pendingMediaPlays.delete(media);
+      return;
+    }
+    let result;
+    try {
+      result = nativeMediaPlay.call(media);
+    } catch (error) {
+      return;
+    }
+    if (result && typeof result.then === 'function') result.then(() => pendingMediaPlays.delete(media), () => {});
+    else pendingMediaPlays.delete(media);
+  });
+}
+['touchend', 'pointerdown', 'click', 'keydown'].forEach((type) => window.addEventListener(type, retryPendingMediaPlays, { capture: true, passive: true }));
+
 // Moquete - Canvas, constantes, estado global, referencias del DOM, guardado, monedas y logros
 // (parte 1 de 10; los archivos se cargan en orden desde index.html)
 
@@ -78,9 +132,9 @@ const attackDamage = 5;
 const heavyAttackDamage = 15;
 const basicAttackCooldown = 8;
 const playerMoveSpeed = 5;
-const tankDamage = 25;
-const tankAttackCooldown = 55;
-const tankShellDamage = 45;
+const tankDamage = 17;
+const tankAttackCooldown = 30;
+const tankShellDamage = 70;
 const tankShellSpeed = playerMoveSpeed * 1.6;
 const tankShellCooldown = 900;
 const fireballDamage = 20;
@@ -282,7 +336,7 @@ const switcherModeStats = {
 };
 const switcherPrismCooldownMultiplier = 0.66;
 const switcherPrismOverdriveCooldownMultiplier = 0.55;
-const characterTypes = ['normal', 'fireMaster', 'tank', 'cowboy', 'reflecter', 'switcher', 'sorcerer', 'gambler', 'chrono', 'ghost', 'lightWarrior', 'divineGeneral', 'monkey'];
+const characterTypes = ['normal', 'fireMaster', 'tank', 'cowboy', 'reflecter', 'switcher', 'sorcerer', 'gambler', 'chrono', 'ghost', 'lightWarrior', 'divineGeneral', 'monkey', 'jophestar'];
 const hiddenCharacterTypes = ['divineGeneral', 'monkey'];
 const debugAffectedCharacters = Object.fromEntries(characterTypes.map((characterType) => [characterType, true]));
 const defaultDebugSettings = {
@@ -1123,6 +1177,10 @@ const lightBoxParryDamage = 3;
 const lightBoxParryHealRatio = 0.02;
 // after every BOX ATTACK the light heals Knight a lot
 const lightBoxHealRatio = 0.35;
+// (his BOX ATTACKS hit harder than any other box)
+const lightBoxDamageScale = 1.7;
+// Light Warrior himself, before the omega form, also hits harder in this fight
+const lightWarriorFinalDamageBoost = 1.35;
 dodgeRoundThemes.lightBox1 = {
   title: 'BOX ATTACK!',
   border: ['#fff59d', '#4fc3f7'],
@@ -1244,7 +1302,12 @@ const farolClimb = { active: false };
 const farolClimbGravity = 0.62;
 const farolClimbJump = -13.6;
 const farolClimbSpeed = 4.8;
-const farolClimbHitRatio = 0.04;
+const farolClimbHitRatio = 0.05;
+// his attacks on the climb push Knight away and slow him down for a moment
+const farolClimbPush = 4;
+const farolClimbSlowFrames = 80;
+const farolClimbSlowFactor = 0.5;
+const farolClimbDiscCount = 30;
 const farolClimbFallRatio = 0.05;
 const farolClimbTaunts = ['No vas a llegar!', 'Bajate de ahi, caballero!', 'Esos discos son mios!', 'Detenete de una vez!', 'El farol no es tuyo!'];
 // on top of the farol: Light Warrior uses the power of friendship
@@ -1258,7 +1321,9 @@ const omegaKickBreakAfter = 5;
 const omegaKickChargeFrames = 90;
 const omegaKickLockFrames = 24;
 const omegaKickSpeed = 17;
-const omegaKickDamage = 40;
+const omegaKickDamage = 58;
+// after the 5th kick the spirits heal Knight
+const omegaKickBreakHealRatio = 0.4;
 const omegaKickBreakFrames = 1200;
 // with the 6 spirits Knight hits twice as hard and takes much less damage
 const omegaSpiritDamageBoost = 2;
@@ -1267,8 +1332,8 @@ const omegaSpiritArmor = 0.55;
 const omegaClashSpeeds = [6, 8, 10.5, 13, 1.6];
 const omegaClashMissRatio = 0.08;
 // parrying a flying kick: Knight's swing has to have started at most this many frames before the kick reaches him
-const omegaKickParryWindow = 10;
-const omegaKickParryReach = 36;
+const omegaKickParryWindow = 20;
+const omegaKickParryReach = 64;
 const omegaKickParryDamage = 80;
 const omegaKickStunFrames = 140;
 let lightClashMusicFade = 1;
@@ -1297,9 +1362,9 @@ const knightFarolTopLines = [
   { speaker: 'knight', text: 'No pienso retroceder ahora, Light Warrior.' },
   { speaker: 'lightWarrior', text: 'Lo se. Por eso esta vez... no voy a pelear solo.' },
   { speaker: 'lightWarrior', text: 'Celeste, Seto, Mochi, el chef, el sheriff... y los espiritus de Robledal. Todos me prestaron algo hoy.' },
-  { speaker: 'lightWarrior', text: 'Y eso tiene un nombre, caballero. Se llama... EL PODER DE LA AMISTAD!' },
-  { speaker: 'knight', text: '...En serio vas a decir eso?', emote: { who: 'gambler', symbol: '...' } },
-  { speaker: 'lightWarrior', text: 'Si! Y va a funcionar! AMIGOS... PRESTENME SU LUZ!', transform: true },
+  { speaker: 'lightWarrior', text: 'No peleo por mi, caballero. Peleo por cada luz que me dieron... y hoy me las prestan todas.' },
+  { speaker: 'knight', text: '...Entonces mostramela.', emote: { who: 'gambler', symbol: '...' } },
+  { speaker: 'lightWarrior', text: 'Espiritus de Robledal... PRESTENME SU LUZ!', transform: true },
   { speaker: 'lightWarrior', text: 'OMEGA LIGHT WARRIOR. La luz de todos... en un solo guerrero.' },
   { speaker: 'knight', text: '...Funciono.', emote: { who: 'gambler', symbol: '!' } },
   { speaker: 'knight', text: 'Entonces voy a tener que ser mas fuerte que todos ellos juntos.', glow: true },

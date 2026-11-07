@@ -239,6 +239,7 @@ function renderCharacterStatisticsRows() {
     if (statsCharacterRows.querySelector(`[data-stats-character="${characterType}"]`)) return;
     statsCharacterRows.appendChild(createCharacterStatsRow(characterType));
   });
+  if (typeof syncRiftLostCharacters === 'function') syncRiftLostCharacters();
 }
 
 function recordPersistentFightStatistics(winnerPlayer, fightTime) {

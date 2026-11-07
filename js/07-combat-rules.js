@@ -429,6 +429,9 @@ function formatDebugMultiplier(value) {
 
 function isDebugAffected(fighter) {
   if (!fighter || !fighter.characterType) return true;
+  // (the debug console can pick one side, and every secret character one by one)
+  const filtered = typeof debugTargetFilter === 'function' ? debugTargetFilter(fighter) : null;
+  if (filtered !== null) return filtered;
   return debugAffectedCharacters[fighter.characterType] !== false;
 }
 
@@ -899,7 +902,8 @@ function applyDamage(attacker, target, damage, { isSpecial = false, ignoreDebug 
   const riftArmorMultiplier = target.riftResolve ? riftKnightArmor : 1;
   // the big friend of the special chapter barely feels the hits
   const bigFriendArmorMultiplier = target.secretVariant === 'bigFriend' ? bigFriendDamageTaken : 1;
-  const targetDamageMultiplier = icedThugArmorMultiplier * frostVulnerabilityMultiplier * scamMultiplier * omegariusArmorMultiplier * knightShieldMultiplier * spiritArmorMultiplier * spiritPowerMultiplier * riftArmorMultiplier * bigFriendArmorMultiplier;
+  const machineShield = (typeof chronoMachineDamageTaken === 'function' ? chronoMachineDamageTaken(target) : 1) * (typeof blackKnightDamageTaken === 'function' ? blackKnightDamageTaken(target) : 1) * (typeof chronoRuleDamageScale === 'function' ? chronoRuleDamageScale(attacker, target) : 1) * (typeof abnPlayerRuleScale === 'function' ? abnPlayerRuleScale(attacker, target) : 1) * (typeof darkworldDamageScale === 'function' ? darkworldDamageScale(attacker, target) : 1) * (typeof debugExtraDamageScale === 'function' ? debugExtraDamageScale(attacker, target) : 1);
+  const targetDamageMultiplier = machineShield * icedThugArmorMultiplier * frostVulnerabilityMultiplier * scamMultiplier * omegariusArmorMultiplier * knightShieldMultiplier * spiritArmorMultiplier * spiritPowerMultiplier * riftArmorMultiplier * bigFriendArmorMultiplier;
   const adaptedDamage = getDivineAdaptedDamage(target, damage * targetDamageMultiplier, resolvedDamageType);
   const previousHealth = Math.max(0, target.health);
   const healthBeforeHit = target.health;
@@ -907,6 +911,10 @@ function applyDamage(attacker, target, damage, { isSpecial = false, ignoreDebug 
   originsDamageFloor(target);
   routeBDamageFloor(target);
   routeB3DamageFloor(target);
+  if (typeof routeB4DamageFloor === 'function') routeB4DamageFloor(target);
+  if (typeof routeB5DamageFloor === 'function') routeB5DamageFloor(target);
+  if (typeof routeB6DamageFloor === 'function') routeB6DamageFloor(target);
+  if (typeof chronoChapterDamageFloor === 'function') chronoChapterDamageFloor(target);
   // Scammer's vampire fangs: player 1 drinks 10% of the damage dealt
   if (attacker === player1 && target !== attacker && scammerShop.owned.vampireFangs && attacker.health > 0) {
     attacker.health = Math.min(attacker.maxHealth, attacker.health + (healthBeforeHit - target.health) * 0.1);
@@ -1729,6 +1737,12 @@ function getVictoryPhrase(fighter, opponent) {
   if (fighter.fleeTaunt) return 'Creiste que iba a ser asi de facil?';
   if (fighter.flametombTrauma) return '...Lo siento. Lo siento mucho.';
   if (fighter.secretVariant === 'frostFire') return getFrostFireVictoryPhrase(opponent);
+  if (fighter === player1 && typeof isChronoChapterFight === 'function' && isChronoChapterFight()) return getChapterChronoVictoryPhrase(opponent);
+  if (fighter.secretVariant === 'abnormal') return ['Jo jo! Una victoria TAN elegante como esperaba!', 'Inclinate, relojito. Al fin.', 'El sparring ha concluido. (Las trampas tambien.)'][Math.floor(Math.random() * 3)];
+  if (fighter.secretVariant === 'obsidian') return getObsidianVictoryPhrase(opponent);
+  if (fighter.frostFire2 && typeof isRouteB6Fight === 'function' && isRouteB6Fight()) return '...Sorcerer...';
+  if (fighter.obsidian && fighter.obsidianControl !== false) return ['...Segui corriendo, escritor. Te voy a encontrar.', '...Esferas. Papel. Tinta. Todo arde.', '...El me trajo hasta aca. Yo me quedo.'][Math.floor(Math.random() * 3)];
+  if (fighter.frostFire2) return opponent && opponent.characterType === 'sorcerer' ? '...Gracias, Sorcerer. Por no tener miedo.' : ['...El olor a aceite no tapa el olor a humo.', 'Otra fabrica. Otros ojos rojos. El mismo fuego.', 'Mi cinto tachado... ya no se quien soy.'][Math.floor(Math.random() * 3)];
   if (fighter.frostFire && (isNeoScammer(opponent) || opponent.scammerBurnt)) return '...Perdon, Scammer. No podia parar.';
   if (fighter.frostFire) return ['...Ni siquiera se donde estoy.', 'Mis manos siguen frias.', 'Gambler... quien sea que seas... donde estas?'][Math.floor(Math.random() * 3)];
   if (fighter.youngScammer) return pickOriginsWinPhrase(opponent);

@@ -179,6 +179,23 @@ class Fighter {
   draw() {
     // (nothing left but dust)
     if (this.dusted) return;
+    // (chapter 6: Divine General grows with what he learns)
+    if (this.giantScale && this.giantScale !== 1 && !this.drawingGiant && !(typeof dodgeRound !== 'undefined' && dodgeRound.active)) {
+      const anchorX = this.position.x + this.width / 2;
+      const anchorY = this.position.y + this.height;
+      ctx.save();
+      ctx.translate(anchorX, anchorY);
+      ctx.scale(this.giantScale, this.giantScale);
+      ctx.translate(-anchorX, -anchorY);
+      this.drawingGiant = true;
+      try {
+        this.draw();
+      } finally {
+        this.drawingGiant = false;
+        ctx.restore();
+      }
+      return;
+    }
     if (blindMode) {
       this.drawBlindDetails();
       return;
@@ -244,6 +261,15 @@ class Fighter {
       return;
     }
 
+    if (typeof isDarkForestMonster === 'function' && isDarkForestMonster(this)) {
+      drawDarkForestMonster(this);
+      return;
+    }
+    if (this.secretVariant === 'arcaneMinion') {
+      drawArcaneMinion(this);
+      return;
+    }
+
     const factoryRobot = hybridEnemyTypes[this.secretVariant] && hybridEnemyTypes[this.secretVariant].robot;
     if (this.characterType === 'tank') {
       this.drawTankDetails();
@@ -263,6 +289,14 @@ class Fighter {
     if (this.characterType === 'fireMaster') {
       this.drawFireMasterDetails();
       if (this.frostFire) drawFrostFireDetails(this);
+      if (this.frostFire2) drawFrostFire4BDetails(this);
+      if (this.obsidian) drawObsidianDetails(this);
+    }
+
+    if (this.secretVariant === 'abnormal' && typeof drawAbnormalDetails === 'function') drawAbnormalDetails(this);
+
+    if (this.characterType === 'chrono' && (this.rareMachine || this.machineLook) && typeof drawChronoMachineGear === 'function') {
+      drawChronoMachineGear(this);
     }
 
     if (this.characterType === 'normal' && this.kaiokenTimer > 0) {
@@ -291,6 +325,8 @@ class Fighter {
 
     if (this.characterType === 'chrono') {
       this.drawChronoDetails();
+      // (chapter 6: broken after the titan's green punch)
+      if (this.brokenLook && typeof drawChronoBrokenLook === 'function') drawChronoBrokenLook(this);
     }
 
     if (this.characterType === 'ghost') {
@@ -299,6 +335,10 @@ class Fighter {
 
     if (this.characterType === 'monkey') {
       this.drawMonkeyDetails();
+    }
+
+    if (this.characterType === 'jophestar' && !this.secretVariant && typeof drawJophestarDetails === 'function') {
+      drawJophestarDetails(this);
     }
 
     if (isHybridEnemy(this)) {
@@ -726,51 +766,53 @@ class Fighter {
       return;
     }
 
-    ctx.fillStyle = '#ffeb3b';
-    ctx.beginPath();
-    ctx.moveTo(x - 14, y + 38);
-    ctx.lineTo(x + 8, y + 42);
-    ctx.lineTo(x + 5, y + 114);
-    ctx.lineTo(x - 20, y + 120);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 3;
-    ctx.stroke();
+    if (!this.skinBaseDrawn) {
+      ctx.fillStyle = '#ffeb3b';
+      ctx.beginPath();
+      ctx.moveTo(x - 14, y + 38);
+      ctx.lineTo(x + 8, y + 42);
+      ctx.lineTo(x + 5, y + 114);
+      ctx.lineTo(x - 20, y + 120);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 3;
+      ctx.stroke();
 
-    ctx.fillStyle = '#fdd835';
-    ctx.fillRect(x + 7, y + 36, this.width - 14, 56);
-    ctx.fillStyle = '#fff8e1';
-    ctx.fillRect(x + 18, y + 40, this.width - 36, 47);
-    ctx.fillStyle = '#111';
-    ctx.fillRect(x + 8, y + 76, this.width - 16, 6);
-    ctx.fillStyle = '#c9a227';
-    ctx.fillRect(centerX - 5, y + 42, 10, 38);
+      ctx.fillStyle = '#fdd835';
+      ctx.fillRect(x + 7, y + 36, this.width - 14, 56);
+      ctx.fillStyle = '#fff8e1';
+      ctx.fillRect(x + 18, y + 40, this.width - 36, 47);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(x + 8, y + 76, this.width - 16, 6);
+      ctx.fillStyle = '#c9a227';
+      ctx.fillRect(centerX - 5, y + 42, 10, 38);
 
-    ctx.fillStyle = '#111';
-    ctx.fillRect(x + 7, y + 21, this.width - 14, 10);
-    ctx.fillStyle = '#fdd835';
-    ctx.fillRect(x + 14, y + 35, this.width - 28, 8);
-    ctx.fillStyle = '#fffde7';
-    ctx.fillRect(x + 16, y + 18, 9, 6);
-    ctx.fillRect(x + this.width - 25, y + 18, 9, 6);
-    ctx.fillStyle = '#b8860b';
-    ctx.fillRect(x + 15, y + 20, 10, 3);
-    ctx.fillRect(x + this.width - 25, y + 20, 10, 3);
-    // in cutscenes his eyes (the white lenses of his glasses) slide toward whoever he looks at:
-    // eyeLook -1 left / 1 right, 0 straight at the player
-    if (typeof this.eyeLook === 'number' && this.eyeLook !== 0) {
-      const shift = this.eyeLook * 4;
-      ctx.fillStyle = this.color;
-      ctx.fillRect(x + 12, y + 17, this.width - 24, 4);
       ctx.fillStyle = '#111';
       ctx.fillRect(x + 7, y + 21, this.width - 14, 10);
+      ctx.fillStyle = '#fdd835';
+      ctx.fillRect(x + 14, y + 35, this.width - 28, 8);
       ctx.fillStyle = '#fffde7';
-      ctx.fillRect(x + 16 + shift, y + 18, 9, 6);
-      ctx.fillRect(x + this.width - 25 + shift, y + 18, 9, 6);
+      ctx.fillRect(x + 16, y + 18, 9, 6);
+      ctx.fillRect(x + this.width - 25, y + 18, 9, 6);
       ctx.fillStyle = '#b8860b';
-      ctx.fillRect(x + 15 + shift, y + 20, 10, 3);
-      ctx.fillRect(x + this.width - 25 + shift, y + 20, 10, 3);
+      ctx.fillRect(x + 15, y + 20, 10, 3);
+      ctx.fillRect(x + this.width - 25, y + 20, 10, 3);
+      // in cutscenes his eyes (the white lenses of his glasses) slide toward whoever he looks at:
+      // eyeLook -1 left / 1 right, 0 straight at the player
+      if (typeof this.eyeLook === 'number' && this.eyeLook !== 0) {
+        const shift = this.eyeLook * 4;
+        ctx.fillStyle = this.color;
+        ctx.fillRect(x + 12, y + 17, this.width - 24, 4);
+        ctx.fillStyle = '#111';
+        ctx.fillRect(x + 7, y + 21, this.width - 14, 10);
+        ctx.fillStyle = '#fffde7';
+        ctx.fillRect(x + 16 + shift, y + 18, 9, 6);
+        ctx.fillRect(x + this.width - 25 + shift, y + 18, 9, 6);
+        ctx.fillStyle = '#b8860b';
+        ctx.fillRect(x + 15 + shift, y + 20, 10, 3);
+        ctx.fillRect(x + this.width - 25 + shift, y + 20, 10, 3);
+      }
     }
 
     if (boosted) {
@@ -1041,7 +1083,8 @@ class Fighter {
 
   drawTankDetails() {
     const x = this.position.x;
-    const y = this.position.y;
+    // (the drawing is 218 tall, the body 240: it sits on the floor, not floating above it)
+    const y = this.position.y + (this.height - 218);
     const facingRight = !this.target || this.target.position.x + this.target.width / 2 >= x + this.width / 2;
     const cannonX = facingRight ? x + this.width - 8 : x - 48;
     const turretX = facingRight ? x + 54 : x + 18;
@@ -1237,12 +1280,14 @@ class Fighter {
     // the knights of the Orden Sombria wear the same armor... in black, purple and blood red
     const dark = this.secretVariant === 'darkKnight' || this.secretVariant === 'darkKnightBoss';
     const captain = this.secretVariant === 'darkKnightBoss';
-    const steel = dark ? '#1c252b' : '#b0bec5';
-    const steelDark = dark ? '#080b0d' : '#607d8b';
-    const steelLight = dark ? '#36454e' : '#eceff1';
-    const tabard = dark ? '#22062e' : '#1e3a8a';
-    const gold = dark ? '#d50000' : '#fbc02d';
-    const glowColor = dark ? '#ff1744' : '#80d8ff';
+    // (a wardrobe skin only changes the colors of his armor)
+    const skin = !dark && typeof getKnightSkinPalette === 'function' ? getKnightSkinPalette(this) : null;
+    const steel = dark ? '#1c252b' : skin ? skin.steel : '#b0bec5';
+    const steelDark = dark ? '#080b0d' : skin ? skin.steelDark : '#607d8b';
+    const steelLight = dark ? '#36454e' : skin ? skin.steelLight : '#eceff1';
+    const tabard = dark ? '#22062e' : skin ? skin.tabard : '#1e3a8a';
+    const gold = dark ? '#d50000' : skin ? skin.gold : '#fbc02d';
+    const glowColor = dark ? '#ff1744' : skin ? skin.glow : '#80d8ff';
     const outline = '#111';
     const shielding = this.knightShieldTimer > 0;
     const lunging = this.knightLungeTimer > 0;
@@ -1441,7 +1486,7 @@ class Fighter {
       ctx.closePath();
       ctx.fill();
     } else {
-      ctx.fillStyle = '#7f1d1d';
+      ctx.fillStyle = skin ? skin.cape : '#7f1d1d';
       ctx.fillRect(-half - 5 + sway, 42, 6, 56);
     }
     // sword resting on the back side
@@ -1466,7 +1511,7 @@ class Fighter {
       ctx.shadowColor = '#ff1744';
       ctx.shadowBlur = 10 + Math.sin(time * 5) * 4;
     }
-    ctx.fillStyle = dark || this.knightPossessed ? '#ff1744' : glow ? '#80d8ff' : '#ffffff';
+    ctx.fillStyle = dark || this.knightPossessed ? '#ff1744' : glow ? glowColor : skin ? skin.eyes : '#ffffff';
     ctx.fillRect(4, 20, dark ? 8 : 6, 3);
     ctx.fillRect(16, 20, dark ? 8 : 6, 3);
     ctx.restore();
@@ -1487,7 +1532,7 @@ class Fighter {
         ctx.stroke();
       });
     } else {
-      ctx.fillStyle = '#d32f2f';
+      ctx.fillStyle = skin ? skin.plume : '#d32f2f';
       ctx.fillRect(-6, -8, 12, 8);
       ctx.fillRect(-14 + sway, -5, 10, 5);
     }
@@ -1553,10 +1598,11 @@ class Fighter {
       ctx.fillRect(-9, 63, 18, 4);
     }
     // belt
-    ctx.fillStyle = dark ? '#120a07' : '#5d4037';
+    ctx.fillStyle = dark ? '#120a07' : skin ? skin.belt : '#5d4037';
     ctx.fillRect(-half, 84, w, 6);
     ctx.fillStyle = gold;
     ctx.fillRect(-4, 83, 8, 8);
+    if (skin && skin.extras) skin.extras(half, w, h, time);
     // legs: the gap between them and the knee plates
     ctx.fillStyle = steelDark;
     ctx.fillRect(-2, 100, 4, h - 100);
@@ -3250,42 +3296,44 @@ class Fighter {
       }
     }
 
-    ctx.fillStyle = prism ? '#1d2630' : '#37474f';
-    ctx.fillRect(x + 8, y + 10, this.width - 16, 30);
-    ctx.fillStyle = prism ? '#0d141a' : '#263238';
-    ctx.fillRect(x + 14, y + 22, this.width - 28, 8);
-    ctx.fillStyle = prism ? '#2b3440' : this.baseColor;
-    ctx.fillRect(x, y + 46, this.width, 48);
-    ctx.fillStyle = prism ? '#111820' : '#263238';
-    ctx.fillRect(x + 10, y + 42, this.width - 20, 10);
-    ctx.fillStyle = collarColor;
-    ctx.fillRect(x + 25, y + 41, 10, 12);
-    if (prism) {
-      const prismColors = ['#ef5350', '#42a5f5', '#66bb6a', '#fdd835'];
-      prismColors.forEach((color, index) => {
-        ctx.fillStyle = color;
-        ctx.fillRect(x + 8 + index * 11, y + 53, 10, 39 - index * 3);
-      });
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.58)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(x + 7, y + 48);
-      ctx.lineTo(x + this.width - 6, y + 88);
-      ctx.moveTo(x + this.width - 7, y + 48);
-      ctx.lineTo(x + 7, y + 88);
-      ctx.stroke();
-      ctx.fillStyle = '#e3f2fd';
-      ctx.fillRect(x + 20, y + 26, this.width - 40, 4);
+    if (!this.skinBaseDrawn) {
+      ctx.fillStyle = prism ? '#1d2630' : '#37474f';
+      ctx.fillRect(x + 8, y + 10, this.width - 16, 30);
+      ctx.fillStyle = prism ? '#0d141a' : '#263238';
+      ctx.fillRect(x + 14, y + 22, this.width - 28, 8);
+      ctx.fillStyle = prism ? '#2b3440' : this.baseColor;
+      ctx.fillRect(x, y + 46, this.width, 48);
+      ctx.fillStyle = prism ? '#111820' : '#263238';
+      ctx.fillRect(x + 10, y + 42, this.width - 20, 10);
+      ctx.fillStyle = collarColor;
+      ctx.fillRect(x + 25, y + 41, 10, 12);
+      if (prism) {
+        const prismColors = ['#ef5350', '#42a5f5', '#66bb6a', '#fdd835'];
+        prismColors.forEach((color, index) => {
+          ctx.fillStyle = color;
+          ctx.fillRect(x + 8 + index * 11, y + 53, 10, 39 - index * 3);
+        });
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.58)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + 7, y + 48);
+        ctx.lineTo(x + this.width - 6, y + 88);
+        ctx.moveTo(x + this.width - 7, y + 48);
+        ctx.lineTo(x + 7, y + 88);
+        ctx.stroke();
+        ctx.fillStyle = '#e3f2fd';
+        ctx.fillRect(x + 20, y + 26, this.width - 40, 4);
+      }
+      ctx.fillStyle = collarColor;
+      ctx.fillRect(x + 8, y + 58, this.width - 16, 5);
+      ctx.fillStyle = switcherModeColors[switcherModes[(this.switcherModeIndex + 1) % switcherModes.length]];
+      ctx.fillRect(x + 8, y + 68, this.width - 16, 4);
+      ctx.fillStyle = switcherModeColors[switcherModes[(this.switcherModeIndex + 2) % switcherModes.length]];
+      ctx.fillRect(x + 8, y + 78, this.width - 16, 4);
+      ctx.fillStyle = '#607d8b';
+      ctx.fillRect(x + 6, y + 96, 18, 24);
+      ctx.fillRect(x + this.width - 24, y + 96, 18, 24);
     }
-    ctx.fillStyle = collarColor;
-    ctx.fillRect(x + 8, y + 58, this.width - 16, 5);
-    ctx.fillStyle = switcherModeColors[switcherModes[(this.switcherModeIndex + 1) % switcherModes.length]];
-    ctx.fillRect(x + 8, y + 68, this.width - 16, 4);
-    ctx.fillStyle = switcherModeColors[switcherModes[(this.switcherModeIndex + 2) % switcherModes.length]];
-    ctx.fillRect(x + 8, y + 78, this.width - 16, 4);
-    ctx.fillStyle = '#607d8b';
-    ctx.fillRect(x + 6, y + 96, 18, 24);
-    ctx.fillRect(x + this.width - 24, y + 96, 18, 24);
 
     if (this.switcherArmorTimer > 0) {
       ctx.strokeStyle = hexToRgba(switcherModeColors.yellow, 0.8);
@@ -3416,81 +3464,83 @@ class Fighter {
     const height = this.height;
     const centerX = x + width / 2;
 
-    ctx.fillStyle = 'rgba(120, 120, 120, 0.5)';
-    [[0.2, 0.84, 7], [0.7, 0.9, 5], [0.45, 0.78, 4], [0.8, 0.22, 4], [0.15, 0.4, 3]].forEach(([spotX, spotY, radius]) => {
+    if (!this.skinBaseDrawn) {
+      ctx.fillStyle = 'rgba(120, 120, 120, 0.5)';
+      [[0.2, 0.84, 7], [0.7, 0.9, 5], [0.45, 0.78, 4], [0.8, 0.22, 4], [0.15, 0.4, 3]].forEach(([spotX, spotY, radius]) => {
+        ctx.beginPath();
+        ctx.arc(x + width * spotX, y + height * spotY, radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = '#1b1b1b';
+      ctx.fillRect(x, y + 52, width, 46);
+      ctx.fillStyle = '#f2f2f2';
       ctx.beginPath();
-      ctx.arc(x + width * spotX, y + height * spotY, radius, 0, Math.PI * 2);
+      ctx.moveTo(centerX - 11, y + 52);
+      ctx.lineTo(centerX + 11, y + 52);
+      ctx.lineTo(centerX, y + 74);
+      ctx.closePath();
       ctx.fill();
-    });
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.moveTo(centerX, y + 55);
+      ctx.lineTo(centerX + 4, y + 62);
+      ctx.lineTo(centerX, y + 82);
+      ctx.lineTo(centerX - 4, y + 62);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(centerX - 11, y + 52);
+      ctx.lineTo(centerX - 4, y + 86);
+      ctx.moveTo(centerX + 11, y + 52);
+      ctx.lineTo(centerX + 4, y + 86);
+      ctx.stroke();
 
-    ctx.fillStyle = '#1b1b1b';
-    ctx.fillRect(x, y + 52, width, 46);
-    ctx.fillStyle = '#f2f2f2';
-    ctx.beginPath();
-    ctx.moveTo(centerX - 11, y + 52);
-    ctx.lineTo(centerX + 11, y + 52);
-    ctx.lineTo(centerX, y + 74);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#111';
-    ctx.beginPath();
-    ctx.moveTo(centerX, y + 55);
-    ctx.lineTo(centerX + 4, y + 62);
-    ctx.lineTo(centerX, y + 82);
-    ctx.lineTo(centerX - 4, y + 62);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = '#444';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(centerX - 11, y + 52);
-    ctx.lineTo(centerX - 4, y + 86);
-    ctx.moveTo(centerX + 11, y + 52);
-    ctx.lineTo(centerX + 4, y + 86);
-    ctx.stroke();
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.moveTo(x - 6, y + 20);
+      ctx.lineTo(x - 2, y - 4);
+      ctx.lineTo(x + 8, y + 2);
+      ctx.lineTo(x + 14, y - 10);
+      ctx.lineTo(x + 24, y - 2);
+      ctx.lineTo(x + 32, y - 12);
+      ctx.lineTo(x + 40, y - 2);
+      ctx.lineTo(x + 50, y - 9);
+      ctx.lineTo(x + 56, y + 2);
+      ctx.lineTo(x + width + 6, y - 2);
+      ctx.lineTo(x + width + 4, y + 22);
+      ctx.lineTo(x + width - 6, y + 14);
+      ctx.lineTo(x + 6, y + 14);
+      ctx.closePath();
+      ctx.fill();
 
-    ctx.fillStyle = '#111';
-    ctx.beginPath();
-    ctx.moveTo(x - 6, y + 20);
-    ctx.lineTo(x - 2, y - 4);
-    ctx.lineTo(x + 8, y + 2);
-    ctx.lineTo(x + 14, y - 10);
-    ctx.lineTo(x + 24, y - 2);
-    ctx.lineTo(x + 32, y - 12);
-    ctx.lineTo(x + 40, y - 2);
-    ctx.lineTo(x + 50, y - 9);
-    ctx.lineTo(x + 56, y + 2);
-    ctx.lineTo(x + width + 6, y - 2);
-    ctx.lineTo(x + width + 4, y + 22);
-    ctx.lineTo(x + width - 6, y + 14);
-    ctx.lineTo(x + 6, y + 14);
-    ctx.closePath();
-    ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#111';
+      ctx.fillStyle = '#f48fb1';
+      ctx.beginPath();
+      ctx.arc(centerX - 10, y + 30, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fdd835';
+      ctx.beginPath();
+      ctx.arc(centerX + 10, y + 30, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(centerX - 3, y + 30);
+      ctx.lineTo(centerX + 3, y + 30);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(centerX - 6, y + 44);
+      ctx.quadraticCurveTo(centerX + 2, y + 48, centerX + 9, y + 42);
+      ctx.stroke();
 
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#111';
-    ctx.fillStyle = '#f48fb1';
-    ctx.beginPath();
-    ctx.arc(centerX - 10, y + 30, 7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#fdd835';
-    ctx.beginPath();
-    ctx.arc(centerX + 10, y + 30, 7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(centerX - 3, y + 30);
-    ctx.lineTo(centerX + 3, y + 30);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(centerX - 6, y + 44);
-    ctx.quadraticCurveTo(centerX + 2, y + 48, centerX + 9, y + 42);
-    ctx.stroke();
-
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(x + 2, y + 2, width - 4, height - 4);
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(x + 2, y + 2, width - 4, height - 4);
+    }
 
     if (this.scammerRage) {
       const pulse = (Math.sin(performance.now() / 90) + 1) / 2;
@@ -4611,68 +4661,70 @@ class Fighter {
     const facingRight = this.attacksToTheRight;
     const centerX = x + this.width / 2;
 
-    ctx.strokeStyle = '#5d3a1a';
-    ctx.lineWidth = 7;
-    ctx.lineCap = 'round';
-    const tailBaseX = facingRight ? x + 4 : x + this.width - 4;
-    const tailDirection = facingRight ? -1 : 1;
-    ctx.beginPath();
-    ctx.moveTo(tailBaseX, y + 92);
-    ctx.bezierCurveTo(tailBaseX + tailDirection * 34, y + 104, tailBaseX + tailDirection * 34, y + 58, tailBaseX + tailDirection * 18, y + 60);
-    ctx.stroke();
-    ctx.lineCap = 'butt';
-
-    ctx.fillStyle = '#7b4a26';
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 3;
-    [x - 6, x + this.width + 6].forEach((earX) => {
+    if (!this.skinBaseDrawn) {
+      ctx.strokeStyle = '#5d3a1a';
+      ctx.lineWidth = 7;
+      ctx.lineCap = 'round';
+      const tailBaseX = facingRight ? x + 4 : x + this.width - 4;
+      const tailDirection = facingRight ? -1 : 1;
       ctx.beginPath();
-      ctx.arc(earX, y + 30, 11, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(tailBaseX, y + 92);
+      ctx.bezierCurveTo(tailBaseX + tailDirection * 34, y + 104, tailBaseX + tailDirection * 34, y + 58, tailBaseX + tailDirection * 18, y + 60);
       ctx.stroke();
+      ctx.lineCap = 'butt';
+
+      ctx.fillStyle = '#7b4a26';
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 3;
+      [x - 6, x + this.width + 6].forEach((earX) => {
+        ctx.beginPath();
+        ctx.arc(earX, y + 30, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#f2c89b';
+        ctx.beginPath();
+        ctx.arc(earX, y + 30, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#7b4a26';
+      });
+
+      ctx.fillStyle = '#5d3a1a';
+      ctx.beginPath();
+      ctx.moveTo(centerX - 10, y + 2);
+      ctx.lineTo(centerX - 2, y - 8);
+      ctx.lineTo(centerX + 2, y + 2);
+      ctx.lineTo(centerX + 8, y - 6);
+      ctx.lineTo(centerX + 12, y + 4);
+      ctx.closePath();
+      ctx.fill();
+
       ctx.fillStyle = '#f2c89b';
       ctx.beginPath();
-      ctx.arc(earX, y + 30, 5, 0, Math.PI * 2);
+      ctx.ellipse(centerX, y + 38, 24, 24, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#7b4a26';
-    });
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 3;
+      ctx.stroke();
 
-    ctx.fillStyle = '#5d3a1a';
-    ctx.beginPath();
-    ctx.moveTo(centerX - 10, y + 2);
-    ctx.lineTo(centerX - 2, y - 8);
-    ctx.lineTo(centerX + 2, y + 2);
-    ctx.lineTo(centerX + 8, y - 6);
-    ctx.lineTo(centerX + 12, y + 4);
-    ctx.closePath();
-    ctx.fill();
+      const lookX = facingRight ? 3 : -3;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(centerX - 15, y + 24, 12, 12);
+      ctx.fillRect(centerX + 3, y + 24, 12, 12);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(centerX - 12 + lookX, y + 27, 6, 7);
+      ctx.fillRect(centerX + 6 + lookX, y + 27, 6, 7);
+      ctx.fillRect(centerX - 5, y + 42, 3, 3);
+      ctx.fillRect(centerX + 2, y + 42, 3, 3);
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(centerX, y + 44, 10, Math.PI * 0.15, Math.PI * 0.85);
+      ctx.stroke();
 
-    ctx.fillStyle = '#f2c89b';
-    ctx.beginPath();
-    ctx.ellipse(centerX, y + 38, 24, 24, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    const lookX = facingRight ? 3 : -3;
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(centerX - 15, y + 24, 12, 12);
-    ctx.fillRect(centerX + 3, y + 24, 12, 12);
-    ctx.fillStyle = '#111';
-    ctx.fillRect(centerX - 12 + lookX, y + 27, 6, 7);
-    ctx.fillRect(centerX + 6 + lookX, y + 27, 6, 7);
-    ctx.fillRect(centerX - 5, y + 42, 3, 3);
-    ctx.fillRect(centerX + 2, y + 42, 3, 3);
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(centerX, y + 44, 10, Math.PI * 0.15, Math.PI * 0.85);
-    ctx.stroke();
-
-    ctx.fillStyle = '#f2c89b';
-    ctx.beginPath();
-    ctx.ellipse(centerX, y + 86, 18, 22, 0, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = '#f2c89b';
+      ctx.beginPath();
+      ctx.ellipse(centerX, y + 86, 18, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     ctx.fillStyle = '#ffe135';
     ctx.strokeStyle = '#111';
@@ -4696,25 +4748,27 @@ class Fighter {
 
     ctx.save();
     ctx.globalAlpha = phased ? 0.44 : 0.78;
-    ctx.fillStyle = '#e0f7fa';
-    ctx.beginPath();
-    ctx.arc(centerX, y + 34, 24, Math.PI, 0);
-    ctx.lineTo(x + this.width - 6, y + 92);
-    ctx.lineTo(centerX + 10, y + 118);
-    ctx.lineTo(centerX, y + 102);
-    ctx.lineTo(centerX - 10, y + 118);
-    ctx.lineTo(x + 6, y + 92);
-    ctx.closePath();
-    ctx.fill();
+    if (!this.skinBaseDrawn) {
+      ctx.fillStyle = '#e0f7fa';
+      ctx.beginPath();
+      ctx.arc(centerX, y + 34, 24, Math.PI, 0);
+      ctx.lineTo(x + this.width - 6, y + 92);
+      ctx.lineTo(centerX + 10, y + 118);
+      ctx.lineTo(centerX, y + 102);
+      ctx.lineTo(centerX - 10, y + 118);
+      ctx.lineTo(x + 6, y + 92);
+      ctx.closePath();
+      ctx.fill();
 
-    ctx.fillStyle = '#111';
-    ctx.fillRect(centerX - 14, y + 30, 7, 7);
-    ctx.fillRect(centerX + 7, y + 30, 7, 7);
-    ctx.strokeStyle = 'rgba(17, 17, 17, 0.55)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(centerX, y + 50, 8, 0, Math.PI);
-    ctx.stroke();
+      ctx.fillStyle = '#111';
+      ctx.fillRect(centerX - 14, y + 30, 7, 7);
+      ctx.fillRect(centerX + 7, y + 30, 7, 7);
+      ctx.strokeStyle = 'rgba(17, 17, 17, 0.55)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(centerX, y + 50, 8, 0, Math.PI);
+      ctx.stroke();
+    }
 
     if (phased) {
       ctx.strokeStyle = 'rgba(224, 247, 250, 0.88)';
@@ -4746,81 +4800,83 @@ class Fighter {
     ctx.ellipse(centerX, y + this.height / 2, this.width * 0.72, this.height * 0.43, 0, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.fillStyle = '#f7fbff';
-    ctx.beginPath();
-    ctx.moveTo(centerX - 23, y + 52);
-    ctx.lineTo(centerX - 36, y + 88);
-    ctx.lineTo(centerX - 22, y + 124);
-    ctx.lineTo(centerX - 6, y + 132);
-    ctx.lineTo(centerX + 5, y + 126);
-    ctx.lineTo(centerX + 21, y + 132);
-    ctx.lineTo(centerX + 32, y + 91);
-    ctx.lineTo(centerX + 36, y + 88);
-    ctx.lineTo(centerX + 22, y + 52);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 5;
-    ctx.stroke();
-
-    ctx.fillStyle = '#f7fbff';
-    ctx.beginPath();
-    ctx.moveTo(centerX - 27, y + 22);
-    ctx.quadraticCurveTo(centerX - 18, y - 3, centerX + 2, y + 4);
-    ctx.quadraticCurveTo(centerX + 28, y + 2, centerX + 31, y + 31);
-    ctx.lineTo(centerX + 20, y + 58);
-    ctx.lineTo(centerX + 6, y + 69);
-    ctx.lineTo(centerX - 14, y + 61);
-    ctx.lineTo(centerX - 30, y + 42);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.fillStyle = '#111';
-    ctx.fillRect(centerX - 17, y + 27, 8, 7);
-    ctx.fillRect(centerX + 8, y + 26, 9, 8);
-    ctx.fillRect(centerX - 4, y + 40, 7, 6);
-    ctx.fillRect(centerX - 14, y + 52, 29, 5);
-
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 4;
-    for (let rib = 0; rib < 4; rib += 1) {
-      const ribY = y + 78 + rib * 15;
+    if (!this.skinBaseDrawn) {
+      ctx.fillStyle = '#f7fbff';
       ctx.beginPath();
-      ctx.moveTo(centerX - 4, ribY);
-      ctx.lineTo(centerX - 24, ribY + 8);
-      ctx.moveTo(centerX + 4, ribY);
-      ctx.lineTo(centerX + 24, ribY + 8);
+      ctx.moveTo(centerX - 23, y + 52);
+      ctx.lineTo(centerX - 36, y + 88);
+      ctx.lineTo(centerX - 22, y + 124);
+      ctx.lineTo(centerX - 6, y + 132);
+      ctx.lineTo(centerX + 5, y + 126);
+      ctx.lineTo(centerX + 21, y + 132);
+      ctx.lineTo(centerX + 32, y + 91);
+      ctx.lineTo(centerX + 36, y + 88);
+      ctx.lineTo(centerX + 22, y + 52);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 5;
       ctx.stroke();
+
+      ctx.fillStyle = '#f7fbff';
+      ctx.beginPath();
+      ctx.moveTo(centerX - 27, y + 22);
+      ctx.quadraticCurveTo(centerX - 18, y - 3, centerX + 2, y + 4);
+      ctx.quadraticCurveTo(centerX + 28, y + 2, centerX + 31, y + 31);
+      ctx.lineTo(centerX + 20, y + 58);
+      ctx.lineTo(centerX + 6, y + 69);
+      ctx.lineTo(centerX - 14, y + 61);
+      ctx.lineTo(centerX - 30, y + 42);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#111';
+      ctx.fillRect(centerX - 17, y + 27, 8, 7);
+      ctx.fillRect(centerX + 8, y + 26, 9, 8);
+      ctx.fillRect(centerX - 4, y + 40, 7, 6);
+      ctx.fillRect(centerX - 14, y + 52, 29, 5);
+
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 4;
+      for (let rib = 0; rib < 4; rib += 1) {
+        const ribY = y + 78 + rib * 15;
+        ctx.beginPath();
+        ctx.moveTo(centerX - 4, ribY);
+        ctx.lineTo(centerX - 24, ribY + 8);
+        ctx.moveTo(centerX + 4, ribY);
+        ctx.lineTo(centerX + 24, ribY + 8);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#f7fbff';
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.moveTo(centerX - 28, y + 68);
+      ctx.lineTo(x + 1, y + 101);
+      ctx.lineTo(x + 17, y + 121);
+      ctx.moveTo(centerX + 28, y + 68);
+      ctx.lineTo(x + this.width - 1, y + 101);
+      ctx.lineTo(x + this.width - 17, y + 121);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.fillStyle = '#f7fbff';
+      ctx.fillRect(x + 10, y + 115, 16, 14);
+      ctx.fillRect(x + this.width - 26, y + 115, 16, 14);
+
+      ctx.fillStyle = '#111';
+      ctx.fillRect(centerX - 31, y + 122, 62, 24);
+      ctx.fillRect(centerX - 28, y + 144, 22, 24);
+      ctx.fillRect(centerX + 6, y + 144, 22, 24);
+
+      ctx.fillStyle = '#f7fbff';
+      ctx.fillRect(centerX - 33, y + 119, 14, 15);
+      ctx.fillRect(centerX + 19, y + 119, 14, 15);
     }
-
-    ctx.strokeStyle = '#f7fbff';
-    ctx.lineWidth = 10;
-    ctx.beginPath();
-    ctx.moveTo(centerX - 28, y + 68);
-    ctx.lineTo(x + 1, y + 101);
-    ctx.lineTo(x + 17, y + 121);
-    ctx.moveTo(centerX + 28, y + 68);
-    ctx.lineTo(x + this.width - 1, y + 101);
-    ctx.lineTo(x + this.width - 17, y + 121);
-    ctx.stroke();
-
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    ctx.fillStyle = '#f7fbff';
-    ctx.fillRect(x + 10, y + 115, 16, 14);
-    ctx.fillRect(x + this.width - 26, y + 115, 16, 14);
-
-    ctx.fillStyle = '#111';
-    ctx.fillRect(centerX - 31, y + 122, 62, 24);
-    ctx.fillRect(centerX - 28, y + 144, 22, 24);
-    ctx.fillRect(centerX + 6, y + 144, 22, 24);
-
-    ctx.fillStyle = '#f7fbff';
-    ctx.fillRect(centerX - 33, y + 119, 14, 15);
-    ctx.fillRect(centerX + 19, y + 119, 14, 15);
 
     ctx.restore();
 
@@ -5349,7 +5405,8 @@ class Fighter {
       this.characterType === 'chrono' ||
       this.characterType === 'ghost' ||
       this.characterType === 'divineGeneral' ||
-      this.characterType === 'monkey'
+      this.characterType === 'monkey' ||
+      this.characterType === 'jophestar'
     ) {
       if (this.characterType === 'reflecter') {
         this.attackColor = hexToRgba(getReflecterLightColor(this), isReflecterUpgrade(this) ? 0.82 : 0.65);

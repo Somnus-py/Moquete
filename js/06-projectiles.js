@@ -313,9 +313,16 @@ class SuperFireKamehameha {
 }
 
 class TankShell {
-  constructor({ x, y, direction, target, attacker, damage = getTankSecretDamage(attacker, tankShellDamage), empowered = false }) {
+  constructor({ x, y, direction, target, attacker, damage = getTankSecretDamage(attacker, tankShellDamage), empowered = false, aimY = null }) {
     this.position = { x, y };
-    this.velocity = { x: getDebugProjectileSpeed(tankShellSpeed, attacker) * direction, y: 0 };
+    const speed = getDebugProjectileSpeed(tankShellSpeed, attacker);
+    this.velocity = { x: speed * direction, y: 0 };
+    if (aimY !== null && target) {
+      // it dips (or rises) toward where the rival's body is
+      const distance = Math.abs(target.position.x + target.width / 2 - x);
+      const frames = Math.max(12, distance / Math.max(1, speed));
+      this.velocity.y = Math.max(-4, Math.min(4, (aimY - y) / frames));
+    }
     this.target = target;
     this.attacker = attacker;
     this.damage = damage;
@@ -347,6 +354,11 @@ class TankShell {
 
   update() {
     this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+    if (this.position.y + this.height > ground) {
+      this.position.y = ground - this.height;
+      this.velocity.y = 0;
+    }
     this.draw();
 
     if (this.position.x + this.width < 0 || this.position.x > canvas.width) {

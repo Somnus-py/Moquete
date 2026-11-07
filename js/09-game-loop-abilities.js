@@ -3,6 +3,7 @@
 
 function animate() {
   animationId = requestAnimationFrame(animate);
+  if (typeof endCutsceneZoom === 'function') endCutsceneZoom();
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   updateReflecterBattleMusic();
@@ -30,6 +31,11 @@ function animate() {
     updateDodgeRound();
     return;
   }
+  // (chapter 6, secret level: Abnormal's maze)
+  if (typeof abnormalGrid !== 'undefined' && abnormalGrid.active) {
+    updateAbnormalGrid();
+    return;
+  }
   if (farolClimb.active) {
     updateFarolClimb();
     return;
@@ -42,6 +48,8 @@ function animate() {
     updateRiftClash();
     return;
   }
+  // (Abnormal's visit freezes the fight while he talks)
+  if (typeof updateAbnormalCameo === 'function' && updateAbnormalCameo()) return;
   updateLightBoxAttacks();
   updateOmegaKickFight();
   if (isRiftFight() && !player2.riftFinalStarted && gameStarted && !gameOver && !arcadeCutscene.active && player2.health <= riftFinalHealth) {
@@ -49,6 +57,7 @@ function animate() {
     return;
   }
   drawStage();
+  if (typeof drawAbnormalSpectator === 'function') drawAbnormalSpectator();
 
   if (!gameStarted) {
     player1.draw();
@@ -244,6 +253,7 @@ function updateHealthBars() {
 }
 
 function getCharacterDisplayName(fighter) {
+  if (typeof isChapterDarkKnight === 'function' && isChapterDarkKnight(fighter) && fighter.secretVariant === 'darkKnightBoss') return 'General Oscuro';
   if (fighter.characterType === 'lightWarrior' && fighter.lightWarriorOmegaTransformed) return 'OMEGA LIGHT WARRIOR!!';
   const baseName = characterDisplayNames[fighter.characterType] || 'Normal';
   if (isHybridEnemy(fighter)) return hybridEnemyTypes[fighter.secretVariant].name;
@@ -258,6 +268,7 @@ function getCharacterDisplayName(fighter) {
   if (fighter.secretVariant === 'lanternGuard') return 'Guardia del Farol';
   if (fighter.secretVariant === 'shaolinMaster') return 'Shang Ting';
   if (fighter.secretVariant === 'frostFire') return 'Fire Master B';
+  if (fighter.obsidian || fighter.secretVariant === 'obsidian') return fighter.obsidianControl === false ? 'Fire Master' : 'Obsidian';
   if (originsNames[fighter.secretVariant]) return originsNames[fighter.secretVariant];
   if (fighter.characterType === 'cowboy' && fighter.sheriffBadge) return 'Sheriff Cowboy';
   if (fighter.secretVariant === 'setoBoy') return 'Seto';
@@ -289,13 +300,13 @@ function updateCombatHudIdentity() {
   let p2Name = getCharacterDisplayName(player2);
   if (normalArcadeActive && (arcadeChapter === 'gambler' || arcadeChapter === 'reflecter')) {
     p2Name = getCharacterDisplayName(player2);
-  } else if (normalArcadeActive && selectedNormalArcadeLevel === 5) {
+  } else if (normalArcadeActive && (arcadeChapter === 'normal' || arcadeChapter === 'fireMaster') && selectedNormalArcadeLevel === 5) {
     p2Name = arcadeChapter === 'fireMaster' ? fireArcadeBossName : normalArcadeBossName;
   } else if (normalArcadeActive && isFireArcadeMiniBoss()) {
     p2Name = fireArcadeMiniBossName;
   } else if (normalArcadeActive && arcadeChapter === 'fireMaster' && selectedNormalArcadeLevel >= 1 && selectedNormalArcadeLevel <= 3) {
     p2Name = fireArcadeBruteName;
-  } else if (normalArcadeActive && selectedNormalArcadeLevel >= 1 && selectedNormalArcadeLevel <= 4) {
+  } else if (normalArcadeActive && arcadeChapter === 'normal' && selectedNormalArcadeLevel >= 1 && selectedNormalArcadeLevel <= 4) {
     p2Name = normalArcadeEnemyName;
   }
   p2CharacterName.innerText = p2Name;
@@ -1312,6 +1323,10 @@ function handleMenuSecretInput(event) {
     menuSecretBuffer = '';
     unlockAchievement('codeBreaker');
     unlockFrostFireCode();
+  } else if (normalizedSecretBuffer.endsWith('obsidian')) {
+    menuSecretBuffer = '';
+    unlockAchievement('codeBreaker');
+    unlockObsidianCode();
   } else if (normalizedSecretBuffer.endsWith('911')) {
     menuSecretBuffer = '';
     unlockAchievement('codeBreaker');
@@ -1324,6 +1339,9 @@ function handleMenuSecretInput(event) {
     menuSecretBuffer = '';
     unlockAchievement('codeBreaker');
     unlockOriginsCode('salesman');
+  } else if (normalizedSecretBuffer.endsWith('darkworld')) {
+    menuSecretBuffer = '';
+    if (typeof unlockDarkworldCode === 'function') unlockDarkworldCode();
   } else if (normalizedSecretBuffer.endsWith('clear')) {
     menuSecretBuffer = '';
     clearActiveCodes();
@@ -1337,6 +1355,11 @@ window.addEventListener('keydown', (event) => {
   }
 
   if (jesterIntro.active && !['a', 'd', 'w', 'A', 'D', 'W'].includes(event.key)) return;
+
+  if (typeof handleAbnCameoKey === 'function' && handleAbnCameoKey(event)) return;
+
+  // playing as Abnormal: his four rules
+  if (['1', '2', '3', '4'].includes(event.key) && !event.repeat && typeof tryAbnPlayerRule === 'function' && tryAbnPlayerRule(Number(event.key))) return;
 
   if (arcadeCutscene.active) {
     // level 7: Knight walks freely toward the farol (he cannot attack)
@@ -1381,7 +1404,7 @@ window.addEventListener('keydown', (event) => {
     }
     return;
   }
-  if (jesterFinal.active || omegariusFinal.active || scamFinal.active || dodgeRound.active || farolClimb.active) {
+  if (jesterFinal.active || omegariusFinal.active || scamFinal.active || dodgeRound.active || farolClimb.active || (typeof abnormalGrid !== 'undefined' && abnormalGrid.active)) {
     // route B: NEO's box has a shooting mode (Q)
     if (scamFinal.active && scamFinal.routeB && (event.key === 'q' || event.key === 'Q') && !event.repeat) fireRouteBShot();
     const movementKeys = { a: 'a', A: 'a', d: 'd', D: 'd', w: 'w', W: 'w', s: 's', S: 's', ArrowLeft: 'ArrowLeft', ArrowRight: 'ArrowRight', ArrowUp: 'ArrowUp', ArrowDown: 'ArrowDown' };
@@ -1448,6 +1471,7 @@ window.addEventListener('keydown', (event) => {
       launchArcadeBossShockwave(player1, player2);
       activateIcedThugFrostField(player1, player2);
       launchMonkeyBanana(player1, player2);
+      if (typeof summonJophestarStand === 'function') summonJophestarStand(player1, player2);
       break;
     case 'f':
     case 'F':
@@ -1486,6 +1510,7 @@ window.addEventListener('keydown', (event) => {
       activateChronoSlow(player1, player2);
       launchIcedThugBlade(player1, player2);
       dropMonkeyPeel(player1, player2);
+      if (typeof launchJophestarBarrage === 'function') launchJophestarBarrage(player1, player2);
       break;
     case 'r':
     case 'R':
@@ -1497,6 +1522,7 @@ window.addEventListener('keydown', (event) => {
       if (keys.r) break;
       keys.r = true;
       if (keys.q && handleMiniFlametomb(player1, player2)) break;
+      if (typeof handleChronoMachineKey === 'function' && handleChronoMachineKey(player1, player2)) break;
       if (handleFlametombKey(player1, player2)) break;
       if (isChronoRival(player1)) {
         castChronoTotalRewind(player1);
@@ -1521,6 +1547,7 @@ window.addEventListener('keydown', (event) => {
       if (handleLightWarriorFrSpecialKey(player1, player2, 'flash', keys.f, 1)) break;
       activateLightWarriorSolarFlash(player1, player2);
       summonMonkeyCoconuts(player1, player2);
+      if (typeof activateJophestarTimeStop === 'function') activateJophestarTimeStop(player1, player2);
       break;
     case 'ArrowLeft':
       if (!botEnabled) keys.ArrowLeft = true;
@@ -1573,6 +1600,7 @@ window.addEventListener('keydown', (event) => {
         launchArcadeBossShockwave(player2, player1);
         activateIcedThugFrostField(player2, player1);
         launchMonkeyBanana(player2, player1);
+        if (typeof summonJophestarStand === 'function') summonJophestarStand(player2, player1);
       }
       break;
     case '.':
@@ -1610,6 +1638,7 @@ window.addEventListener('keydown', (event) => {
         activateChronoSlow(player2, player1);
         launchIcedThugBlade(player2, player1);
         dropMonkeyPeel(player2, player1);
+        if (typeof launchJophestarBarrage === 'function') launchJophestarBarrage(player2, player1);
       }
       break;
     case 'Enter':
@@ -1639,6 +1668,7 @@ window.addEventListener('keydown', (event) => {
         if (handleLightWarriorFrSpecialKey(player2, player1, 'flash', keys.period, 2)) break;
         activateLightWarriorSolarFlash(player2, player1);
         summonMonkeyCoconuts(player2, player1);
+        if (typeof activateJophestarTimeStop === 'function') activateJophestarTimeStop(player2, player1);
       }
       break;
   }
@@ -1990,7 +2020,9 @@ function launchTankShell(attacker, target) {
   const targetCenterX = target.position.x + target.width / 2;
   const direction = targetCenterX >= attackerCenterX ? 1 : -1;
   const startX = direction > 0 ? attacker.position.x + attacker.width : attacker.position.x - 28;
-  const startY = attacker.position.y + 84;
+  // (from the cannon's mouth: it matches the drawing, which sits on the floor)
+  const startY = attacker.position.y + (attacker.height - 218) + 84;
+  const aimY = target.position.y + target.height * 0.5 - 7;
   const shellKey = attacker === player1 ? 'p1ShellAvailable' : 'p2ShellAvailable';
   const empowered = tankClash.active && tankClash[shellKey];
   const damage = empowered ? tankClashShellDamage : getTankSecretDamage(attacker, tankShellDamage);
@@ -2000,7 +2032,7 @@ function launchTankShell(attacker, target) {
     tankClash.active = false;
     tankClash.closeFrames = 0;
   }
-  tankShells.push(new TankShell({ x: startX, y: startY, direction, target, attacker, damage, empowered }));
+  tankShells.push(new TankShell({ x: startX, y: startY, direction, target, attacker, damage, empowered, aimY }));
   playSound('tankShell');
   recordSpecialUsed(attacker);
   attacker.tankShellCooldown = getDebugCooldown(tankShellCooldown, attacker);
@@ -3556,6 +3588,8 @@ function launchChronoBlade(attacker, target) {
 function activateChronoSlow(attacker, target) {
   if (!canFighterAct(attacker)) return;
   if (attacker.characterType !== 'chrono' || attacker.chronoSlowCooldown > 0 || gameOver) return;
+  // (chapter 6, against the titan: it slows down the titan's attacks instead)
+  if (typeof chronoTitanTimeSlow === 'function' && chronoTitanTimeSlow(attacker)) return;
 
   chronoZones.push(new ChronoZone({ attacker, target }));
   detonateChronoMark(attacker, target);
@@ -3583,6 +3617,8 @@ function activateChronoTimeStop(attacker, target) {
   if (attacker.characterType !== 'chrono' || attacker.chronoTimeStopCooldown > 0 || gameOver) return false;
 
   target.chronoTimeStopTimer = Math.max(target.chronoTimeStopTimer, getDebugDuration(chronoTimeStopDuration, target));
+  // (in his own castle, Shadow Jester doesn't stop: he only slows down to a crawl)
+  if (typeof chronoJesterResistsTimeStop === 'function' && chronoJesterResistsTimeStop(target)) target.chronoTimeStopTimer = 0;
   target.velocity.x = 0;
   target.velocity.y = 0;
   target.isAttacking = false;
@@ -7477,7 +7513,9 @@ function spawnDodgePattern(pattern, t) {
   };
   if (spawnLightBoxPattern(pattern, t, push, box, soul)) return;
   if (spawnFriendBoxPattern(pattern, t, push, box, soul)) return;
+  if (typeof spawnArcaneBoxPattern === 'function' && spawnArcaneBoxPattern(pattern, t, push, box, soul)) return;
   if (spawnJesterFinalePattern(pattern, t, push, box, soul)) return;
+  if (typeof spawnTitanBoxPattern === 'function' && spawnTitanBoxPattern(pattern, t, push, box, soul)) return;
   if (pattern === 'pastryRain') {
     if (t % 16 === 0) push({ type: 'drop', sprite: 'pastry', x: box.x + 20 + Math.random() * (box.width - 40), y: box.y - 20, vy: 4.2 + Math.random() * 1.5, r: 11, warn: 24 });
   } else if (pattern === 'glovePunches') {
@@ -7556,11 +7594,12 @@ function spawnDodgePattern(pattern, t) {
   }
 }
 
-function hurtDodgeTarget() {
+function hurtDodgeTarget(scale = 1) {
   const round = dodgeRound;
   if (round.invulnerable > 0) return;
   const target = round.target;
-  const damage = target.health * dodgeRoundDamagePercent;
+  const boxBoost = round.config && round.config.charged ? lightBoxDamageScale : 1;
+  const damage = target.health * dodgeRoundDamagePercent * scale * boxBoost;
   if (target.health > 1) {
     target.health = Math.max(1, target.health - damage);
     getPlayerStats(target).damageTaken += damage;
@@ -7582,12 +7621,17 @@ function updateDodgeItems() {
   const touches = (x, y, r) => Math.hypot(center.x - x, center.y - y) < r + soulRadius;
   const hit = (item) => {
     if (item.blue && round.dash.timer > 0) parryDodgeItem(item);
-    else hurtDodgeTarget();
+    else hurtDodgeTarget(item.dmgScale || 1);
   };
   round.items.forEach((item) => {
     item.life -= 1;
     if (item.warn > 0) {
       item.warn -= 1;
+      return;
+    }
+    // (the titan's own attacks: charged spheres, spikes of darkness)
+    if (item.custom && typeof updateTitanBoxCustomItem === 'function') {
+      updateTitanBoxCustomItem(item, round, center, soulRadius, box);
       return;
     }
     if (item.type === 'drop') {
@@ -7609,13 +7653,13 @@ function updateDodgeItems() {
       if (touches(item.x, item.y, item.r)) hit(item);
     } else if (item.type === 'lane') {
       item.x += item.dir * item.speed;
-      if (Math.abs(center.x - item.x) < 30 && center.y > item.y && center.y < item.y + item.h) hurtDodgeTarget();
+      if (Math.abs(center.x - item.x) < 30 && center.y > item.y && center.y < item.y + item.h) hurtDodgeTarget(item.dmgScale || 1);
       if (item.x < box.x - 80 || item.x > box.x + box.width + 80) item.life = 0;
     } else if (item.type === 'wall') {
       item.y += item.vy;
       const inBand = center.y + soulRadius > item.y && center.y - soulRadius < item.y + item.h;
       const inGap = center.x - soulRadius > item.gapX && center.x + soulRadius < item.gapX + item.gapWidth;
-      if (inBand && !inGap) hurtDodgeTarget();
+      if (inBand && !inGap) hurtDodgeTarget(item.dmgScale || 1);
       if (item.y > box.y + box.height + 40) item.life = 0;
     } else if (item.type === 'revolver') {
       // it turns toward Knight, locks on (a red line), and fires
@@ -7643,12 +7687,12 @@ function updateDodgeItems() {
       item.active -= 1;
       if (item.active <= 0) item.life = 0;
       const inside = item.orient === 'v' ? Math.abs(center.x - item.pos) < item.size / 2 + soulRadius * 0.6 : Math.abs(center.y - item.pos) < item.size / 2 + soulRadius * 0.6;
-      if (inside) hurtDodgeTarget();
+      if (inside) hurtDodgeTarget(item.dmgScale || 1);
     } else if (item.type === 'giantScythe') {
       item.vy = Math.min(16, (item.vy || 1) + 0.6);
       item.y += item.vy;
       item.spin = (item.spin || 0) + 0.08;
-      if (touches(item.x, item.y, item.r * 0.7)) hurtDodgeTarget();
+      if (touches(item.x, item.y, item.r * 0.7)) hurtDodgeTarget(item.dmgScale || 1);
       if (item.y + item.r * 0.4 >= box.y + box.height) {
         item.life = 0;
         riftTerrainBroken = true;
@@ -7667,7 +7711,7 @@ function updateDodgeItems() {
       // a joke bomb: it drops, sits there ticking... and bursts into shards
       if (item.y < item.stopY) item.y = Math.min(item.stopY, item.y + item.vy);
       else item.fuse -= 1;
-      if (touches(item.x, item.y, item.r)) hurtDodgeTarget();
+      if (touches(item.x, item.y, item.r)) hurtDodgeTarget(item.dmgScale || 1);
       if (item.fuse <= 0) {
         item.life = 0;
         for (let shard = 0; shard < 8; shard += 1) {
@@ -7717,7 +7761,7 @@ function updateDodgeItems() {
         for (let ray = 0; ray < 9; ray += 1) shoot(Math.PI * 0.12 + (ray / 8) * Math.PI * 0.76, 3.4);
         playSound('judgeLight');
       }
-      if (touches(item.x, item.y, item.r)) hurtDodgeTarget();
+      if (touches(item.x, item.y, item.r)) hurtDodgeTarget(item.dmgScale || 1);
     } else if (item.type === 'ring') {
       // a ring of light growing from a point, with one gap to slip through
       item.radius += item.speed;
@@ -7725,13 +7769,13 @@ function updateDodgeItems() {
       let angle = Math.atan2(center.y - item.y, center.x - item.x) - item.gap;
       while (angle > Math.PI) angle -= Math.PI * 2;
       while (angle < -Math.PI) angle += Math.PI * 2;
-      if (Math.abs(distance - item.radius) < 7 + soulRadius && Math.abs(angle) > item.gapSize / 2) hurtDodgeTarget();
+      if (Math.abs(distance - item.radius) < 7 + soulRadius && Math.abs(angle) > item.gapSize / 2) hurtDodgeTarget(item.dmgScale || 1);
       if (item.radius > 520) item.life = 0;
     } else if (item.type === 'crosshair') {
       if (!item.fired) {
         item.fired = true;
         playSound('cowboyBurst');
-        if (touches(item.x, item.y, item.r * 0.7)) hurtDodgeTarget();
+        if (touches(item.x, item.y, item.r * 0.7)) hurtDodgeTarget(item.dmgScale || 1);
       }
     }
   });
@@ -7825,6 +7869,11 @@ function drawDodgeItem(item) {
   const box = round.box;
   ctx.save();
   if (item.warn > 0) {
+    // (the titan's box draws its own warnings)
+    if (typeof drawTitanBoxWarning === 'function' && drawTitanBoxWarning(item, box)) {
+      ctx.restore();
+      return;
+    }
     // warnings: a red marker where the attack is coming
     ctx.fillStyle = `rgba(255, 82, 82, ${0.35 + Math.sin(round.frame / 2) * 0.25})`;
     if (item.type === 'drop') ctx.fillRect(item.x - 12, box.y + 2, 24, 8);
@@ -7903,7 +7952,7 @@ function drawDodgeItem(item) {
     ctx.fillStyle = glow;
     ctx.fillRect(item.x - (item.r || 10) - 12, item.y - (item.r || 10) - 12, ((item.r || 10) + 12) * 2, ((item.r || 10) + 12) * 2);
   }
-  if (drawFriendBoxItem(item, box) || drawLightBoxItem(item, box, spin)) {
+  if ((typeof drawTitanBoxItem === 'function' && drawTitanBoxItem(item, box)) || drawFriendBoxItem(item, box) || drawLightBoxItem(item, box, spin) || (typeof drawArcaneBoxItem === 'function' && drawArcaneBoxItem(item, box))) {
     ctx.restore();
     return;
   }
@@ -8209,7 +8258,7 @@ function updateDodgeRound() {
     }
   } else if (round.stage === 'phase') {
     // while the dash charges, time runs slower for the attacks
-    round.timeAcc = (round.timeAcc || 0) + (round.dash.charging ? lightBoxSlowScale : 1);
+    round.timeAcc = (round.timeAcc || 0) + (round.dash.charging ? lightBoxSlowScale : 1) * (typeof getTitanBoxTimeScale === 'function' ? getTitanBoxTimeScale(round) : 1);
     round.simSteps = 0;
     while (round.timeAcc >= 1 && round.stage === 'phase') {
       round.timeAcc -= 1;
@@ -8222,6 +8271,7 @@ function updateDodgeRound() {
       finishDodgeRound();
       if (config.onEnd === 'riftClash') startRiftClash();
       if (config.onEnd === 'friendBoxEnd') friendBoxEnd();
+      if (config.titanBox && typeof startChronoTitanBabyCall === 'function') startChronoTitanBabyCall();
       return;
     }
   } else if (round.stage === 'finale') {
@@ -8291,7 +8341,7 @@ function drawDodgeRound(round, config) {
   caster.position = { x: 820, y: ground - caster.height };
   caster.attacksToTheRight = false;
   // (Light Warrior casts from afar: no punch flying toward a Knight who is inside the box)
-  caster.isAttacking = !config.charged && round.theme !== 'jesterFinale' && Math.floor(round.frame / 12) % 3 === 0 && round.stage === 'phase';
+  caster.isAttacking = !config.charged && round.theme !== 'jesterFinale' && !round.theme.startsWith('arcaneBox') && Math.floor(round.frame / 12) % 3 === 0 && round.stage === 'phase';
   caster.draw();
   caster.position = savedPosition;
   caster.attacksToTheRight = savedFacing;
@@ -8310,6 +8360,7 @@ function drawDodgeRound(round, config) {
     mochi.draw();
   }
   if (config.helpers) drawLightBoxHelpers(round);
+  if (config.titanBox && typeof drawTitanBoxScene === 'function') drawTitanBoxScene(round);
   // the box
   const box = round.box;
   ctx.fillStyle = '#0a0710';
@@ -8329,6 +8380,8 @@ function drawDodgeRound(round, config) {
     ctx.fillRect(box.x, box.y, box.width, box.height);
   }
   round.items.forEach(drawDodgeItem);
+  if (config.laserMode && typeof updateDrawTitanLasers === 'function') updateDrawTitanLasers(round);
+  if (config.hammerMode && typeof updateDrawHammerMode === 'function') updateDrawHammerMode(round);
   (round.popups || []).forEach((popup) => {
     ctx.fillStyle = `rgba(105, 240, 174, ${Math.min(1, popup.life / 15)})`;
     ctx.font = '900 16px Courier New, monospace';
@@ -8833,6 +8886,7 @@ function drawLightBoxHelpers(round) {
         actor.setCharacterType('normal', helper.variant);
       }
       if (helper.powered) actor.mochiPowered = true;
+      if (helper.minionColor) actor.minionColor = helper.minionColor;
       if (helper.variant === 'chefBoss') actor.chefCalm = true;
       return { actor, helper };
     });
@@ -8858,8 +8912,8 @@ function drawLightBoxHelpers(round) {
 function drawLightBoxTalk(round) {
   const line = round.config.talk[round.talkIndex];
   if (!line) return;
-  const names = { lightWarrior: 'LIGHT WARRIOR', knight: 'KNIGHT', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', cowboy: 'SHERIFF COWBOY', friend: '? ? ?', scammer: 'SCAMMER' };
-  const accents = { lightWarrior: '#fff59d', knight: '#90caf9', celeste: '#4fc3f7', seto: '#66bb6a', mochi: '#ef5350', chef: '#ffcc80', cowboy: '#ff7043', friend: '#ff4fa3', scammer: '#fdd835' };
+  const names = { sorcerer: 'SORCERER', obsidian: 'OBSIDIAN', lightWarrior: 'LIGHT WARRIOR', knight: 'KNIGHT', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', cowboy: 'SHERIFF COWBOY', friend: '? ? ?', scammer: 'SCAMMER' };
+  const accents = { sorcerer: '#b388ff', obsidian: '#ff3d00', lightWarrior: '#fff59d', knight: '#90caf9', celeste: '#4fc3f7', seto: '#66bb6a', mochi: '#ef5350', chef: '#ffcc80', cowboy: '#ff7043', friend: '#ff4fa3', scammer: '#fdd835' };
   const accent = accents[line.speaker] || '#ffffff';
   const shown = line.text.slice(0, Math.floor(round.talkFrame * 1.6));
   ctx.save();
@@ -8942,11 +8996,8 @@ function updateLightFinale(round) {
             const speedOut = 3 + Math.random() * 7;
             round.sparks.push({ x: finale.x, y: finale.y, vx: Math.cos(angle) * speedOut, vy: Math.sin(angle) * speedOut, life: 30 });
           }
-          const before = target.health;
-          target.health = Math.min(target.maxHealth, target.health + target.maxHealth * lightBoxHealRatio);
-          updateHealthBars();
-          const healed = Math.round(target.health - before);
-          dodgeRoundCaption(healed > 0 ? `PARRY PERFECTO!  +${healed} VIDA` : 'PARRY PERFECTO!', '#69f0ae');
+          // (no healing here anymore: the climb is earned with the health you have)
+          dodgeRoundCaption('PARRY PERFECTO!', '#69f0ae');
           playSound('judgeParry');
           playSound('achievement');
         } else {
@@ -9056,7 +9107,8 @@ function buildFarolClimbDiscs() {
   let x = 470;
   let y = ground - 100;
   let direction = -1;
-  for (let index = 0; index < 22; index += 1) {
+  const last = farolClimbDiscCount - 1;
+  for (let index = 0; index < farolClimbDiscCount; index += 1) {
     const wobble = Math.abs(Math.sin(index * 12.9898) * 43758.5453) % 1;
     if (index > 0) {
       if (index % 3 === 0) direction *= -1;
@@ -9070,9 +9122,9 @@ function buildFarolClimbDiscs() {
         direction = -1;
       }
     }
-    if (index === 20) x = 470;
-    if (index === 21) x = 600;
-    const kind = index < 2 || index >= 20 ? 'solid' : index % 5 === 3 ? 'moving' : index % 4 === 1 ? 'crumble' : 'solid';
+    if (index === last - 1) x = 470;
+    if (index === last) x = 600;
+    const kind = index < 2 || index >= last - 1 ? 'solid' : index % 5 === 3 ? 'moving' : index % 4 === 1 ? 'crumble' : 'solid';
     discs.push({ x, baseX: x, y, w: 104, kind, seed: index, crumble: 0, gone: 0, dx: 0 });
     y -= 102 + wobble * 12;
   }
@@ -9125,8 +9177,9 @@ function hurtFarolClimbKnight(direction, ratio = farolClimbHitRatio) {
   if (knight.invuln > 0) return;
   player1.health = Math.max(1, player1.health - player1.maxHealth * ratio);
   knight.invuln = 50;
-  // no knockback: a hit hurts, but it never throws Knight off his disc
-  knight.kb = 0;
+  // a hit pushes Knight away and slows him down for a moment
+  knight.kb = direction * farolClimbPush;
+  if (direction !== 0) knight.slow = farolClimbSlowFrames;
   climb.hits += 1;
   playSound('judgeFinalHurt');
   updateHealthBars();
@@ -9166,7 +9219,7 @@ function updateFarolClimb() {
 
   if (climb.stage === 'form') {
     if (climb.stageFrame === 1) climb.caption = { text: 'LOS DISCOS FORMAN UN PUENTE HASTA EL FAROL!', life: 150 };
-    if (climb.stageFrame > 22 * 4 + 40) {
+    if (climb.stageFrame > farolClimbDiscCount * 4 + 40) {
       climb.stage = 'pan';
       climb.stageFrame = 0;
     }
@@ -9216,7 +9269,8 @@ function updateFarolClimbKnight() {
   const move = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
   if (move) knight.facing = move;
   knight.kb *= 0.88;
-  knight.vx = move * farolClimbSpeed + knight.kb;
+  if (knight.slow > 0) knight.slow -= 1;
+  knight.vx = move * farolClimbSpeed * (knight.slow > 0 ? farolClimbSlowFactor : 1) + knight.kb;
   const jumpKey = keys.w || keys.ArrowUp;
   if (jumpKey && !knight.jumpHeld && knight.grounded) {
     knight.vy = farolClimbJump;
@@ -9282,16 +9336,16 @@ function updateFarolClimbLightWarrior() {
   const lwCenter = { x: lw.x + player2.width / 2, y: lw.y - player2.height / 2 };
   const knightCenter = { x: knight.x + player1.width / 2, y: knight.y - player1.height / 2 };
   // a fan of light orbs
-  const orbRate = Math.round(86 - progress * 30);
+  const orbRate = Math.round(135 - progress * 35);
   if (time > 60 && time % orbRate === 0) {
     const aim = Math.atan2(knightCenter.y - lwCenter.y, knightCenter.x - lwCenter.x);
     [-0.25, 0, 0.25].forEach((spread) => climb.shots.push({ x: lwCenter.x, y: lwCenter.y, vx: Math.cos(aim + spread) * 4.6, vy: Math.sin(aim + spread) * 4.6, r: 9, life: 200, kind: 'orb' }));
     playSound('judgeLight');
   }
   // a column of light on Knight
-  if (time > 120 && time % 230 === 0) climb.beams.push({ x: knightCenter.x, warn: 45, active: 18, w: 46 });
+  if (time > 160 && time % 330 === 0) climb.beams.push({ x: knightCenter.x, warn: 50, active: 18, w: 46 });
   // a disc sliding across at Knight's height
-  if (time > 200 && time % 320 === 160) {
+  if (time > 240 && time % 420 === 210) {
     const fromLeft = Math.random() < 0.5;
     climb.shots.push({ x: fromLeft ? -40 : canvas.width + 40, y: knightCenter.y - 10, vx: fromLeft ? 7 : -7, vy: 0, r: 15, life: 260, kind: 'disc', warn: 35 });
   }
@@ -9513,6 +9567,7 @@ function drawFarolBubble(x, y, text, color) {
 // ---------- the final round: OMEGA LIGHT WARRIOR's flying kicks ----------
 function startOmegaKickFight() {
   Object.assign(omegaKickFight, {
+    breakHealed: false,
     active: true,
     won: false,
     stage: 'rise',
@@ -9542,6 +9597,14 @@ function getOmegaHoverPoint(side) {
 function setOmegaKickStage(stage) {
   omegaKickFight.stage = stage;
   omegaKickFight.frame = 0;
+  if (stage === 'spiritsOut' && !omegaKickFight.breakHealed) {
+    omegaKickFight.breakHealed = true;
+    const before = player1.health;
+    player1.health = Math.min(player1.maxHealth, player1.health + player1.maxHealth * omegaKickBreakHealRatio);
+    updateHealthBars();
+    showScamLabel(player1, `+${Math.round(player1.health - before)}`);
+    playSound('achievement');
+  }
 }
 
 function updateOmegaKickFight() {

@@ -877,7 +877,7 @@ function endArcadeCutscene() {
     player2.lightBoxIndex = 5;
     selectedMap = 'farolTop';
     player1.knightGlow = 0;
-    player1.health = Math.max(player1.health, player1.maxHealth * 0.6);
+    // (no healing here: Knight starts the last round with the health he climbed with)
     player1.position = { x: 230, y: ground - player1.height };
     player2.position = { x: 720, y: ground - player2.height };
     [player1, player2].forEach((fighter) => {
@@ -891,6 +891,87 @@ function endArcadeCutscene() {
     updateHealthBars();
     updateCombatHudIdentity();
     startOmegaKickFight();
+    return;
+  }
+  if (arcadeCutscene.scene === 'originsIntro' && arcadeCutscene.secretBox && arcadeCutscene.midFight) {
+    // chapter 6, secret level: the distinguished maze
+    startAbnormalGrid(arcadeCutscene.secretBox === 3 ? 3 : arcadeCutscene.secretBox === 5 ? 5 : 1);
+    return;
+  }
+  if (arcadeCutscene.scene === 'originsIntro' && arcadeCutscene.secretPowers && arcadeCutscene.midFight) {
+    // chapter 6, secret level: Abnormal starts changing everything
+    [player1, player2].forEach((fighter) => {
+      fighter.velocity.x = 0;
+      fighter.velocity.y = 0;
+      fighter.isAttacking = false;
+      fighter.position.y = ground - fighter.height;
+    });
+    resetKeys();
+    startChronoPowers();
+    return;
+  }
+  if (arcadeCutscene.scene === 'originsIntro' && arcadeCutscene.secretRules && arcadeCutscene.midFight) {
+    // chapter 6, secret level: Abnormal starts writing the rules
+    [player1, player2].forEach((fighter) => {
+      fighter.velocity.x = 0;
+      fighter.velocity.y = 0;
+      fighter.isAttacking = false;
+      fighter.position.y = ground - fighter.height;
+    });
+    resetKeys();
+    startChronoRules();
+    return;
+  }
+  if (arcadeCutscene.scene === 'originsIntro' && arcadeCutscene.titan9 && arcadeCutscene.midFight) {
+    // chapter 6, level 9: the next part of the fight
+    endChronoTitan9Scene(arcadeCutscene.titan9);
+    return;
+  }
+  if (arcadeCutscene.scene === 'originsIntro' && arcadeCutscene.titanShot && arcadeCutscene.midFight) {
+    // chapter 6, level 8: after the first shot the titan gets angry; after the second, the box
+    if (arcadeCutscene.shotNumber === 2) startChronoTitanBox();
+    else startChronoTitanPhase2();
+    return;
+  }
+  if (arcadeCutscene.scene === 'originsIntro' && arcadeCutscene.titanBabies) {
+    // chapter 6, level 8: the baby titans
+    startChronoTitanBabies();
+    return;
+  }
+  if (arcadeCutscene.scene === 'originsIntro' && arcadeCutscene.ceilingScene) {
+    // chapter 6, level 6: the same level goes on, now Divine General against the black knight
+    startChronoHallDuel();
+    return;
+  }
+  if (arcadeCutscene.scene === 'originsIntro' && arcadeCutscene.darkWorld && arcadeCutscene.outro) {
+    finishChronoChapterOutro();
+    return;
+  }
+  if (arcadeCutscene.scene === 'originsIntro' && arcadeCutscene.midFight) {
+    // 4B, level 5: the story goes on in the middle of the fight
+    [player1, player2].forEach((fighter) => {
+      fighter.velocity.x = 0;
+      fighter.velocity.y = 0;
+      fighter.isAttacking = false;
+      fighter.position.y = ground - fighter.height;
+    });
+    resetKeys();
+    updateHealthBars();
+    updateCombatHudIdentity();
+    return;
+  }
+  if (arcadeCutscene.scene === 'routeB4Library') {
+    // 4B, level 3: the level ends in Sorcerer's library
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+    player1.position = { x: 300, y: ground - player1.height };
+    player2.health = 0;
+    player2.position = { x: canvas.width + 400, y: ground - player2.height };
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawSorcererLibraryStage();
+    finishFight();
     return;
   }
   if (arcadeCutscene.scene === 'originsOutro') {
@@ -1224,6 +1305,10 @@ function endArcadeCutscene() {
     if (arcadeCutscene.scene === 'scamFinalStart') castScamFinalAct(player2, player1);
     // chapter 3B, level 4: Gambler is gone; now it's Fire Master's fight
     if (arcadeCutscene.scene === 'routeB3Meet') finishRouteB3Meet();
+    if (arcadeCutscene.scene === 'routeB4Escape') {
+      startRouteB4Library();
+      return;
+    }
     if (arcadeCutscene.scene === 'routeB5Final') castRouteBScamFinal();
     [player1, player2].forEach((fighter) => {
       fighter.velocity.x = 0;
@@ -2285,6 +2370,8 @@ function beginCutsceneDialog() {
 function advanceArcadeCutscene() {
   const cutscene = arcadeCutscene;
   if (!cutscene.active) return;
+  // (a few scenes have to be watched to the end)
+  if (cutscene.holdLine === cutscene.lineIndex) return;
   if (['teleport', 'arrive', 'exorcism', 'loseLaugh', 'scriptedFinal', 'screenThrow', 'screenFly', 'robotsFall', 'explosions', 'ram', 'ascent', 'chronoDive', 'ch6Blast', 'ch6Surround', 'ch6Carry', 'ch6Titan', 'titanDeath', 'ch6Pinball', 'ch7Arrive', 'ch7Hammer', 'ch7Slam', 'neoTransform', 'knightArrive', 'forestArrive', 'lightBlast', 'villageArrive', 'plazaArrive', 'spaArrive', 'mochiBarrage', 'alleyWalk', 'jailArrive', 'guardArrive', 'strike', 'approach', 'spirits', 'gift', 'ascend', 'transform', 'slam', 'act', 'shaolinArrive'].includes(cutscene.phase)) return;
   // the first line of the Chrono intro leads into the explosions, not straight into the next line
   if (cutscene.scene === 'chronoIntro' && cutscene.phase === 'dialog' && cutscene.lineIndex === 0) {
@@ -2325,7 +2412,7 @@ function advanceArcadeCutscene() {
       cutscene.phase = 'approach';
       cutscene.frame = 0;
       cutscene.emote = null;
-    } else if (cutscene.scene === 'originsOutro' || cutscene.scene === 'knightRiftAbduct' || cutscene.scene === 'knightRiftAngry' || cutscene.scene === 'knightFarolEnd' || cutscene.scene === 'knightGuardFall' || cutscene.scene === 'knightSheriffStand' || cutscene.scene === 'knightSheriffEnd' || cutscene.scene === 'knightSpaVictory' || cutscene.scene === 'knightAlley' || cutscene.scene === 'knightOutro' || cutscene.scene === 'knightLight' || cutscene.scene === 'jesterTired' || cutscene.scene === 'jesterOutroCity' || cutscene.scene === 'jesterImpatient' || cutscene.scene === 'chronoAscent' || ch7MidFightScenes.includes(cutscene.scene)) {
+    } else if (cutscene.scene === 'routeB4Library' || (cutscene.scene === 'originsIntro' && cutscene.noVersus) || cutscene.scene === 'originsOutro' || cutscene.scene === 'knightRiftAbduct' || cutscene.scene === 'knightRiftAngry' || cutscene.scene === 'knightFarolEnd' || cutscene.scene === 'knightGuardFall' || cutscene.scene === 'knightSheriffStand' || cutscene.scene === 'knightSheriffEnd' || cutscene.scene === 'knightSpaVictory' || cutscene.scene === 'knightAlley' || cutscene.scene === 'knightOutro' || cutscene.scene === 'knightLight' || cutscene.scene === 'jesterTired' || cutscene.scene === 'jesterOutroCity' || cutscene.scene === 'jesterImpatient' || cutscene.scene === 'chronoAscent' || ch7MidFightScenes.includes(cutscene.scene)) {
       endArcadeCutscene();
     } else if (cutscene.scene === 'jesterAngry') {
       cutscene.phase = 'screenThrow';
@@ -2577,12 +2664,30 @@ function drawCutsceneProp(prop) {
 }
 
 function drawCutsceneDialog() {
+  // (chapter 5: Abnormal stayed to watch, so he is in the scene too)
+  if (typeof drawAbnormalCutsceneGuest === 'function') drawAbnormalCutsceneGuest();
+  if (typeof endCutsceneZoom === 'function') endCutsceneZoom();
   const line = arcadeCutscene.lines[arcadeCutscene.lineIndex];
+  if (line.noBox) return;
   const isScammerLine = line.speaker === 'scammer' || line.speaker === 'jester' || line.speaker === 'neoScammer';
   const jesterColors = ['#ea80fc', '#fdd835', '#b388ff', '#ff4081'];
   const upgradedVoice = line.speaker === 'reflecter' && isPlayerReflecterUpgrade();
+  const kingVoice = line.speaker === 'king' || line.speaker === 'kingHidden';
   const luckVoice = line.speaker === 'reflecter' && isPlayerReflecterMirrorLuck();
   const speakerAccents = {
+    abnormal: '#90caf9',
+    darkTitan: '#ffffff',
+    omegaAbnormal: '#ffd54f',
+    tempusSoldier: '#90a4ae',
+    king: '#b388ff',
+    kingHidden: '#7e57c2',
+    hooded: '#9575cd',
+    machine: '#ffd54f',
+    darkGeneral: '#ff5252',
+    orderLeader: '#c9a227',
+    orderSecond: '#90caf9',
+    orderThird: '#9575cd',
+    blackKnight: '#cfd8dc',
     reflecter: '#26c6da',
     chrono: '#448aff',
     omegarius: '#ffca28',
@@ -2617,6 +2722,7 @@ function drawCutsceneDialog() {
     normal: '#90a4ae',
     fireMaster: '#ff7043',
     fireMasterB: '#ff8a65',
+    obsidian: '#ff3d00',
     cowboy: '#bcaaa4',
     switcher: '#66bb6a',
     sorcerer: '#b388ff',
@@ -2626,7 +2732,7 @@ function drawCutsceneDialog() {
   const accent = upgradedVoice ? '#ff1744' : luckVoice ? '#39ff88' : speakerAccents[line.speaker] || (line.speaker === 'jester'
     ? jesterColors[Math.floor(performance.now() / 180) % jesterColors.length]
     : isScammerLine ? (line.mood === 'angry' || line.rage ? '#ff1744' : '#fdd835') : '#ba68c8');
-  const menace = upgradedVoice && line.menace;
+  const menace = (upgradedVoice && line.menace) || kingVoice;
   const menaceStart = menace ? Math.max(0, 1 - arcadeCutscene.typed / 14) : 0;
   const shake = isScammerLine && (arcadeCutscene.mood === 'angry' || arcadeCutscene.mood === 'crazy') ? (Math.random() - 0.5) * 4
     : line.fear ? (Math.random() - 0.5) * 5
@@ -2635,19 +2741,19 @@ function drawCutsceneDialog() {
     const glow = 0.4 + Math.sin(performance.now() / 260) * 0.12;
     const vignette = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 120, canvas.width / 2, canvas.height / 2, canvas.width * 0.7);
     vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    vignette.addColorStop(1, `rgba(90, 0, 10, ${glow})`);
+    vignette.addColorStop(1, kingVoice ? `rgba(40, 0, 70, ${glow + 0.15})` : `rgba(90, 0, 10, ${glow})`);
     ctx.save();
-    ctx.fillStyle = `rgba(0, 0, 0, ${0.25 + menaceStart * 0.3})`;
+    ctx.fillStyle = kingVoice ? `rgba(0, 0, 0, ${0.06 + menaceStart * 0.2})` : `rgba(0, 0, 0, ${0.25 + menaceStart * 0.3})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (menaceStart > 0) {
-      ctx.fillStyle = `rgba(255, 23, 68, ${menaceStart * 0.25})`;
+      ctx.fillStyle = kingVoice ? `rgba(124, 77, 255, ${menaceStart * 0.25})` : `rgba(255, 23, 68, ${menaceStart * 0.25})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
     ctx.restore();
   }
-  const speakerNames = { gambler: 'GAMBLER', scammer: 'SCAMMER', jester: 'SHADOW JESTER', reflecter: isPlayerReflecterUpgrade() ? 'REFLECTER 2.0' : 'REFLECTER', chrono: 'CHRONO', omegarius: 'OMEGARIUS', neoScammer: 'NEO SCAMMER', knight: 'KNIGHT', lightWarrior: 'LIGHT WARRIOR', divineGeneral: 'DIVINE GENERAL', tank: 'LIVING TANK', gangBoss: 'JEFE DE LA BANDA', mossBeast: 'BESTIA DEL MUSGO', darkKnight: 'CABALLERO OSCURO', lanternGuard: 'GUARDIA DEL FAROL', shang: 'SHANG TING', fireMasterB: 'FIRE MASTER', customer: 'CLIENTE ENOJADO', police: 'POLICIA', sergeant: 'SARGENTO', chief: 'COMISARIO', origEyes: '???', origNarrator: 'MAS TARDE', friend: '???', darkWhisper: 'VOZ OSCURA', lightNote: 'NOTA DE L.W.', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', darkKnightBoss: 'CAPITAN OSCURO', icedThug: 'MATON HELADO', iceMaster: 'ICE MASTER', assembler: 'ENSAMBLADORA', chronoBoost: 'CHRONO POTENCIADO', titan: 'PROYECTO TITAN', normal: 'NORMAL', fireMaster: 'FIRE MASTER', cowboy: 'COWBOY', switcher: 'SWITCHER', sorcerer: 'SORCERER', ghost: 'GHOST', monkey: 'MONKEI' };
+  const speakerNames = { gambler: 'GAMBLER', scammer: 'SCAMMER', jester: 'SHADOW JESTER', reflecter: isPlayerReflecterUpgrade() ? 'REFLECTER 2.0' : 'REFLECTER', chrono: 'CHRONO', omegarius: 'OMEGARIUS', neoScammer: 'NEO SCAMMER', knight: 'KNIGHT', lightWarrior: 'LIGHT WARRIOR', divineGeneral: 'DIVINE GENERAL', tank: 'LIVING TANK', gangBoss: 'JEFE DE LA BANDA', mossBeast: 'BESTIA DEL MUSGO', darkKnight: 'CABALLERO OSCURO', lanternGuard: 'GUARDIA DEL FAROL', shang: 'SHANG TING', fireMasterB: 'FIRE MASTER', obsidian: 'OBSIDIAN', abnormal: 'ABNORMAL', hooded: '???', machine: 'MAQUINA RARA', blackKnight: 'CABALLERO NEGRO', darkTitan: 'TITAN', omegaAbnormal: 'OMEGA ABNORMAL', tempusSoldier: 'SOLDADO DE TEMPUS', king: 'EL REY', kingHidden: '???', darkGeneral: 'GENERAL OSCURO', orderLeader: 'EL REGENTE', orderSecond: 'LA LUNA', orderThird: 'EL VIGIA', customer: 'CLIENTE ENOJADO', police: 'POLICIA', sergeant: 'SARGENTO', chief: 'COMISARIO', origEyes: '???', origNarrator: 'MAS TARDE', friend: '???', darkWhisper: 'VOZ OSCURA', lightNote: 'NOTA DE L.W.', celeste: 'CELESTE', seto: 'SETO', mochi: 'MOCHI', chef: 'CHEF', darkKnightBoss: 'CAPITAN OSCURO', icedThug: 'MATON HELADO', iceMaster: 'ICE MASTER', assembler: 'ENSAMBLADORA', chronoBoost: 'CHRONO POTENCIADO', titan: 'PROYECTO TITAN', normal: 'NORMAL', fireMaster: 'FIRE MASTER', cowboy: 'COWBOY', switcher: 'SWITCHER', sorcerer: 'SORCERER', ghost: 'GHOST', monkey: 'MONKEI' };
   ctx.save();
   // in the last levels of chapter 5 the box goes lower, under the health bars
   const dialogDrop = 0;
@@ -2663,12 +2769,16 @@ function drawCutsceneDialog() {
   ctx.font = '900 18px Courier New, monospace';
   ctx.textAlign = 'center';
   ctx.fillText(speakerNames[line.speaker] || 'GAMBLER', 176 + shake, 66);
-  ctx.fillStyle = upgradedVoice ? '#ff5252' : luckVoice ? '#69f0ae' : '#fff';
-  ctx.font = upgradedVoice ? '700 20px Courier New, monospace' : '700 20px Arial';
+  ctx.fillStyle = kingVoice ? '#ffe9a8' : upgradedVoice ? '#ff5252' : luckVoice ? '#69f0ae' : '#fff';
+  ctx.font = kingVoice ? '800 21px Courier New, monospace' : upgradedVoice ? '700 20px Courier New, monospace' : '700 20px Arial';
   ctx.textAlign = 'left';
   if (upgradedVoice) {
     ctx.shadowColor = '#ff1744';
     ctx.shadowBlur = menace ? 12 : 6;
+  }
+  if (kingVoice) {
+    ctx.shadowColor = '#aa00ff';
+    ctx.shadowBlur = 14 + Math.sin(performance.now() / 300) * 4;
   }
   drawWrappedText(line.text.slice(0, Math.floor(arcadeCutscene.typed)), 84 + shake, 104, 850, 26);
   ctx.shadowBlur = 0;
@@ -2684,6 +2794,8 @@ function drawCutsceneDialog() {
 function updateAndDrawArcadeCutscene() {
   const cutscene = arcadeCutscene;
   cutscene.frame += 1;
+  // (a scene can zoom the world: the dialog box stays where it is)
+  if (typeof beginCutsceneZoom === 'function') beginCutsceneZoom(cutscene);
   if (cutscene.phase === 'exorcism' || cutscene.phase === 'loseLaugh' || cutscene.phase === 'scriptedFinal') {
     updateJesterLosePhase(cutscene);
     return;
@@ -2746,6 +2858,7 @@ function updateAndDrawArcadeCutscene() {
   if (cutscene.scene === 'originsOutro') updateOriginsOutro(cutscene);
   if (cutscene.scene === 'originsIntro') updateOriginsIntro(cutscene);
   if (cutscene.scene === 'routeB3Meet') updateRouteB3Meet(cutscene);
+  if (cutscene.scene === 'routeB4Escape' || cutscene.scene === 'routeB4Library') updateRouteB4Scene(cutscene);
   if (cutscene.scene === 'knightFarolEnd') updateKnightFarolEnd(cutscene);
   if (cutscene.scene === 'knightRiftIntro') updateKnightRiftIntro(cutscene);
   if (cutscene.scene === 'knightRiftAbduct') updateKnightRiftAbduct(cutscene);
@@ -2759,7 +2872,7 @@ function updateAndDrawArcadeCutscene() {
     // Omegarius's gift: the armor appears on Reflecter with a burst of gold sparks
     spawnOmegariusGiftSparks(cutscene, 'omegariusArmor', ch7OmegariusLines, 'armor');
   }
-  if (ch7MidFightScenes.includes(cutscene.scene)) {
+  if (ch7MidFightScenes.includes(cutscene.scene) && cutscene.scene !== 'routeB4Escape') {
     cutscene.scammerY = 0;
     spawnOmegariusGiftSparks(cutscene, 'omegariusArmorPlus', ch7MercyLines, 'armorPlus');
   }
@@ -2911,7 +3024,15 @@ function updateAndDrawArcadeCutscene() {
     drawRobledalJailStage(cutscene.posterFocus || 0);
   } else if (cutscene.scene === 'originsOutro') {
     drawOriginsOutroStage(cutscene);
-  } else if (cutscene.scene === 'originsIntro' || cutscene.scene === 'routeB3Meet' || cutscene.scene === 'routeB5Final') {
+  } else if (cutscene.scene === 'routeB4Library') {
+    drawSorcererLibraryStage();
+  } else if (cutscene.scene === 'originsIntro' || cutscene.scene === 'routeB3Meet' || cutscene.scene === 'routeB5Final' || cutscene.scene === 'routeB4Escape') {
+    // (the ritual shakes the whole room)
+    if ((cutscene.ritual || cutscene.sixth || cutscene.rescue || cutscene.orderOutro || cutscene.castle || cutscene.reflectScene || cutscene.overchargeScene) && cutscene.shake > 0.3) {
+      ctx.save();
+      cutscene.shaking = true;
+      ctx.translate((Math.random() - 0.5) * cutscene.shake, (Math.random() - 0.5) * cutscene.shake);
+    }
     drawStage();
   } else if (cutscene.scene === 'shaolinIntro') {
     drawShaolinTempleStage();
@@ -3055,6 +3176,7 @@ function updateAndDrawArcadeCutscene() {
   if (cutscene.scene === 'originsOutro') drawOriginsOutroFx(cutscene);
   if (cutscene.scene === 'originsIntro') drawOriginsIntroFx(cutscene);
   if (cutscene.scene === 'routeB3Meet') drawRouteB3MeetFx(cutscene);
+  if (cutscene.scene === 'routeB4Escape' || cutscene.scene === 'routeB4Library') drawRouteB4SceneFx(cutscene);
   if (cutscene.scene === 'shaolinIntro') drawShaolinIntroFx(cutscene);
 
   cutscene.particles.forEach((particle) => {
@@ -3072,6 +3194,10 @@ function updateAndDrawArcadeCutscene() {
     if (cutscene.emote.who === 'gambler' || scammerVisible) drawCutsceneEmote(fighter, cutscene.emote.symbol, cutscene.emote.timer);
   }
 
+  if (cutscene.shaking) {
+    ctx.restore();
+    cutscene.shaking = false;
+  }
   if (cutscene.phase === 'dialog') drawCutsceneDialog();
 
   if (cutscene.phase === 'teleport' && cutscene.frame >= 60) {
@@ -3147,7 +3273,7 @@ function updateAndDrawArcadeCutscene() {
     ctx.lineJoin = 'round';
     ctx.font = '900 38px Courier New, monospace';
     ctx.textAlign = 'center';
-    const ch6Names = { ch6Intro: 'ROBOTS DE LA PLANTA 7', ch6Chrono: 'CHRONO', ch6Giant: 'PROYECTO TITAN', ch7Intro: 'OMEGARIUS', scamIntro: 'SCAMMER', scamNeo: 'NEO SCAMMER', knightIntro: 'KNIGHT', knightForestIntro: 'BESTIA DEL MUSGO', knightVillageIntro: 'ORDEN SOMBRIA', knightPlazaIntro: 'CELESTE', knightSetoIntro: 'SETO', knightKidsTeam: 'CELESTE Y SETO', knightSpaIntro: 'MOCHI', knightMochiBarrage: 'MOCHI POTENCIADO', knightChefFury: 'CHEF FURIOSO', knightJailIntro: 'SHERIFF COWBOY', knightGuardIntro: 'GUARDIA DEL FAROL', knightApproach: 'LIGHT WARRIOR', knightFarolTop: 'OMEGA LIGHT WARRIOR', knightRiftIntro: 'SHADOW JESTER', shaolinIntro: 'SHANG TING', originsIntro: isFriendThing(player2) ? '? ? ?' : (getCharacterDisplayName(player2) || '').toUpperCase() };
+    const ch6Names = { ch6Intro: 'ROBOTS DE LA PLANTA 7', ch6Chrono: 'CHRONO', ch6Giant: 'PROYECTO TITAN', ch7Intro: 'OMEGARIUS', scamIntro: 'SCAMMER', scamNeo: 'NEO SCAMMER', knightIntro: 'KNIGHT', knightForestIntro: 'BESTIA DEL MUSGO', knightVillageIntro: 'ORDEN SOMBRIA', knightPlazaIntro: 'CELESTE', knightSetoIntro: 'SETO', knightKidsTeam: 'CELESTE Y SETO', knightSpaIntro: 'MOCHI', knightMochiBarrage: 'MOCHI POTENCIADO', knightChefFury: 'CHEF FURIOSO', knightJailIntro: 'SHERIFF COWBOY', knightGuardIntro: 'GUARDIA DEL FAROL', knightApproach: 'LIGHT WARRIOR', knightFarolTop: 'OMEGA LIGHT WARRIOR', knightRiftIntro: 'SHADOW JESTER', shaolinIntro: 'SHANG TING', originsIntro: cutscene.versusName ? cutscene.versusName : isFriendThing(player2) ? '? ? ?' : (getCharacterDisplayName(player2) || '').toUpperCase() };
     const versusName = ch6Names[cutscene.scene] || (cutscene.scene === 'chronoIntro' ? 'CHRONO' : cutscene.scene === 'jester' ? 'SHADOW JESTER' : cutscene.rageVisible ? 'SCAMMER FURIOSO' : 'SCAMMER');
     const scamScene = cutscene.scene === 'scamIntro' || cutscene.scene === 'scamNeo' || cutscene.scene === 'knightIntro' || cutscene.scene === 'knightForestIntro' || cutscene.scene === 'knightVillageIntro' || cutscene.scene === 'knightPlazaIntro' || cutscene.scene === 'knightSetoIntro' || cutscene.scene === 'knightKidsTeam' || cutscene.scene === 'knightSpaIntro' || cutscene.scene === 'knightMochiBarrage' || cutscene.scene === 'knightChefFury' || cutscene.scene === 'knightJailIntro' || cutscene.scene === 'knightGuardIntro' || cutscene.scene === 'knightApproach' || cutscene.scene === 'knightFarolTop' || cutscene.scene === 'knightRiftIntro' || cutscene.scene === 'shaolinIntro' || cutscene.scene === 'originsIntro';
     const heroName = scamScene ? getCharacterDisplayName(player1).toUpperCase() : cutscene.scene === 'chronoIntro' || ch6Names[cutscene.scene] ? (isPlayerReflecterUpgrade() ? 'REFLECTER 2.0' : 'REFLECTER') : 'GAMBLER';
@@ -3776,6 +3902,18 @@ function makeRobotActor(id) {
   return actor;
 }
 
+function routeBSceneDefaults() {
+  return {
+    darkWorld: false, chargeGlow: 0, pillarK: 0, knockT: 0, whistled: false, dropHold: 0, debris: null, standK: 0, omegaCards: null, burstT: 0, whiteK: 0, dgRandX: 0, dgFallY: 0, reflActor: null, robotActors: null, fadeT: 0, dropY: 0, dropLanded: false, secretScene: false, secretBox: false, secretRules: false, secretPowers: false, secretDg: null, secretDgX: 0, secretNotice: 0, candlesBurst: false, musicFading: false, boltK: 0, boltX: 0, kingMusicOn: false, shadowK: 0, followK: 0, dgScale: 1, magicK: 0, rebuildK: 0, fadeIn: 0, kingThunder: false, jesterPopped9: false, abnY9: 0, portalK: 0, swallowK: 0, jesterActor9: null, abnActor9: null, dgFixedX: null, chronoDownX: null, punchK: 0, punchT: 0, mouthK: 0, deflectT: 0, titan9: null, t9: 0, t9Debris: null, t9Green: null, dgY: 0, fistDone: false, fistT9: 0, dgLanded: false, bigChunks: null, crackK: 0, dustK: 0, eyeOpen: 0, ceilingDust: null, flicker: 0, babyCount: 2, shotNumber: 0, hitDone: false, barFrom: undefined, angryRoar: false, handsK: 0, titanIntro: false, titanBabies: false, titanShot: false, dgActor: null, dgX: 0, fistT: 0, wallDebris: null, wallBroken: false, eyeSound: false, dropT: 0, babyActor: null, chargeK: 0, goldBits: null, fired: false, abnMusicOn: false, abnDistortT: 0, abnActor: null, abnY: 0, abnT: 0, abnLeaveT: 0, impactT: 0, jumpY: 0, musicFade: 1, darkBolts: null, slowT: 0, trail: null, pillarWidth: 0, shockRings: null, debrisUp: null, rumbleT: 0, invert: 0, crater: false, darkShotScene: false, darkK: 0, darkBits: null, pillarT: 0, pillarFade: 1, pillarStarted: false, smokeT: 0, jesterOut: 0, shotPlayed: false, offPlayed: false, ceilingScene: false, knightDuel: false, knightDown: false, grabbed: false, ceilingBroken: false, liftT: 0, rubble: null, thudT: 0, memoryT: 0, glowT: 0, clashT: 0, hallDivine: null, jesterHall: false, overchargeScene: false, dragX: 40, knightAsideT: 0, jesterPopped: false, absorbT: 0, burstT: 0, bits: null, drain: 0, lightBits: null, impactRings: null, cracksHall: false, kx: 720, freeze: 0, fallT: 0, sparkLife: 1, stopPlayed: false, reflectScene: false, beamK: 0, beamBack: 0, chargeT: 0, downT: 0, darkT: 0, chronoHit: false, dashing: false, knightX: -200, dashT: 0, pushT: 0, pushFrom: 0, hitDone: false, impactFlash: 0, energy: null, cracks: false, barricadeUp: false, knightBlockT: 0, weaponT: 0, weaponFlash: 0, orderOutro: false, standUp: 0, hideT: 0, stunGlow: 0, stunPlayed: false, chronoFade: 0, blackKnightAlpha: 0, doorDust: null, angry: false, castle: false, walkHistory: null, orderActors: null, versusName: null, locFade: 0, hoodedGone: 0, knightGone: 0, sealPlayed: false, surgeGlow: 0, rescue: false, sphere: null, hydraFall: 0, hoodedX: 2000, knightsX: 2000, hoodedCome: false, knightsCome: false, rings: [], headsDown: 0, collapseT: 0, staggerT: 0, hydraHit: 0, deepGlow: 0, riverT: 0, riverFadeT: 0, knightSound: false, chronoLeft: false, divineIn: false, forest: false, forestEyes: 0, friendPeek: 0, friendLaughed: false, outro: false, ascendT: 0, darkMusic: false, divineActor: null, divineAlpha: 0, descendY: -1, skyGlint: 0, riftOpen: 0, riftSound: false,
+    routeB3: false, ritual: false, finale: false, sixth: false, ending: false, noVersus: false, midFight: false,
+    chronoFloat: false, fmShown: false, hideEnemy: false, lyingEnemy: false, gamblerActor: null, actorFacesLeft: false,
+    portal: 0, portalOut: 0, portalSound: false, summoned: [], puffs: [], sparks: [], shards: [], papers: [], runeFx: [], iceFx: [],
+    sealGlow: 0, sealCracked: false, corrupt: 0, dark: 0, eyes: 0, reveal: 0, resolveGlow: 0, glow: 0, flash: 0, whiteFlash: 0,
+    whiteOut: 0, black: 0, shock: 0, sphereR: 0, towerT: 0, clashY: 0, spheresIn: 0, redFlash: 0, finalTyped: 0, fireHand: 0,
+    powerGlow: 0, holdLine: -1, terrorT: 0, dust: null, reading: false, strobe: 0, fmBaseX: undefined, sphereSound: false, towerSound: false, laterFade: 0, riftGlow: 0, miniGlow: 0,
+  };
+}
+
 function ch6CutsceneBase(scene, lines, phase, extra = {}) {
   Object.assign(arcadeCutscene, {
     active: true,
@@ -3808,6 +3946,8 @@ function ch6CutsceneBase(scene, lines, phase, extra = {}) {
     darkIn: false,
     monsterIn: false,
     musicOn: false,
+    // (chapter 4B: the ritual, the guardians, the portals... stay in their own scene)
+    ...routeBSceneDefaults(),
     ...extra,
   });
   document.body.classList.add('arcade-cutscene');
@@ -6855,7 +6995,7 @@ function drawMilitaryStage() {
 function displayWinner(text, winner, loser) {
   ctx.fillStyle = 'rgba(0, 0, 0, 0.58)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  if (winner && loser) {
+  if (winner && loser && !(typeof drawSpecialVictoryScreen === 'function' && drawSpecialVictoryScreen(winner))) {
     drawVictoryTaunt(winner, loser);
   }
   victoryTitle.innerText = text;
@@ -6966,6 +7106,7 @@ function updateFightAchievements(winnerPlayer, fightTime) {
 }
 
 function finishFight() {
+  if (typeof cleanupAbnMenuFight === 'function') cleanupAbnMenuFight();
   // (the reset refills Light Warrior's health: keep who actually won)
   const healthAtEnd = [player1.health, player2.health];
   resetLightWarriorOmegaState(player1);
@@ -6998,6 +7139,7 @@ function finishFight() {
     else startKnightSetoIntro();
     return;
   }
+  if (typeof tryChronoChapterOutro === 'function' && tryChronoChapterOutro()) return;
   if (normalArcadeActive && player1.health > 0 && player2.health <= 0 && normalArcadeEnemiesRemaining > 0) {
     awardCoins(100);
     startNextNormalArcadeEnemy();
@@ -7039,6 +7181,9 @@ function finishFight() {
   }
 
   if (isJesterArcadeFight()) playJesterTrack('battle');
+
+  // (after the Flametomb of chapter 2B: "Fire Master se hizo más fuerte." before the victory screen)
+  if (typeof tryFireStronger === 'function' && tryFireStronger()) return;
 
   const fightTime = pendingFightTime !== null ? pendingFightTime : performance.now() - fightStartedAt;
   pendingFightTime = null;
@@ -7171,6 +7316,12 @@ function resetFight() {
   prepareOriginsCodeFighter(player2);
   prepareFrostFireFighter(player1);
   prepareFrostFireFighter(player2);
+  prepareObsidianFighter(player1);
+  prepareObsidianFighter(player2);
+  if (typeof prepareChronoMachine === 'function') {
+    prepareChronoMachine(player1);
+    prepareChronoMachine(player2);
+  }
   // HARDERCORE: the health from the last level comes along
   if (hardcoreRun.active && hardcoreRun.mode === 'harder' && normalArcadeActive && hardcoreRun.carry !== null) {
     player1.health = Math.max(1, Math.min(player1.maxHealth, hardcoreRun.carry));
@@ -7181,7 +7332,8 @@ function resetFight() {
   chronoOutroPlayed = false;
   ch6OutroPlayed = false;
   jesterLosePlayed = false;
-  reflecterBattleMusic.restart = true;
+  // (a song that already started in the intro keeps going into the fight, without starting over)
+  if (!arcadeCutscene.darkMusic) reflecterBattleMusic.restart = true;
   cancelJesterImpatience();
   pendingFightTime = null;
   jesterFinal.active = false;
@@ -7206,6 +7358,7 @@ function resetFight() {
 }
 
 function returnToMenu() {
+  if (typeof cleanupAbnMenuFight === 'function') cleanupAbnMenuFight();
   endScamChallenge();
   knightChallenge.active = false;
   shaolinChallenge.active = false;
@@ -7220,6 +7373,8 @@ function returnToMenu() {
   player1.youngGlasses = false;
   player1.youngScar = false;
   player1.frostFire = false;
+  player1.frostFire2 = false;
+  player1.obsidian = false;
   // (leaving after Flametomb: the music comes back)
   if (typeof setFlametombSilence === 'function') {
     flametomb.active = false;
@@ -7904,6 +8059,7 @@ const knightIntroBossHeroes = ['arcadeBoss', 'icedThug', 'iceMaster', 'scammer',
 function getKnightIntroHero() {
   if (isKnight(player1)) return 'knight';
   if (player1.secretVariant === 'frostFire') return 'fireMasterB';
+  if (player1.secretVariant === 'obsidian') return 'obsidian';
   if (knightIntroBossHeroes.includes(player1.secretVariant)) return player1.secretVariant;
   if (player1.secretVariant && (isArcadeBossFighter(player1) || isFactoryRobot(player1))) return null;
   return player1.characterType;
@@ -10287,7 +10443,15 @@ function drawKnightGuardFallFx(cutscene) {
     actor.attacksToTheRight = true;
     actor.isAttacking = false;
     // his eyes are on Knight while he talks (and on the farol when he leaves)
-    actor.eyeLook = 1;
+    // (in a "glance" line, he looks at you for a moment, with a smile)
+    const glanceLine = cutscene.lines[cutscene.lineIndex];
+    actor.eyeLook = glanceLine && glanceLine.glance ? 0 : 1;
+    if (glanceLine && glanceLine.glance) {
+      ctx.fillStyle = `rgba(255, 245, 157, ${0.6 + Math.sin(performance.now() / 150) * 0.3})`;
+      ctx.font = '900 16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('✦', cutscene.lwX + actor.width + 10, ground - actor.height - cutscene.lwY + 6);
+    }
     if (cutscene.lwY > 0) {
       ctx.fillStyle = 'rgba(255, 249, 196, 0.3)';
       ctx.fillRect(cutscene.lwX + actor.width / 2 - 28, 0, 56, actor.position.y + actor.height);
@@ -11412,10 +11576,11 @@ function updateKnightFarolTop(cutscene) {
     playSound('achievement');
     playSound('judgeOverdrive');
   }
-  if (frame >= 400) {
+  if (frame >= 460) {
     cutscene.phase = 'dialog';
     cutscene.frame = 0;
     cutscene.friends = null;
+    cutscene.omegaEpic = null;
     startCutsceneLine(cutscene.lineIndex + 1);
   }
 }
@@ -11521,8 +11686,8 @@ function drawKnightFarolTopFx(cutscene) {
       ctx.font = '900 20px Courier New, monospace';
       ctx.lineWidth = 5;
       ctx.fillStyle = '#ffffff';
-      ctx.strokeText('EL PODER DE LA AMISTAD', canvas.width / 2, 156);
-      ctx.fillText('EL PODER DE LA AMISTAD', canvas.width / 2, 156);
+      ctx.strokeText('LA LUZ DE ROBLEDAL', canvas.width / 2, 156);
+      ctx.fillText('LA LUZ DE ROBLEDAL', canvas.width / 2, 156);
       ctx.globalAlpha = 1;
       ctx.textAlign = 'left';
     }
@@ -13647,7 +13812,7 @@ function configureShaolinChallenge() {
 }
 
 function startShaolinIntro() {
-  const hero = isScammer(player1) ? 'scammer' : player1.secretVariant === 'frostFire' ? 'fireMasterB' : player1.characterType;
+  const hero = isScammer(player1) ? 'scammer' : player1.secretVariant === 'frostFire' ? 'fireMasterB' : player1.secretVariant === 'obsidian' ? 'obsidian' : player1.characterType;
   const lines = (shaolinIntroLines[hero] || shaolinIntroLines.generic).map((line) => ({ ...line, speaker: line.speaker === 'hero' ? getShaolinHeroSpeaker() : line.speaker }));
   // he is meditating when you arrive, stands up on his first words, and takes his stance at the end
   lines.unshift({ speaker: 'shang', text: '......嗡......(Ommm......)', meditate: true });

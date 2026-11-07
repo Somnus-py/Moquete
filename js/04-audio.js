@@ -476,12 +476,29 @@ function isScammerArcadeFight() {
 }
 
 function getReflecterBattleTrackKey() {
+  // (Abnormal came to visit: his theme comes with him)
+  if (typeof abnCameoMusicKey === 'function' && abnCameoMusicKey()) return 'rouxls';
+  // (the music chosen in the map select, for versus fights)
+  const versusChoice = typeof getVersusMusicChoice === 'function' ? getVersusMusicChoice() : null;
+  if (versusChoice) return versusChoice;
   if (scamChallenge.active) return scamChallenge.stage === 'neo' ? 'scamNeo' : 'scamNormal';
   // versus against (or as) NEO SCAMMER plays BIG SHOT
   if (!normalArcadeActive && (player1.secretVariant === 'neoScammer' || player2.secretVariant === 'neoScammer')) return 'scamNeo';
   if (normalArcadeActive && arcadeChapter === 'knight' && player2.secretVariant === 'chefBoss') return 'furiousChef';
   if (normalArcadeActive && arcadeChapter === 'origins') return getOriginsTrackKey();
   if (normalArcadeActive && arcadeChapter === 'gamblerB' && isNeoScammer(player2)) return 'scamNeo';
+  if (normalArcadeActive && arcadeChapter === 'reflecterB' && selectedNormalArcadeLevel === 4) return 'rouxls';
+  if (normalArcadeActive && arcadeChapter === 'reflecterB' && selectedNormalArcadeLevel === 5) return 'rouxlsExt';
+  if (normalArcadeActive && arcadeChapter === 'chrono' && selectedNormalArcadeLevel === 1) return 'rouxls';
+  if (normalArcadeActive && arcadeChapter === 'chrono' && (selectedNormalArcadeLevel === 2 || selectedNormalArcadeLevel === 3)) return 'forestBattle';
+  if (normalArcadeActive && arcadeChapter === 'chrono' && selectedNormalArcadeLevel === 4) return 'orderBattle';
+  if (normalArcadeActive && arcadeChapter === 'chrono' && selectedNormalArcadeLevel === 5) return 'chaosKing';
+  if (normalArcadeActive && arcadeChapter === 'chrono' && selectedNormalArcadeLevel === 6) return chronoCh.duelPhase ? 'desterrado' : 'jesterCastle';
+  if (normalArcadeActive && arcadeChapter === 'chrono' && selectedNormalArcadeLevel === 7) return 'worldRoaring';
+  if (normalArcadeActive && arcadeChapter === 'chrono' && selectedNormalArcadeLevel === 8) return 'guardian';
+  if (normalArcadeActive && arcadeChapter === 'chrono' && selectedNormalArcadeLevel === 9) return typeof omegaGuest !== 'undefined' && omegaGuest.silent ? null : typeof omegaGuest !== 'undefined' && omegaGuest.music ? 'needHand' : 'guardian';
+  if (normalArcadeActive && arcadeChapter === 'chrono' && selectedNormalArcadeLevel === 10) return 'rouxlsRemix';
+  if (normalArcadeActive && arcadeChapter === 'reflecterB' && selectedNormalArcadeLevel === 6) return getRouteB6TrackKey();
   if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 8) return 'worldRoaring';
   if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 7) return 'lightFinal';
   if (normalArcadeActive && arcadeChapter === 'knight' && selectedNormalArcadeLevel === 6) return 'lanternGuardian';
@@ -495,7 +512,7 @@ function getReflecterBattleTrackKey() {
 }
 
 function getReflecterBattleVolume(key) {
-  return (reflecterBattleTrackVolumes[key] || 0.5) * audioSettings.master * audioSettings.music * lightClashMusicFade;
+  return (reflecterBattleTrackVolumes[key] || 0.5) * audioSettings.master * audioSettings.music * lightClashMusicFade * (typeof getChronoMusicFade === 'function' ? getChronoMusicFade() : 1);
 }
 
 function stopReflecterBattleMusic() {
@@ -512,7 +529,9 @@ function updateReflecterBattleMusic() {
     return;
   }
   const midFightScene = arcadeCutscene.active && (ch7MidFightScenes.includes(arcadeCutscene.scene) || arcadeCutscene.scene === 'knightFarolTop' || arcadeCutscene.scene === 'knightRiftAngry');
-  const fighting = gameStarted && !gameOver && (!arcadeCutscene.active || midFightScene);
+  // (4B's last level: the music keeps going through its story scenes)
+  const finaleScene = (arcadeCutscene.active && arcadeCutscene.finale && arcadeCutscene.noVersus) || (arcadeCutscene.active && arcadeCutscene.darkMusic);
+  const fighting = gameStarted && !gameOver && (!arcadeCutscene.active || midFightScene || finaleScene);
   // Light Warrior arrives in the Bosque Lumina with his own cheerful theme
   const lightScene = arcadeCutscene.active && arcadeCutscene.scene === 'knightLight' && arcadeCutscene.musicOn;
   // the rescue at the foot of the farol: Light Warrior's theme
@@ -526,6 +545,12 @@ function updateReflecterBattleMusic() {
     const track = new Audio(reflecterBattleTrackSources[key]);
     track.preload = 'auto';
     track.loop = true;
+    if (typeof reflecterBattleTrackRates !== 'undefined' && reflecterBattleTrackRates[key]) {
+      track.preservesPitch = false;
+      track.mozPreservesPitch = false;
+      track.webkitPreservesPitch = false;
+      track.playbackRate = reflecterBattleTrackRates[key];
+    }
     reflecterBattleMusic.tracks[key] = track;
   }
   const track = reflecterBattleMusic.tracks[key];

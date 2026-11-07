@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Moquete</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -224,6 +227,16 @@
               <span class="preview-monkey-banana"></span>
             </span>
           </button>
+          <button type="button" class="character-option jophestar-option hidden" id="jophestarCharacterButton" disabled>
+            <span>Jophestar</span>
+            <span class="character-preview jophestar-preview" aria-hidden="true">
+              <span class="preview-joph-stand"></span>
+              <span class="preview-body"></span>
+              <span class="preview-joph-face"></span>
+              <span class="preview-joph-cap"></span>
+              <span class="preview-joph-chain"></span>
+            </span>
+          </button>
           <button type="button" class="character-option scammer-option hidden" id="scammerCharacterButton" disabled>
             <span>Scammer</span>
             <span class="character-preview scammer-preview" aria-hidden="true">
@@ -295,6 +308,30 @@
           <button type="button" class="character-option arcade-boss-option assembler-option hidden" id="assemblerCharacterButton">
             <span>Ensambladora Defectuosa</span>
             <span class="character-preview assembler-preview" aria-hidden="true">
+              <span class="preview-body"></span>
+              <span class="preview-robot-eyes"></span>
+              <span class="preview-robot-core"></span>
+            </span>
+          </button>
+          <button type="button" class="character-option darkworld-option darkworld-hydra-option hidden" id="darkworldHydraButton">
+            <span>Bestia de Tres Cabezas</span>
+            <span class="character-preview darkworld-preview darkworld-hydra-preview" aria-hidden="true"><i></i><i></i><i></i></span>
+          </button>
+          <button type="button" class="character-option darkworld-option darkworld-knight-option hidden" id="darkworldKnightButton">
+            <span>Caballero Negro</span>
+            <span class="character-preview darkworld-preview darkworld-knight-preview" aria-hidden="true"><i></i></span>
+          </button>
+          <button type="button" class="character-option darkworld-option darkworld-baby-option hidden" id="darkworldBabyButton">
+            <span>Bebe Titan</span>
+            <span class="character-preview darkworld-preview darkworld-baby-preview" aria-hidden="true"><i></i></span>
+          </button>
+          <button type="button" class="character-option darkworld-option darkworld-titan-option hidden" id="darkworldTitanButton" aria-label="Titan">
+            <span class="dw-glitch" data-text="T I T A N">? ? ?</span>
+            <span class="character-preview darkworld-preview darkworld-titan-preview" aria-hidden="true"><i class="dw-eye"></i><i class="dw-eye"></i><i class="dw-grin"></i></span>
+          </button>
+          <button type="button" class="character-option abnormal-option hidden" id="abnormalCharacterButton">
+            <span>Abnormal</span>
+            <span class="character-preview abnormal-preview" aria-hidden="true">
               <span class="preview-body"></span>
               <span class="preview-robot-eyes"></span>
               <span class="preview-robot-core"></span>
@@ -382,6 +419,14 @@
       <div class="menu-screen map-menu hidden" id="mapScreen">
         <h2>Elegir mapa</h2>
         <div class="map-grid">
+          <button type="button" class="map-option random-map" data-map="random" id="randomMapButton">
+            <span>Aleatorio</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail">?</span>
+            </span>
+          </button>
           <button type="button" class="map-option alpha-map" data-map="alpha">
             <span>Alpha</span>
             <span class="map-preview" aria-hidden="true">
@@ -630,6 +675,14 @@
               <span class="map-detail"></span>
             </span>
           </button>
+          <button type="button" class="map-option abnormal-roster-map hidden" data-map="abnormalArena" id="abnormalHallMapButton">
+            <span>Salon de Abnormal</span>
+            <span class="map-preview" aria-hidden="true">
+              <span class="map-sky"></span>
+              <span class="map-platform"></span>
+              <span class="map-detail"></span>
+            </span>
+          </button>
           <button type="button" class="map-option arcade-map-option factory-hidden-map hidden" data-map="factoryHidden">
             <span>Sector 0</span>
             <span class="map-preview" aria-hidden="true">
@@ -667,6 +720,10 @@
         <label class="setting-row" title="Devuelve la IA anterior del bot: mas simple y mas facil de vencer. Sirve si una parte del arcade se te hace imposible.">
           <span data-i18n="classicBot">Bot clasico (mas facil de vencer)</span>
           <input type="checkbox" id="classicBotToggle" />
+        </label>
+        <label class="setting-row" title="Muestra (o esconde) la letra de LIGHTFULL MAN en la pelea final del capitulo 5.">
+          <span>Letra de LIGHTFULL MAN (capitulo 5)</span>
+          <input type="checkbox" id="lightfullLyricsToggle" checked />
         </label>
         <label class="setting-row audio-setting">
           <span data-i18n="masterVolume">Volumen general</span>
@@ -1059,6 +1116,7 @@
                 <span data-chrono-req="machine">Tener la Maquina Rara</span>
                 <span data-chrono-req="secret">Superar el nivel secreto del capitulo 5</span>
                 <span data-chrono-req="flametomb">Aprender Flametomb</span>
+                <span data-chrono-req="use">Usar la Maquina Rara</span>
               </span>
             </span>
             <span class="arcade-chapter-badge chronoArcade-badge">PROXIMAMENTE</span>
@@ -1097,10 +1155,21 @@
             <span class="arcade-chapter-badge routeB-badge">RUTA B</span>
             <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
           </button>
-          <button type="button" class="arcade-chapter-option routeB-chapter-option routeB-locked" disabled>
+          <button type="button" class="arcade-chapter-option reflecterArcade-chapter-option routeB-chapter-option" id="reflecterArcadeBChapterButton">
             <span class="arcade-chapter-number">4B</span>
-            <span class="arcade-level-scene routeB-level-scene" aria-hidden="true"></span>
-            <span class="arcade-chapter-copy"><strong>???</strong><span>Todavia no.</span></span>
+            <span class="arcade-level-scene reflecterArcade-level-scene routeB-level-scene" aria-hidden="true">
+              <span class="arcade-level-player fireArcade-level-player routeB-frost-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss reflecterArcade-level-boss"></span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong data-routeb4-title>Una fabrica que no es la suya</strong>
+              <span data-routeb4-copy>Capitulo 4B. Fire Master despierta entre robots rotos. Alguien que maneja el tiempo podria ayudarlo... si no le tuviera tanto miedo.</span>
+            </span>
+            <span class="arcade-chapter-badge routeB-badge">RUTA B</span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
           </button>
           <button type="button" class="arcade-chapter-option routeB-chapter-option routeB-locked" disabled>
             <span class="arcade-chapter-number">5B</span>
@@ -1165,6 +1234,11 @@
             </button>
             <button type="button" class="arcade-level-option arcade-level-secret locked hidden" data-arcade-level="9" disabled>
               <span class="arcade-level-number">09</span>
+              <span class="arcade-level-copy"><strong>???</strong><span>Proximamente.</span></span>
+              <span class="arcade-level-status">BLOQUEADO</span>
+            </button>
+            <button type="button" class="arcade-level-option arcade-level-secret locked hidden" data-arcade-level="10" disabled>
+              <span class="arcade-level-number">??</span>
               <span class="arcade-level-copy"><strong>???</strong><span>Proximamente.</span></span>
               <span class="arcade-level-status">BLOQUEADO</span>
             </button>
@@ -1312,6 +1386,7 @@
             <span><strong>Light Warrior</strong> logro Heroe de la luz: gana con Normal contra bot dificil en menos de 20 segundos sin recibir dano.</span>
             <span><strong>Divine General Full Adapt</strong> codigo fulladapt: requiere haber desbloqueado a Divine General; sube a 250 vida y empieza con 6 a 10 adaptaciones contra los tipos principales de golpes, proyectiles y estados.</span>
             <span><strong>Scammer</strong> logro [[BIG SHOT]]: derrotalo en el nivel 5 del capitulo 3 de Arcade. 185 vida, 7 dano. Q oferta irresistible, F mercancia trucha desde cualquier lado, R tragamonedas del cielo. Cada estafa perjudica distinto segun el rival: a Gambler le roba suerte, a Normal le baja los stats, a Fire Master le recarga el fuego, a Tank le deja el blindaje de carton, a Chrono le atrasa el reloj, y asi con todos.</span>
+            <span class="hidden" id="jophestarGuideEntry"><strong>Jophestar</strong> el tipo que nadie invito: aparece si te quedas quieto en el menu hasta que algo amenazante (ゴ) se asoma, y atrapas cada ゴ antes de que se desvanezca. 150 vida, 8 dano. Q invoca su Stand (un fantasma de ropa bizarra, de un color distinto cada vez). Con el Stand: F rafaga ORA ORA, R tiempo detenido. Sin el Stand: F moneda, R "Yare yare" (el rival pega menos). Se mueve en el tiempo detenido de Chrono, y si ambos lo detienen... chocan.</span>
             <span><strong>Monkei</strong> aparece solo mientras algun personaje tenga exactamente 67% de winrate en Estadisticas. Si ese porcentaje cambia, vuelve a bloquearse. 167 vida, 6.7 dano, Q pistola banana, F cascara de banana que hace resbalar, R lluvia de cocos.</span>
             <span><strong>Divine General</strong> desafio de los 7 sellos: gana Perfect Duel, Reflectado, Casino Royale, Mana Meltdown, Choque de Titanes, Ejecutor temporal y Dominio absoluto.</span>
           </div>
@@ -1430,17 +1505,17 @@
             <span>Win with Chrono after dealing damage during Time Stop.</span>
           </div>
           <div class="achievement-card" data-achievement="absoluteDominance">
-            <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
+            <span class="achievement-icon achievement-icon-dominance" aria-hidden="true"></span>
             <strong>Absolute Dominance</strong>
             <span>Win against a hard bot in under 25 seconds without taking damage.</span>
           </div>
           <div class="achievement-card" data-achievement="heroOfLight">
-            <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
+            <span class="achievement-icon achievement-icon-herolight" aria-hidden="true"></span>
             <strong>Heroe de la luz</strong>
             <span>Unlock Light Warrior: win with Normal against a hard bot in under 20 seconds without taking damage.</span>
           </div>
           <div class="achievement-card" data-achievement="ghostUnlocked">
-            <span class="achievement-icon achievement-icon-dark" aria-hidden="true"></span>
+            <span class="achievement-icon achievement-icon-ghostroom" aria-hidden="true"></span>
             <strong>Dark Room Wraith</strong>
             <span>Unlock Ghost after playing a match in Dark Room.</span>
           </div>
@@ -1455,7 +1530,7 @@
             <span>Win Mana Meltdown with Fire Master in under 45 seconds and with 80+ health.</span>
           </div>
           <div class="achievement-card" data-achievement="normalArcadeCompleted">
-            <span class="achievement-icon achievement-icon-flawless" aria-hidden="true"></span>
+            <span class="achievement-icon achievement-icon-normalchallenge" aria-hidden="true"></span>
             <strong>El desafio de Normal</strong>
             <span>Completa el capitulo de Normal en el modo Arcade.</span>
           </div>
@@ -1485,7 +1560,7 @@
             <span>Derrota a Shadow Jester y completa el capitulo de Gambler en el modo Arcade. El show termino... por ahora.</span>
           </div>
           <div class="achievement-card" data-achievement="originsCompleted">
-            <span class="achievement-icon achievement-icon-bigshot" aria-hidden="true"></span>
+            <span class="achievement-icon achievement-icon-entrepreneur" aria-hidden="true"></span>
             <strong>LOS COMIENZOS DE UN [[EMPRENDEDOR]]</strong>
             <span>Completa el capitulo especial de Scammer. Asi empezo todo: con agua mojada y un contenedor muy acogedor.</span>
           </div>
@@ -1495,7 +1570,7 @@
             <span>Derrota a Scammer en el capitulo 3 de Arcade. Ahora es TU oportunidad de jugar con el.</span>
           </div>
           <div class="achievement-card" data-achievement="fireArcadeCompleted">
-            <span class="achievement-icon achievement-icon-thaw" aria-hidden="true"></span>
+            <span class="achievement-icon achievement-icon-thawtotal" aria-hidden="true"></span>
             <strong>Deshielo total</strong>
             <span>Completa el capitulo de Fire Master en el modo Arcade derrotando a Ice Master.</span>
           </div>
@@ -1725,7 +1800,75 @@
       <div class="menu-screen info-menu hidden" id="infoScreen">
         <h2 data-i18n="information">Changelog</h2>
         <div class="guide-section changelog-new">
-          <h3>Actualizacion 3.6</h3>
+          <h3>Actualizacion 4.0</h3>
+          <div class="character-guide">
+            <span><strong>La actualizacion mas grande hasta ahora:</strong> el capitulo 6 completo, un capitulo especial escondido, un modo de juego nuevo, skins, trofeos y personajes nuevos.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Capitulo 6: La hora oscura de Chrono</h3>
+          <div class="character-guide">
+            <span><strong>Ya se puede jugar</strong> un bosque de hojas rojas, un castillo, la Orden Sombria, un caballero negro, un titan y una persecucion por un castillo que se derrumba. Al final, alguien con corona espera.</span>
+            <span><strong>Shadow Jester</strong> no se cansa nunca. Ya vas a ver.</span>
+            <span><strong>???</strong> un nivel secreto con una sala de esgrima muy elegante. Su dueño escribe las reglas... literalmente.</span>
+            <span><strong>Omegarius</strong> si jugaste cierto nivel secreto del capitulo 4, el nivel 9 cambia.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Capitulo especial: ???</h3>
+          <div class="character-guide">
+            <span><strong>Una puerta negra</strong> aparece en el menu para quien tenga la llave correcta. Detras hay un bosque oscuro, seis niveles, niebla, un golem antiguo... y una cosecha que mejor no ver de cerca.</span>
+            <span><strong>Una pista</strong> una llave oxidada no abre nada... a menos que alguien la lleve a otro tiempo.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Modo de juego: Box Attack Rush</h3>
+          <div class="character-guide">
+            <span><strong>Todos los box attacks</strong> que venciste en el Arcade, uno detras de otro, con nota al final.</span>
+            <span><strong>Modificadores</strong> para hacerlos mas dificiles (o mas raros), desde la misma pantalla.</span>
+            <span><strong>Cinco boxes exclusivos</strong> que solo existen en este modo. Cada uno desbloquea el siguiente. Uno tiene su propia musica... y tararea a las 3 de la tarde.</span>
+            <span><strong>Tutorial mejorado</strong> consejos, teclas en pantalla y un objetivo claro.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Personajes</h3>
+          <div class="character-guide">
+            <span><strong>???</strong> alguien muy distinguido, que prefiere escribir sus propias reglas, podria terminar peleando de tu lado... si antes le ganas en su propia casa. Jo jo.</span>
+            <span><strong>Codigo ???</strong> despues del capitulo 6, algunos que viven del otro lado de la grieta podrian cruzar. Solo hace falta la palabra justa.</span>
+            <span><strong>Chrono</strong> su Campo lento se ve y funciona mejor.</span>
+            <span><strong>Capitulo 5</strong> el trato de la Orden Sombria ahora se puede rechazar. La transformacion de Omega Light Warrior es mas grande, y su tema final tiene letra en pantalla.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>El Vestidor</h3>
+          <div class="character-guide">
+            <span><strong>Skins</strong> un nuevo articulo en la tienda de Scammer para cambiarle la ropa a los luchadores: Normal 2.0, Maestro Igneo, Acorazado MK-II, Forajido, Relojero, Chrono HD, Reflecter HD, Reflecter de Bronce, Archimago, High Roller, Paladin Solar, General Eclipse, Fantasma Victoriano, Calabaza Errante, Monkei Pirata, Switcher Mecha, Caballero de Escarcha y Mercader de Gabardina.</span>
+            <span><strong>Las habilidades cambian de color</strong> con cada skin (sin cambiar su fuerza).</span>
+            <span><strong>Los vendedores se dan cuenta</strong> si vestis a Scammer o a Chrono, van a tener algo que decir en sus tiendas.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Tienda y menu</h3>
+          <div class="character-guide">
+            <span><strong>Trofeos de capitulo</strong> un podio y una estatua por cada capitulo del Arcade, que mejoran con los modos dificiles.</span>
+            <span><strong>Mercaderia de terror</strong> un caldero, un fantasma en frasco, polvo de fantasma, una llave oxidada... y mas.</span>
+            <span><strong>Tres libros nuevos</strong> uno escrito por Monkei (con crayones), la segunda parte de la guia del mundo oscuro y un archivo de robots.</span>
+            <span><strong>Una maquina de arcade</strong> en el menu. Si la miras de cerca, se ve otro mundo del otro lado de la pantalla. Algunos ya le dejaron notas.</span>
+            <span><strong>Mapa aleatorio</strong> y musica de fondo elegible para las peleas versus.</span>
+            <span><strong>Menu ordenado</strong> y retratos nuevos para los personajes del Arcade.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Otros cambios</h3>
+          <div class="character-guide">
+            <span><strong>Scammer tiene memoria</strong> si rebobinaste la Maquina Rara en el Mercado de Tempus y te hiciste millonario, cada pelea contra el te va a costar. Aunque ganes.</span>
+            <span><strong>Ajustes</strong> una opcion para esconder la letra de LIGHTFULL MAN en el capitulo 5. A cierto alguien le va a importar.</span>
+            <span><strong>Consola de debug</strong> (codigo cheater) con pestañas, mas herramientas y mas caos.</span>
+            <span><strong>Rendimiento</strong> los efectos de las skins ya no traban el juego, y correcciones varias.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Actualizacion 3.6 (anterior)</h3>
           <div class="character-guide">
             <span><strong>Mercado de Tempus</strong> una segunda tienda, atendida por alguien que siempre llega puntual. Productos exclusivos y un servicio muy... temporal. Se abre despues de los niveles 5 y 6 del capitulo 4.</span>
             <span><strong>Codigos nuevos</strong> algunos tienen que ver con cierto capitulo especial. Una pista: emergencias, amistades y vendedores.</span>
@@ -1734,14 +1877,14 @@
             <span><strong>Otros</strong> nuevos dialogos en la tienda de Scammer (si te pasaste de listo) y correcciones varias.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
-          <h3>Actualizacion 3.5</h3>
+        <div class="guide-section">
+          <h3>Actualizacion 3.5 (anterior)</h3>
           <div class="character-guide">
             <span><strong>Un capitulo especial escondido, libros, magia prohibida, controles para celular</strong> y algunas cosas que es mejor descubrir solo.</span>
             <span><em>Algo cambio en el Arcade. Si lo notaste... ya sabes de que hablamos.</em></span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Capitulo especial: ???</h3>
           <div class="character-guide">
             <span><strong>Antes del contenedor</strong> la historia de como alguien muy conocido empezo su "negocio". Dicen que la entrada esta escondida en un libro... en un lugar que nadie mira dos veces.</span>
@@ -1749,20 +1892,20 @@
             <span><strong>???</strong> un nivel secreto para quien lo supere sin caer.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Arcade: Ruta ???</h3>
           <div class="character-guide">
             <span><strong>A y ...</strong> hay quien dice que la seleccion de capitulos tiene otra cara. Nadie sabe bien como se abre.</span>
             <span><strong>Una pista</strong> algunas promesas no deberian romperse.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Capitulo 6: en construccion</h3>
           <div class="character-guide">
             <span><strong>La hora oscura de Chrono</strong> todavia no se puede jugar, pero ya se pueden ver sus requisitos en la seleccion de capitulos. Mejor ir preparandose.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Tienda de Scammer</h3>
           <div class="character-guide">
             <span><strong>Libro de Hechizos</strong> la magia de varios luchadores, pagina por pagina... y una segunda parte con ideas para improvisar. Algunas paginas estan borrosas. Otras, encadenadas. Y una esta caliente.</span>
@@ -1770,20 +1913,20 @@
             <span><strong>Estante de Biblioteca</strong> para tener todos tus libros juntos en el menu.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Fire Master</h3>
           <div class="character-guide">
             <span><strong>???</strong> existe una tercera habilidad. Muy pocos saben como aprenderla, y quienes la usaron no quieren hablar de eso.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Celulares y tablets</h3>
           <div class="character-guide">
             <span><strong>Controles tactiles</strong> joystick para moverse y botones de golpe, golpe fuerte, salto y habilidades (Q, F y R; los combos se hacen apretando dos a la vez). Arriba: ENTER para los dialogos, ESC y MENU para salir de la pelea.</span>
             <span><strong>Pantalla completa</strong> en el celular el juego ocupa toda la pantalla, sin bordes grises. Se juega con el celular acostado.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Otros cambios</h3>
           <div class="character-guide">
             <span><strong>Capitulos 3, 4 y 5</strong> nuevas portadas en la seleccion de capitulos.</span>
@@ -1791,7 +1934,7 @@
           </div>
         </div>
         <div class="guide-section">
-          <h3>Actualizacion 3.0</h3>
+          <h3>Actualizacion 3.0 (anterior)</h3>
           <div class="character-guide">
             <span><strong>El final del capitulo de Reflecter, el capitulo 5 de Knight completo, el modo Hardcore, algun que otro secreto</strong> y una tienda de Scammer mas peligrosa (y mas rara) que nunca.</span>
             <span><em>"Y la 2.6?" Se convirtio en la 3.0 mientras nadie miraba.</em></span>
@@ -2165,5 +2308,7 @@
   <script src="js/10-controls-bot-menus.js"></script>
   <script src="js/11-touch-controls.js"></script>
   <script src="js/12-tempus-market.js"></script>
+  <script src="js/13-chrono-chapter.js"></script>
+  <script src="js/14-jophestar.js"></script>
 </body>
 </html>

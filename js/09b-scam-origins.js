@@ -330,6 +330,10 @@ function startOriginsIntro() {
 // level 1: Scammer has nothing, gets splashed by the fountain... and has his million-coin idea
 function updateOriginsIntro(cutscene) {
   if (cutscene.phase !== 'dialog') return;
+  if (cutscene.darkWorld) {
+    updateDarkWorldIntro(cutscene);
+    return;
+  }
   if (cutscene.routeB3) {
     updateRouteB3Intro(cutscene);
     return;
@@ -422,6 +426,10 @@ function updateOriginsPuffs(cutscene) {
 
 function drawOriginsIntroFx(cutscene) {
   const time = performance.now() / 1000;
+  if (cutscene.darkWorld) {
+    drawDarkWorldIntroFx(cutscene);
+    return;
+  }
   if (cutscene.routeB3) {
     drawRouteB3IntroFx(cutscene);
     return;
@@ -1984,6 +1992,31 @@ function drawOriginsStage() {
   if (selectedMap === 'originsNight') return drawOriginsNightStage(), true;
   if (selectedMap === 'originsCastle') return drawOriginsCastleStage(), true;
   if (selectedMap === 'cobaltEdge') return drawCobaltEdgeStage(), true;
+  if (selectedMap === 'sorcererLibrary') return drawSorcererLibraryStage(), true;
+  if (selectedMap === 'burningLibrary') return drawBurningLibraryStage(), true;
+  if (selectedMap === 'darkWorld') return drawDarkWorldStage(), true;
+  if (selectedMap === 'redForest') return drawForestStage('red'), true;
+  if (selectedMap === 'violetForest') return drawForestStage('violet'), true;
+  if (selectedMap === 'castleGate') return drawCastleGateStage(), true;
+  if (selectedMap === 'castleClocks') return drawCastleClocksStage(), true;
+  if (selectedMap === 'castleMirrors') return drawCastleMirrorsStage(), true;
+  if (selectedMap === 'castleDining') return drawCastleDiningStage(), true;
+  if (selectedMap === 'castleGallery') return drawCastleGalleryStage(), true;
+  if (selectedMap === 'castleArmory') return drawCastleArmoryStage(), true;
+  if (selectedMap === 'castleStairs') return drawCastleStairsStage(), true;
+  if (selectedMap === 'castleHall') return drawCastleHallStage(), true;
+  if (selectedMap === 'castleThroneHall') return drawCastleThroneHallStage(), true;
+  if (selectedMap === 'castleRoof') return drawCastleRoofStage(), true;
+  if (selectedMap === 'castleRuins') return drawCastleRuinsStage(), true;
+  if (selectedMap === 'kingThrone') return drawKingThroneStage(), true;
+  if (selectedMap === 'castleOutskirts') return drawCastleOutskirtsStage(), true;
+  if (selectedMap === 'abnormalArena') return drawAbnormalArenaStage(), true;
+  if (selectedMap === 'abnormalMenu') return drawAbnormalMenuStage(), true;
+  if (selectedMap === 'gameMenu') return drawGameMenuStage(), true;
+  if (selectedMap === 'lightWorld') return drawLightWorldStage(), true;
+  if (selectedMap === 'tempusLobby') return drawTempusLobbyStage(), true;
+  if (selectedMap === 'abnormalUpside') return drawAbnormalUpsideStage(), true;
+  if (selectedMap === 'orderChamber') return drawOrderChamberStage(), true;
   if (selectedMap === 'originsRooftopsDark') return drawOriginsRooftopsDarkStage(), true;
   if (selectedMap === 'originsAlleyDark') return drawGamblerAlleyStage(1.9, 0), drawOriginsAlleyDecay(), true;
   return false;
@@ -4102,6 +4135,7 @@ function unlockOriginsCode(code) {
 
 function lockOriginsCodes() {
   if (typeof lockFrostFireCode === 'function') lockFrostFireCode();
+  if (typeof lockObsidianCode === 'function') lockObsidianCode();
   Object.keys(originsCodes).forEach((code) => {
     originsCodes[code] = false;
   });
