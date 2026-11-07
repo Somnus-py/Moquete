@@ -427,3 +427,35 @@ function setupTouchSuperFireMaster() {
 }
 
 setupTouchSuperFireMaster();
+
+// ---------- screens on top of the game (results, books, the wardrobe...) on phones ----------
+// The touch controls sit above everything: while one of those screens is open they step aside,
+// and if the screen is taller than the phone it becomes scrollable (its buttons were out of reach).
+const touchOverlaySkip = ['game-shell', 'touch-controls', 'touch-rotate', 'touch-fullscreen', 'achievement-toast'];
+
+function findTouchBlockingOverlays() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  return Array.from(document.body.children).filter((element) => {
+    if (element.tagName === 'SCRIPT' || element.tagName === 'CANVAS' || element.classList.contains('hidden')) return false;
+    if (touchOverlaySkip.some((name) => element.classList.contains(name)) || element.id === 'achievementToast') return false;
+    const style = getComputedStyle(element);
+    // (no opacity check: a screen that is still fading in already counts)
+    if (style.position !== 'fixed' || style.display === 'none' || style.visibility === 'hidden') return false;
+    const box = element.getBoundingClientRect();
+    return box.width >= width * 0.8 && box.height >= height * 0.8;
+  });
+}
+
+function syncTouchOverlays() {
+  if (!document.body.classList.contains('touch-mode')) return;
+  const overlays = findTouchBlockingOverlays();
+  document.body.classList.toggle('touch-overlay-open', overlays.length > 0);
+  overlays.forEach((overlay) => {
+    // (only when it does not fit: a screen that fits keeps its own layout)
+    const tooTall = Array.from(overlay.children).some((child) => child.getBoundingClientRect().height > overlay.clientHeight - 8);
+    if (tooTall || overlay.scrollHeight > overlay.clientHeight + 4) overlay.classList.add('touch-scroll');
+  });
+}
+
+setInterval(syncTouchOverlays, 250);

@@ -12871,3 +12871,34 @@ body.forest-waiting .health-panel.right { opacity: 0.25; filter: grayscale(1); }
 .stats-row.joph-locked-row .fighter-portrait { filter: brightness(0) drop-shadow(0 0 4px #7e57c2); }
 .stats-row.joph-locked-row .stats-character b { color: #9575cd; }
 .joph-stats-hint { display: block; font-size: 11px; color: #b39ddb; font-style: italic; }
+
+/* ---------- phones: screens on top of the game can always be closed ---------- */
+body.touch-mode.touch-overlay-open .touch-controls {
+  display: none !important;
+}
+
+/* a screen taller than the phone: it scrolls, and its panel starts at the top instead of being cut */
+body.touch-mode .touch-scroll {
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  touch-action: pan-y !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+body.touch-mode .touch-scroll > * {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  flex-shrink: 0;
+}
+
+body.touch-mode .touch-scroll * {
+  touch-action: pan-y;
+}
+
+/* the box rush results, smaller on short screens */
+@media (max-height: 620px) {
+  .br-results-panel { gap: 6px; padding: 14px 18px; }
+  .br-big-grade { font-size: 76px !important; }
+  .br-new-best { margin: 0; }
+}
