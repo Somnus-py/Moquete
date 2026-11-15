@@ -3564,8 +3564,9 @@ mainMenu.addEventListener('pointerover', (event) => {
 });
 
 playButton.addEventListener('click', openCharacterSelect);
-oldDaysPlayButton.addEventListener('click', startOldDaysGame);
-oldDaysBackButton.addEventListener('click', closeOldDays);
+// (by name: the Alpha edition replaces them later)
+oldDaysPlayButton.addEventListener('click', () => startOldDaysGame());
+oldDaysBackButton.addEventListener('click', () => closeOldDays());
 normalCharacterButton.addEventListener('click', () => selectCharacter('normal'));
 lightWarriorCharacterButton.addEventListener('click', () => selectCharacter('lightWarrior'));
 fireMasterCharacterButton.addEventListener('click', () => selectCharacter('fireMaster'));
@@ -3626,7 +3627,12 @@ function startArcadeLevel(level) {
     normalArcadeActive = true;
     if (isArcadeLevelComingSoon(selectedNormalArcadeLevel)) return;
     player1.setCharacterType(getArcadeChapterHero());
-    if (arcadeChapter === 'knight') player1.setCharacterType('normal', 'knight');
+    if (arcadeChapter === 'knight' || arcadeChapter === 'knightB') player1.setCharacterType('normal', 'knight');
+    // (entering 5B from the menu always starts in the forest)
+    if (arcadeChapter === 'knightB' && typeof knightBState !== 'undefined') knightBState.atBridge = false;
+    if (arcadeChapter === 'knightB' && typeof knightB6 !== 'undefined') Object.assign(knightB6, { phase: 'travel', screen: 0, fade: 0, entering: 0 });
+    if (arcadeChapter === 'knightB' && typeof knightB7 !== 'undefined') knightB7.phase = 'intro';
+    if (arcadeChapter === 'knightB' && typeof knightB8 !== 'undefined') Object.assign(knightB8, { phase: 'intro', checkpoint: 'p1' });
     if (arcadeChapter === 'origins') makeYoungScammer(player1);
     player1.frostFire = false;
     player1.frostFire2 = false;
@@ -3656,6 +3662,12 @@ function startArcadeLevel(level) {
     if (arcadeChapter === 'origins') startOriginsIntro();
     if (arcadeChapter === 'gamblerB') startRouteB3Intro();
     if (arcadeChapter === 'reflecterB') startRouteB4Intro();
+    if (arcadeChapter === 'knightB' && selectedNormalArcadeLevel === 1 && typeof startKnightBForestIntro === 'function') startKnightBForestIntro();
+    if (arcadeChapter === 'knightB' && selectedNormalArcadeLevel >= 2 && selectedNormalArcadeLevel <= 5 && typeof startKnightBRobledal === 'function') startKnightBRobledal();
+    if (arcadeChapter === 'knightB' && selectedNormalArcadeLevel === 6 && typeof startKnightB6Intro === 'function') startKnightB6Intro();
+    if (arcadeChapter === 'knightB' && selectedNormalArcadeLevel === 7 && typeof startKnightB7Intro === 'function') startKnightB7Intro();
+    if (arcadeChapter === 'knightB' && selectedNormalArcadeLevel === 8 && typeof startKnightB8Intro === 'function') startKnightB8Intro();
+    if (arcadeChapter === 'knightB' && selectedNormalArcadeLevel === 9 && typeof startKnightB9Scene === 'function') startKnightB9Scene();
     if (arcadeChapter === 'chrono') startChronoChapterIntro();
     if (typeof queueAbnormalCameo === 'function') queueAbnormalCameo();
 }

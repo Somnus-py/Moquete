@@ -1205,7 +1205,7 @@ function handleMenuSecretInput(event) {
   } else if (normalizedSecretBuffer.endsWith('codex')) {
     menuSecretBuffer = '';
     unlockCodexOpinion();
-  } else if (normalizedSecretBuffer.endsWith('old')) {
+  } else if (normalizedSecretBuffer.endsWith('alpha')) {
     menuSecretBuffer = '';
     openOldDays();
   } else if (normalizedSecretBuffer.endsWith('blind')) {
@@ -7620,9 +7620,21 @@ function updateDodgeItems() {
   const soulRadius = Math.min(soul.width, soul.height) * 0.45;
   const touches = (x, y, r) => Math.hypot(center.x - x, center.y - y) < r + soulRadius;
   const hit = (item) => {
-    if (item.blue && round.dash.timer > 0) parryDodgeItem(item);
-    else hurtDodgeTarget(item.dmgScale || 1);
+    if (item.parried) return;
+    if (item.blue && round.dash.timer > 0) {
+      item.parried = true;
+      parryDodgeItem(item);
+    } else hurtDodgeTarget(item.dmgScale || 1);
   };
+  if (round.config.parryAssist && round.dash.timer > 0) {
+    round.items.forEach((item) => {
+      if (!item.blue || item.parried || item.warn > 0 || item.x === undefined || item.life <= 0) return;
+      if (Math.hypot(center.x - item.x, center.y - item.y) < (item.r || 10) + soulRadius + 16) {
+        item.parried = true;
+        parryDodgeItem(item);
+      }
+    });
+  }
   round.items.forEach((item) => {
     item.life -= 1;
     if (item.warn > 0) {
@@ -7809,12 +7821,32 @@ function moveDodgeSoul() {
           dash.aimX = moveX / length;
           dash.aimY = moveY / length;
           dash.manualAim = true;
+          if (round.config.parryAssist) {
+            // precision: if a parryable attack is close to where you aim, the aim snaps onto it
+            const center = getDodgeSoulCenter();
+            let best = null;
+            round.items.forEach((item) => {
+              if (!item.blue || item.parried || item.warn > 0 || item.x === undefined) return;
+              const dx = item.x - center.x;
+              const dy = item.y - center.y;
+              const distance = Math.hypot(dx, dy);
+              if (distance < 1 || distance > 260) return;
+              const cos = (dx * dash.aimX + dy * dash.aimY) / distance;
+              if (cos < 0.82) return;
+              if (!best || distance < best.distance) best = { item, distance };
+            });
+            dash.aimTarget = best ? best.item : null;
+            if (best) {
+              dash.aimX = (best.item.x - center.x) / best.distance;
+              dash.aimY = (best.item.y - center.y) / best.distance;
+            }
+          }
         } else if (!dash.manualAim) {
           // no direction pressed: it aims by itself at the nearest blue attack
           const center = getDodgeSoulCenter();
           let best = null;
           round.items.forEach((item) => {
-            if (!item.blue || item.warn > 0 || item.x === undefined) return;
+            if (!item.blue || item.parried || (round.config.hiddenParry && !round.config.parryAssist) || item.warn > 0 || item.x === undefined) return;
             const distance = Math.hypot(item.x - center.x, item.y - center.y);
             if (!best || distance < best.distance) best = { item, distance };
           });
@@ -7835,6 +7867,8 @@ function moveDodgeSoul() {
           dash.timer = 1;
           dash.dirX = dash.aimX;
           dash.dirY = dash.aimY;
+          dash.lock = round.config.parryAssist ? dash.aimTarget : null;
+          dash.extensions = 0;
           dash.aimTarget = null;
           playSound('judgeOverdrive');
         }
@@ -7845,11 +7879,30 @@ function moveDodgeSoul() {
     }
     if (dash.timer > 0) {
       dash.timer += 1;
+      const lock = dash.lock;
+      if (lock && !lock.parried && lock.life > 0 && lock.x !== undefined) {
+        const center = getDodgeSoulCenter();
+        const dx = lock.x - center.x;
+        const dy = lock.y - center.y;
+        const distance = Math.hypot(dx, dy) || 1;
+        dash.dirX += (dx / distance - dash.dirX) * 0.45;
+        dash.dirY += (dy / distance - dash.dirY) * 0.45;
+        const norm = Math.hypot(dash.dirX, dash.dirY) || 1;
+        dash.dirX /= norm;
+        dash.dirY /= norm;
+        if (dash.timer === lightBoxDashFrames && distance < 120 && (dash.extensions || 0) < 2) {
+          dash.timer -= 5;
+          dash.extensions = (dash.extensions || 0) + 1;
+        }
+      } else {
+        dash.lock = null;
+      }
       soul.x += dash.dirX * lightBoxDashSpeed;
       soul.y += dash.dirY * lightBoxDashSpeed;
       dash.trail.push({ x: soul.x + soul.width / 2, y: soul.y + soul.height / 2, life: 10 });
       if (dash.timer > lightBoxDashFrames) {
         dash.timer = 0;
+        dash.lock = null;
         dash.cooldown = lightBoxDashCooldown;
       }
     } else {
@@ -8111,6 +8164,11 @@ function drawDodgeItem(item) {
   ctx.restore();
 }
 
+// (the charged dash is blue... unless the theme gives it another color)
+function getDodgeDashRgb() {
+  return (dodgeRound.config && dodgeRound.config.dashColor) || '64, 196, 255';
+}
+
 function drawDodgeSoul() {
   const round = dodgeRound;
   if (round.invulnerable > 0 && Math.floor(round.invulnerable / 4) % 2 === 0) return;
@@ -8121,14 +8179,14 @@ function drawDodgeSoul() {
   ctx.save();
   if (round.config.charged) {
     round.dash.trail.forEach((ghost) => {
-      ctx.fillStyle = `rgba(64, 196, 255, ${ghost.life / 22})`;
+      ctx.fillStyle = `rgba(${getDodgeDashRgb()}, ${ghost.life / 22})`;
       ctx.beginPath();
       ctx.arc(ghost.x, ghost.y, 14, 0, Math.PI * 2);
       ctx.fill();
     });
     // the charge ring: full when the dash is ready
     const ready = round.dash.cooldown === 0 && round.dash.timer === 0;
-    ctx.strokeStyle = ready ? 'rgba(64, 196, 255, 0.9)' : 'rgba(64, 196, 255, 0.3)';
+    ctx.strokeStyle = ready ? `rgba(${getDodgeDashRgb()}, 0.9)` : `rgba(${getDodgeDashRgb()}, 0.3)`;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(center.x, center.y, 22, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - round.dash.cooldown / lightBoxDashCooldown));
@@ -8138,7 +8196,7 @@ function drawDodgeSoul() {
     // the aim: an arrow where the dash will go (and a mark on the blue attack it locked on)
     const dash = round.dash;
     const fill = Math.min(1, dash.charge / 20);
-    ctx.strokeStyle = `rgba(64, 196, 255, ${0.5 + fill * 0.5})`;
+    ctx.strokeStyle = `rgba(${getDodgeDashRgb()}, ${0.5 + fill * 0.5})`;
     ctx.fillStyle = ctx.strokeStyle;
     ctx.lineWidth = 3;
     const tipX = center.x + dash.aimX * 80;
@@ -8157,7 +8215,7 @@ function drawDodgeSoul() {
     ctx.closePath();
     ctx.fill();
     if (dash.aimTarget) {
-      ctx.strokeStyle = '#40c4ff';
+      ctx.strokeStyle = `rgb(${getDodgeDashRgb()})`;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(dash.aimTarget.x, dash.aimTarget.y, (dash.aimTarget.r || 10) + 9 + Math.sin(round.age / 3) * 2, 0, Math.PI * 2);
@@ -8176,7 +8234,7 @@ function drawDodgeSoul() {
     ctx.arc(center.x, center.y, 40 - round.healFx / 3, 0, Math.PI * 2);
     ctx.fill();
   }
-  ctx.fillStyle = round.dash.timer > 0 ? 'rgba(64, 196, 255, 0.45)' : 'rgba(144, 202, 249, 0.18)';
+  ctx.fillStyle = round.dash.timer > 0 ? `rgba(${getDodgeDashRgb()}, 0.45)` : round.config.dashColor ? `rgba(${getDodgeDashRgb()}, 0.16)` : 'rgba(144, 202, 249, 0.18)';
   ctx.beginPath();
   ctx.arc(center.x, center.y, 24, 0, Math.PI * 2);
   ctx.fill();
@@ -8307,7 +8365,7 @@ function advanceDodgePhase(round, config) {
         round.items = [];
         round.dash.charging = false;
         const cleared = round.hits === 0 ? 'SIN UN RASGUÑO!' : 'RONDA SUPERADA!';
-        if (config.charged) {
+        if (config.charged && !config.noTargetHeal) {
           // the light of the spirits heals Knight
           const target = round.target;
           const before = target.health;
@@ -8376,7 +8434,7 @@ function drawDodgeRound(round, config) {
   ctx.rect(box.x - 2, box.y - 2, box.width + 4, box.height + 4);
   ctx.clip();
   if (round.dash.charging) {
-    ctx.fillStyle = 'rgba(64, 196, 255, 0.1)';
+    ctx.fillStyle = `rgba(${getDodgeDashRgb()}, 0.1)`;
     ctx.fillRect(box.x, box.y, box.width, box.height);
   }
   round.items.forEach(drawDodgeItem);
@@ -8395,7 +8453,7 @@ function drawDodgeRound(round, config) {
       ctx.fillRect(spark.x - 4, spark.y - 4, 8, 8);
       return;
     }
-    ctx.fillStyle = `rgba(64, 196, 255, ${spark.life / 14})`;
+    ctx.fillStyle = `rgba(${getDodgeDashRgb()}, ${spark.life / 14})`;
     ctx.fillRect(spark.x - 2, spark.y - 2, 4, 4);
   });
   if (round.groundBreak > 0) {
@@ -8436,10 +8494,10 @@ function drawDodgeRound(round, config) {
     ctx.textAlign = 'center';
     ctx.fillText(`${round.phaseIndex + 1} / ${config.phases.length}   -   esquiva con W A S D`, canvas.width / 2, box.y + box.height + 26);
     if (config.charged) {
-      ctx.fillStyle = '#40c4ff';
+      ctx.fillStyle = `rgb(${getDodgeDashRgb()})`;
       ctx.font = '900 12px Courier New, monospace';
       const parries = round.parries > 0 ? `   PARRYS: ${round.parries}` : '';
-      ctx.fillText(`mantene Q: camara lenta y apunta - solta Q: dash (parry a lo AZUL)${parries}`, canvas.width / 2, box.y + box.height + 44);
+      ctx.fillText(config.hiddenParry ? `mantene Q: camara lenta y apunta - solta Q: dash${parries}` : `mantene Q: camara lenta y apunta - solta Q: dash (parry a lo AZUL)${parries}`, canvas.width / 2, box.y + box.height + 44);
     }
   }
   if (round.finale) drawLightFinale(round);
@@ -8591,7 +8649,8 @@ function parryDodgeItem(item) {
   // ...and a little of it heals Knight
   const target = round.target;
   const before = target.health;
-  target.health = Math.min(target.maxHealth, target.health + target.maxHealth * lightBoxParryHealRatio);
+  const parryHeal = round.config.parryHeal !== undefined ? round.config.parryHeal : round.config.noTargetHeal ? 0 : lightBoxParryHealRatio;
+  if (parryHeal) target.health = Math.min(target.maxHealth, target.health + target.maxHealth * parryHeal);
   const healed = Math.round(target.health - before);
   if (healed > 0) {
     const center = getDodgeSoulCenter();

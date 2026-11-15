@@ -27565,6 +27565,8 @@ function drawArcadeVhs() {
     c.fillStyle = aura;
     c.fillRect(0, 0, W, H);
   }
+  // (a code typed on the tape: another world, when the third one comes close)
+  if (typeof drawArcadeVhsCodeWorld === 'function') drawArcadeVhsCodeWorld(c, W, H, t);
   // ---- VHS: color bleed, tracking band, noise, scanlines, the OSD ----
   c.save();
   c.globalAlpha = 0.18;

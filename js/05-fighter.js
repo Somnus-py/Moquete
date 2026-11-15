@@ -769,10 +769,13 @@ class Fighter {
     if (!this.skinBaseDrawn) {
       ctx.fillStyle = '#ffeb3b';
       ctx.beginPath();
+      // (in the wind: the bottom of the cape flutters back)
+      const wind = this.capeWind ? Math.sin(performance.now() / 260) * 7 - 14 : 0;
+      const flutter = this.capeWind ? Math.sin(performance.now() / 110) * 4 : 0;
       ctx.moveTo(x - 14, y + 38);
       ctx.lineTo(x + 8, y + 42);
-      ctx.lineTo(x + 5, y + 114);
-      ctx.lineTo(x - 20, y + 120);
+      ctx.lineTo(x + 5 + wind * 0.6, y + 114 + flutter * 0.5);
+      ctx.lineTo(x - 20 + wind * 1.6, y + 120 - Math.abs(wind) * 0.6 + flutter);
       ctx.closePath();
       ctx.fill();
       ctx.strokeStyle = '#111';
@@ -1356,9 +1359,17 @@ class Fighter {
       ctx.beginPath();
       ctx.moveTo(-3.5, 4);
       ctx.lineTo(3.5, 4);
-      ctx.lineTo(2.5, 60);
-      ctx.lineTo(0, 68);
-      ctx.lineTo(-2.5, 60);
+      if (this.knightSwordBroken) {
+        // (snapped in half: a jagged end)
+        ctx.lineTo(3, 30);
+        ctx.lineTo(1, 35);
+        ctx.lineTo(-1, 29);
+        ctx.lineTo(-3, 33);
+      } else {
+        ctx.lineTo(2.5, 60);
+        ctx.lineTo(0, 68);
+        ctx.lineTo(-2.5, 60);
+      }
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
@@ -1367,7 +1378,7 @@ class Fighter {
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(0, 8);
-      ctx.lineTo(0, 56);
+      ctx.lineTo(0, this.knightSwordBroken ? 27 : 56);
       ctx.stroke();
       ctx.fillStyle = gold;
       ctx.strokeStyle = outline;
@@ -1490,7 +1501,7 @@ class Fighter {
       ctx.fillRect(-half - 5 + sway, 42, 6, 56);
     }
     // sword resting on the back side
-    if (!swinging && !slamming) drawSword(-half - 4, 50, 0.12);
+    if (!swinging && !slamming && !this.knightSwordGone) drawSword(-half - 4, 50, 0.12);
     // armored body block
     ctx.fillStyle = steel;
     ctx.fillRect(-half, 0, w, h);
@@ -1630,7 +1641,9 @@ class Fighter {
       ctx.stroke();
     }
     // shield: on the front arm, or raised in front while blocking
-    if (shielding) drawShield(half - 6, 28, 30, 70);
+    if (this.knightShieldGone) {
+      // (no shield anymore: only the bare arm)
+    } else if (shielding) drawShield(half - 6, 28, 30, 70);
     else drawShield(half - 10, 54, 20, 38);
     ctx.restore();
   }

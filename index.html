@@ -99,6 +99,7 @@
       <div class="menu-screen olddays-menu hidden" id="oldDaysScreen">
         <h1>Moquete</h1>
         <span class="menu-subtitle">Alpha edition</span>
+        <p class="olddays-note">Como era antes de la 2.0: cinco luchadores, los primeros mapas y nada de codigos.</p>
         <div class="menu-actions">
           <button type="button" id="oldDaysPlayButton" data-i18n="play">Jugar</button>
         </div>
@@ -428,7 +429,7 @@
             </span>
           </button>
           <button type="button" class="map-option alpha-map" data-map="alpha">
-            <span>Alpha</span>
+            <span>Beta</span>
             <span class="map-preview" aria-hidden="true">
               <span class="map-sky"></span>
               <span class="map-platform"></span>
@@ -1171,10 +1172,21 @@
             <span class="arcade-chapter-badge routeB-badge">RUTA B</span>
             <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
           </button>
-          <button type="button" class="arcade-chapter-option routeB-chapter-option routeB-locked" disabled>
+          <button type="button" class="arcade-chapter-option knightArcade-chapter-option routeB-chapter-option routeB-locked" id="knightArcadeBChapterButton" disabled>
             <span class="arcade-chapter-number">5B</span>
-            <span class="arcade-level-scene routeB-level-scene" aria-hidden="true"></span>
-            <span class="arcade-chapter-copy"><strong>???</strong><span>Todavia no.</span></span>
+            <span class="arcade-level-scene knightArcade-level-scene routeB-level-scene" aria-hidden="true">
+              <span class="arcade-level-player knightArcade-level-player"></span>
+              <span class="arcade-level-enemies">
+                <span></span><span></span><span></span><span></span>
+              </span>
+              <span class="arcade-level-boss knightArcade-level-boss"></span>
+            </span>
+            <span class="arcade-chapter-copy">
+              <strong data-routeb5-title>???</strong>
+              <span data-routeb5-copy>Termina el capitulo 4B.</span>
+            </span>
+            <span class="arcade-chapter-badge routeB-badge">RUTA B</span>
+            <span class="arcade-level-arrow" aria-hidden="true">&gt;&gt;</span>
           </button>
         </div>
         <button type="button" id="arcadeChaptersBackButton" data-i18n="back">Volver</button>
@@ -1352,7 +1364,7 @@
           <h3>Codigos</h3>
           <div class="character-guide">
             <span><strong>cheater</strong> abre la Pantalla Debug para alterar dano, vida, velocidad, cooldowns, gravedad, proyectiles, duraciones, empuje y personajes afectados.</span>
-            <span><strong>Old</strong> abre la version Alpha edition, con partida directa Normal vs Normal.</span>
+            <span><strong>Alpha</strong> abre la Alpha edition: el juego como era antes de la 2.0, con Normal, Fire Master, Living Tank, Cowboy y Reflecter, los primeros mapas y la interfaz de antes.</span>
             <span><strong>blind</strong> activa modo guess who: nombres ocultos, personajes blancos y habilidades mezcladas temporalmente.</span>
             <span><strong>overheat</strong> potencia a Fire Master con mas dano y menos cooldown.</span>
             <span><strong>ironwall</strong> potencia a Living Tank con mas vida y golpes/canon mas fuertes.</span>
@@ -1800,12 +1812,64 @@
       <div class="menu-screen info-menu hidden" id="infoScreen">
         <h2 data-i18n="information">Changelog</h2>
         <div class="guide-section changelog-new">
-          <h3>Actualizacion 4.0</h3>
+          <h3>Actualizacion 4.5</h3>
+          <div class="character-guide">
+            <span><strong>Lo que vino despues de la 4.0:</strong> un capitulo nuevo, un modo de juego nuevo, menus renovados, codigos nuevos... y algunas paginas que mejor no leer de noche.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>B</h3>
+          <div class="character-guide">
+            <span><strong>B</strong></span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Modo de juego: Relevos</h3>
+          <div class="character-guide">
+            <span><strong>Equipos de 2 a 7 luchadores</strong> por jugador. Cuando uno cae, entra el siguiente (con un momento de proteccion al entrar). Pierde el equipo que se queda sin nadie.</span>
+            <span><strong>Dos reglas opcionales</strong> el que gana un duelo se cura un poco, y el ultimo de cada equipo se convierte en la ULTIMA ESPERANZA: pega mas fuerte, envuelto en un aura dorada.</span>
+            <span><strong>Contra un amigo o contra el bot</strong> y el equipo se guarda para la proxima.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Menus renovados</h3>
+          <div class="character-guide">
+            <span><strong>Estadisticas</strong> en tres pestañas: un resumen con tu winrate, tus luchadores (ordenables, filtrables, en lista o en tarjetas) y tu progreso.</span>
+            <span><strong>Guia</strong> con pestañas (Controles, Personajes, Mapas, Eventos), buscador y tarjetas en vez de parrafos largos.</span>
+            <span><strong>Logros</strong> por categorias, con filtro de conseguidos y faltantes, buscador y la recompensa en monedas de cada uno.</span>
+            <span><strong>Changelog</strong> este mismo: las versiones a un lado, la elegida al otro, y un buscador.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Codigos</h3>
+          <div class="character-guide">
+            <span><strong>Alpha</strong> el juego como era antes de la 2.0: Normal, Fire Master, Living Tank, Cowboy y Reflecter, los primeros mapas y la interfaz de antes. (El mapa limpio ahora se llama Beta... salvo ahi adentro.)</span>
+            <span><strong>Codigo ???</strong> para quien ya conozca la otra ruta: algunas caras del otro lado ahora se pueden elegir. Y sus lugares tambien. Dicen que en el techo de cierto farol el cielo no se queda quieto.</span>
+            <span><strong>La cinta</strong> de la maquina de arcade escucha. Algunas palabras escritas mientras la miras (o el boton CANAL, en celular) llevan a otros lugares cuando la tercera figura se acerca. No todos son lindos.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Secretos</h3>
+          <div class="character-guide">
+            <span><strong>Chrono tiene algo que contar</strong> una vez en el capitulo 6, y otra en el ultimo nivel del 4B. Solo para quien ya conozca la otra ruta... y en ese orden.</span>
+            <span><strong>Fuego en las Manos</strong> el libro de Fire Master puede cambiar una vez mas. Si lo encontras mojado, lee hasta el final: alguien necesita tu ayuda.</span>
+          </div>
+        </div>
+        <div class="guide-section changelog-new">
+          <h3>Otros cambios</h3>
+          <div class="character-guide">
+            <span><strong>Celulares (4.1)</strong> los controles tactiles se apartan cuando hay una pantalla abierta encima del juego, y las pantallas mas altas que el telefono se pueden deslizar.</span>
+            <span><strong>Box attacks</strong> el dash cargado puede cambiar de color segun quien ataca.</span>
+            <span><strong>Correcciones varias</strong> en todos lados.</span>
+          </div>
+        </div>
+        <div class="guide-section">
+          <h3>Actualizacion 4.0 (anterior)</h3>
           <div class="character-guide">
             <span><strong>La actualizacion mas grande hasta ahora:</strong> el capitulo 6 completo, un capitulo especial escondido, un modo de juego nuevo, skins, trofeos y personajes nuevos.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Capitulo 6: La hora oscura de Chrono</h3>
           <div class="character-guide">
             <span><strong>Ya se puede jugar</strong> un bosque de hojas rojas, un castillo, la Orden Sombria, un caballero negro, un titan y una persecucion por un castillo que se derrumba. Al final, alguien con corona espera.</span>
@@ -1814,14 +1878,14 @@
             <span><strong>Omegarius</strong> si jugaste cierto nivel secreto del capitulo 4, el nivel 9 cambia.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Capitulo especial: ???</h3>
           <div class="character-guide">
             <span><strong>Una puerta negra</strong> aparece en el menu para quien tenga la llave correcta. Detras hay un bosque oscuro, seis niveles, niebla, un golem antiguo... y una cosecha que mejor no ver de cerca.</span>
             <span><strong>Una pista</strong> una llave oxidada no abre nada... a menos que alguien la lleve a otro tiempo.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Modo de juego: Box Attack Rush</h3>
           <div class="character-guide">
             <span><strong>Todos los box attacks</strong> que venciste en el Arcade, uno detras de otro, con nota al final.</span>
@@ -1830,7 +1894,7 @@
             <span><strong>Tutorial mejorado</strong> consejos, teclas en pantalla y un objetivo claro.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Personajes</h3>
           <div class="character-guide">
             <span><strong>???</strong> alguien muy distinguido, que prefiere escribir sus propias reglas, podria terminar peleando de tu lado... si antes le ganas en su propia casa. Jo jo.</span>
@@ -1839,7 +1903,7 @@
             <span><strong>Capitulo 5</strong> el trato de la Orden Sombria ahora se puede rechazar. La transformacion de Omega Light Warrior es mas grande, y su tema final tiene letra en pantalla.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>El Vestidor</h3>
           <div class="character-guide">
             <span><strong>Skins</strong> un nuevo articulo en la tienda de Scammer para cambiarle la ropa a los luchadores: Normal 2.0, Maestro Igneo, Acorazado MK-II, Forajido, Relojero, Chrono HD, Reflecter HD, Reflecter de Bronce, Archimago, High Roller, Paladin Solar, General Eclipse, Fantasma Victoriano, Calabaza Errante, Monkei Pirata, Switcher Mecha, Caballero de Escarcha y Mercader de Gabardina.</span>
@@ -1847,7 +1911,7 @@
             <span><strong>Los vendedores se dan cuenta</strong> si vestis a Scammer o a Chrono, van a tener algo que decir en sus tiendas.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Tienda y menu</h3>
           <div class="character-guide">
             <span><strong>Trofeos de capitulo</strong> un podio y una estatua por cada capitulo del Arcade, que mejoran con los modos dificiles.</span>
@@ -1858,7 +1922,7 @@
             <span><strong>Menu ordenado</strong> y retratos nuevos para los personajes del Arcade.</span>
           </div>
         </div>
-        <div class="guide-section changelog-new">
+        <div class="guide-section">
           <h3>Otros cambios</h3>
           <div class="character-guide">
             <span><strong>Scammer tiene memoria</strong> si rebobinaste la Maquina Rara en el Mercado de Tempus y te hiciste millonario, cada pelea contra el te va a costar. Aunque ganes.</span>
@@ -2135,7 +2199,7 @@
         <div class="guide-section">
           <h3>Mapas y audio</h3>
           <div class="character-guide">
-            <span><strong>Alpha</strong> no tiene interaccion de terreno. Es el mapa limpio para probar balance puro.</span>
+            <span><strong>Beta</strong> no tiene interaccion de terreno. Es el mapa limpio para probar balance puro.</span>
             <span><strong>Desierto</strong> las dunas laterales ralentizan un poco. El centro es la zona mas estable.</span>
             <span><strong>Neon</strong> el carril central da velocidad. Sirve para persecuciones y entradas agresivas.</span>
             <span><strong>Casino</strong> la casilla 777 cambia de posicion y puede curar o potenciar suerte. Gambler saca mas valor de este mapa.</span>
@@ -2157,23 +2221,6 @@
             <span><strong>Tank vs Tank en Militar</strong> el choque pesado premia posicionamiento y distancia corta.</span>
             <span><strong>Fire Master vs Sorcerer en Foundry</strong> Mana Meltdown vuelve el intercambio de magia mas peligroso.</span>
             <span><strong>Divine General vs Chrono en Dark Room</strong> Absolute Adaptation convierte las adaptaciones de Divine en una crisis temporal.</span>
-          </div>
-        </div>
-        <div class="guide-section">
-          <h3>Counters</h3>
-          <div class="character-guide">
-            <span><strong>Normal</strong> sufre contra Living Tank por vida/alcance, Sorcerer por control y Divine General si la pelea se alarga. Le conviene presionar a Cowboy, Fire Master y Gambler antes de que usen distancia o recursos.</span>
-            <span><strong>Light Warrior</strong> counterea a Cowboy y Fire Master si conecta sus rafagas y mantiene la presion con velocidad. Sufre contra Living Tank por aguante, Reflecter si devuelve sus disparos y Chrono si interrumpe su carga.</span>
-            <span><strong>Fire Master</strong> counterea a Living Tank porque castiga su lentitud desde lejos. Sufre contra Reflecter, Chrono y Divine General: uno copia, otro corta ventanas, y Divine se adapta al fuego.</span>
-            <span><strong>Living Tank</strong> counterea a Normal, Cowboy y Ghost por aguante y golpes grandes. Sufre contra Fire Master, Sorcerer y Divine General porque lo obligan a caminar bajo castigo o le rompen el plan pesado.</span>
-            <span><strong>Cowboy</strong> counterea a Fire Master, Switcher y Ghost si mantiene distancia con rafagas. Sufre contra Living Tank, Reflecter y Divine General cuando sus balas dejan de ser ventaja.</span>
-            <span><strong>Reflecter</strong> counterea a Fire Master, Cowboy, Sorcerer y Chrono si predice especiales. Sufre contra Normal, Tank, Switcher agresivo y Divine General si lo fuerzan a pelear sin depender del escudo.</span>
-            <span><strong>Sorcerer</strong> counterea a Living Tank, Normal y Ghost con control de zona. Sufre contra Reflecter, Cowboy temprano, Chrono si pierde el ritmo y Divine General si este adapta arcane.</span>
-            <span><strong>Switcher</strong> puede adaptarse contra casi todos: azul para entrar, verde para curar, amarillo para aguantar, rojo para castigar. Sufre contra Cowboy, Sorcerer y Divine General si lo fuerzan a gastar mal su habilidad de modo.</span>
-            <span><strong>Gambler</strong> amenaza a cualquiera si llega a jackpot o acumula suerte. Sufre contra Cowboy, Chrono, Ghost agresivo y Divine General si este adapta luck y le rompe la economia de suerte.</span>
-            <span><strong>Chrono</strong> counterea personajes que dependen de una ventana clara, como Fire Master, Gambler y Ghost. Sufre contra presion constante de Cowboy, Reflecter si lee cuchillas, y Divine General si no gana antes del escalado.</span>
-            <span><strong>Ghost</strong> molesta a zoners y jugadores lentos con fase, invulnerabilidad y velocidad. Sufre contra Living Tank por no bajarlo rapido, Sorcerer por control de zona y Chrono si predice la entrada.</span>
-            <span><strong>Divine General</strong> counterea peleas largas y personajes predecibles porque convierte dano recibido en defensa y dano base. Sufre si lo rematan antes de acumular adaptaciones o si le baitéan Q/F para dejarlo sin respuesta.</span>
           </div>
         </div>
         <button type="button" id="guideBackButton">Volver</button>
@@ -2310,5 +2357,16 @@
   <script src="js/12-tempus-market.js"></script>
   <script src="js/13-chrono-chapter.js"></script>
   <script src="js/14-jophestar.js"></script>
+  <script src="js/15-statistics.js"></script>
+  <script src="js/16-guide.js"></script>
+  <script src="js/17-alpha-edition.js"></script>
+  <script src="js/18-achievements-changelog.js"></script>
+  <script src="js/19-relay-mode.js"></script>
+  <script src="js/20-vhs-codes.js"></script>
+  <script src="js/21-chapter-5b.js"></script>
+  <script src="js/22-chapter-5b-level7.js"></script>
+  <script src="js/23-side-b.js"></script>
+  <script src="js/24-fire-book-last.js"></script>
+  <script src="js/25-chrono-secrets.js"></script>
 </body>
 </html>
